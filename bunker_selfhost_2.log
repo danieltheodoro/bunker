@@ -1,0 +1,182 @@
+--- Bunker Self-Hosted Lexer & Parser v0.3 ---
+Reading file: src/selfhost/bunker.bnk
+File read, length: 115259
+Initializing Lexer...
+Lexer initialized.
+Collecting tokens...
+Tokens collected
+DEBUG: Parser initialized with 14849 tokens
+DEBUG: parseIncludeFile path=src.selfhost.ast resolved=src/selfhost/ast.bnk
+DEBUG: Parser initialized with 870 tokens
+DEBUG: parseIncludeFile path=bunker.std.strings resolved=bunker/std/strings.bnk
+DEBUG: Parser initialized with 440 tokens
+DEBUG: parseIncludeFile path=bunker.std.collections resolved=bunker/std/collections.bnk
+DEBUG: Parser initialized with 602 tokens
+DEBUG: parseCall ':' nt.type=IDENT value=Map
+DEBUG: parseCall ':' tk2.type=SYMBOL value=<
+DEBUG: parseCall ':' nt.type=IDENT value=alloc
+DEBUG: parseCall ':' tk2.type=SYMBOL value=;
+DEBUG: created LiteralExpr NUM val=16
+DEBUG: created LiteralExpr NUM val=0
+DEBUG: parseCall ':' nt.type=IDENT value=create
+DEBUG: parseCall ':' tk2.type=SYMBOL value=:
+DEBUG: created LiteralExpr NUM val=16
+DEBUG: parseCall ':' nt.type=IDENT value=create
+DEBUG: parseCall ':' tk2.type=SYMBOL value=:
+DEBUG: created LiteralExpr NUM val=16
+DEBUG: Creating method create
+DEBUG: parseCall ':' nt.type=IDENT value=int
+DEBUG: parseCall ':' tk2.type=OPERATOR value=<-
+DEBUG: created LiteralExpr NUM val=0
+DEBUG: parseCall ':' nt.type=KEYWORD value=unabstracted
+DEBUG: parseCall ':' tk2.type=SYMBOL value=:
+Error at line 24, col 46: Unexpected token ';'
+                  asm c: "bool match = false;";
+                                               ^
+Error at line 25, col 71: Unexpected token ';'
+                  asm c: "if (_Generic((key), char*: 1, default: 0)) {";
+                                                                        ^
+Error at line 26, col 89: Unexpected token ';'
+                  asm c: "  match = strcmp((char*)key, (char*)self->keys->data[i]) == 0;";
+                                                                                          ^
+Error at line 27, col 35: Unexpected token ';'
+                  asm c: "} else {";
+                                    ^
+Error at line 28, col 67: Unexpected token ';'
+                  asm c: "  match = key == (K)self->keys->data[i];";
+                                                                    ^
+Error at line 29, col 28: Unexpected token ';'
+                  asm c: "}";
+                             ^
+Error at line 30, col 87: Unexpected token ';'
+                  asm c: "if (match) { self->values->data[i] = (void*)value; return; }";
+                                                                                        ^
+DEBUG: created LiteralExpr NUM val=1
+Error at line 40, col 35: Expected ']' after array index.
+               self.keys[self.count] <- key;
+                                    ^
+Error at line 40, col 35: Unexpected token ']'
+               self.keys[self.count] <- key;
+                                    ^
+Error at line 40, col 37: Unexpected token '<-'
+               self.keys[self.count] <- key;
+                                      ^
+Error at line 41, col 37: Expected ']' after array index.
+               self.values[self.count] <- value;
+                                      ^
+Error at line 41, col 37: Unexpected token ']'
+               self.values[self.count] <- value;
+                                      ^
+Error at line 41, col 39: Unexpected token '<-'
+               self.values[self.count] <- value;
+                                        ^
+DEBUG: created LiteralExpr NUM val=1
+DEBUG: Creating method set
+DEBUG: parseCall ':' nt.type=IDENT value=int
+DEBUG: parseCall ':' tk2.type=OPERATOR value=<-
+DEBUG: created LiteralExpr NUM val=0
+DEBUG: parseCall ':' nt.type=KEYWORD value=unabstracted
+DEBUG: parseCall ':' tk2.type=SYMBOL value=:
+Error at line 51, col 46: Unexpected token ';'
+                  asm c: "bool match = false;";
+                                               ^
+Error at line 52, col 71: Unexpected token ';'
+                  asm c: "if (_Generic((key), char*: 1, default: 0)) {";
+                                                                        ^
+Error at line 53, col 89: Unexpected token ';'
+                  asm c: "  match = strcmp((char*)key, (char*)self->keys->data[i]) == 0;";
+                                                                                          ^
+Error at line 54, col 35: Unexpected token ';'
+                  asm c: "} else {";
+                                    ^
+Error at line 55, col 67: Unexpected token ';'
+                  asm c: "  match = key == (K)self->keys->data[i];";
+                                                                    ^
+Error at line 56, col 28: Unexpected token ';'
+                  asm c: "}";
+                             ^
+Error at line 57, col 70: Unexpected token ';'
+                  asm c: "if (match) return (V)self->values->data[i];";
+                                                                       ^
+DEBUG: created LiteralExpr NUM val=1
+DEBUG: Creating method get
+DEBUG: parseCall ':' nt.type=IDENT value=List
+DEBUG: parseCall ':' tk2.type=SYMBOL value=<
+DEBUG: parseCall ':' nt.type=IDENT value=alloc
+DEBUG: parseCall ':' tk2.type=SYMBOL value=;
+DEBUG: created LiteralExpr NUM val=0
+DEBUG: created LiteralExpr NUM val=8
+DEBUG: parseCall ':' nt.type=IDENT value=create
+DEBUG: parseCall ':' tk2.type=SYMBOL value=:
+DEBUG: created LiteralExpr NUM val=8
+DEBUG: Creating method create
+Error at line 87, col 30: Expected ']' after array index.
+          self.data[self.count] <- item;
+                               ^
+Error at line 87, col 30: Unexpected token ']'
+          self.data[self.count] <- item;
+                               ^
+Error at line 87, col 32: Unexpected token '<-'
+          self.data[self.count] <- item;
+                                 ^
+DEBUG: created LiteralExpr NUM val=1
+DEBUG: Creating method add
+Error at line 94, col 29: Expected type argument.
+              return index < 0 or index >= self.count;
+                              ^
+Error at line 94, col 29: >
+              return index < 0 or index >= self.count;
+                              ^
+DEBUG: created LiteralExpr NUM val=0
+Error at line 100, col 32: Expected ']' after array index.
+          return self.data[index];
+                                 ^
+Error at line 100, col 32: Unexpected token ']'
+          return self.data[index];
+                                 ^
+Error at line 100, col 33: Unexpected token ';'
+          return self.data[index];
+                                  ^
+DEBUG: Creating method get
+DEBUG: Creating method size
+DEBUG: parseCall ':' nt.type=IDENT value=int
+DEBUG: parseCall ':' tk2.type=OPERATOR value=<-
+DEBUG: created LiteralExpr NUM val=2
+DEBUG: parseCall ':' nt.type=IDENT value=Array
+DEBUG: parseCall ':' tk2.type=SYMBOL value=<
+DEBUG: parseCall ':' nt.type=IDENT value=create
+DEBUG: parseCall ':' tk2.type=SYMBOL value=:
+DEBUG: parseCall ':' nt.type=IDENT value=int
+DEBUG: parseCall ':' tk2.type=OPERATOR value=<-
+DEBUG: created LiteralExpr NUM val=0
+DEBUG: parseCall ':' nt.type=IDENT value=newData
+DEBUG: parseCall ':' tk2.type=SYMBOL value=[
+Error at line 112, col 23: Expected ']' after array index.
+              newData[i] <- self.data[i];
+                        ^
+Error at line 112, col 23: Unexpected token ']'
+              newData[i] <- self.data[i];
+                        ^
+Error at line 112, col 25: Unexpected token '<-'
+              newData[i] <- self.data[i];
+                          ^
+Error at line 112, col 39: Expected ']' after array index.
+              newData[i] <- self.data[i];
+                                        ^
+Error at line 112, col 39: Unexpected token ']'
+              newData[i] <- self.data[i];
+                                        ^
+Error at line 112, col 40: Unexpected token ';'
+              newData[i] <- self.data[i];
+                                         ^
+DEBUG: created LiteralExpr NUM val=1
+DEBUG: Creating method _resize
+DEBUG: Creating method concat
+DEBUG: Creating method length
+DEBUG: Creating method substring
+DEBUG: Creating method charAt
+DEBUG: Creating method charToString
+DEBUG: Creating method startsWith
+DEBUG: Creating method trim
+DEBUG: Creating method toUpper
+DEB

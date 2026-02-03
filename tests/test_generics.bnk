@@ -1,0 +1,37 @@
+
+module TestGenerics;
+
+import bunker.std.collections;
+
+Entity App:
+    has public method main:
+        print: "=== Generics Test ===";
+        
+        # Test List<int>
+        list: List<int> <- List : create;
+        list : append: 10;
+        list : append: 20;
+        
+        val: int <- list : get: 0;
+        print: val; # Expect 10
+        
+        val2: int <- list : get: 1;
+        print: val2; # Expect 20
+        
+        size: int <- list : size;
+        print: size; # Expect 2
+        
+        # Test List<str>
+        slist: List<str> <- List : create;
+        slist : append: "Hello";
+        slist : append: "World";
+        
+        s1: str <- slist : get: 0;
+        print: s1; # Expect Hello
+        
+        s2: str <- slist : get: 1;
+        print: s2; # Expect World
+        
+        print: "=== Done ===";
+    end method.
+end Entity.

@@ -1,0 +1,13 @@
+# test_error.bnk
+module TestError;
+
+Entity Greeter:
+    has method greet: name: string -> void:
+        print: "Hello, " + name
+    end method.
+
+    has method fail: -> void:
+        # Deliberate syntax error: missing semicolon or dot, or just unfinished expression
+        let x: int <- 10 + 
+    end method.
+end Entity.

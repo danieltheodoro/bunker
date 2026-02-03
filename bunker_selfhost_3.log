@@ -1,0 +1,83 @@
+--- Bunker Self-Hosted Lexer & Parser v0.3 ---
+Reading file: src/selfhost/bunker.bnk
+File read, length: 115264
+Initializing Lexer...
+Lexer initialized.
+Collecting tokens...
+Tokens collected
+DEBUG: Parser initialized with 14849 tokens
+DEBUG: parseIncludeFile path=src.selfhost.ast resolved=src/selfhost/ast.bnk
+DEBUG: Parser initialized with 870 tokens
+DEBUG: parseIncludeFile path=bunker.std.strings resolved=bunker/std/strings.bnk
+DEBUG: Parser initialized with 440 tokens
+DEBUG: parseIncludeFile path=bunker.std.collections resolved=bunker/std/collections.bnk
+DEBUG: Parser initialized with 602 tokens
+DEBUG: parseCall ':' nt.type=IDENT value=Map
+DEBUG: parseCall ':' tk2.type=SYMBOL value=<
+DEBUG: parseCall ':' nt.type=IDENT value=alloc
+DEBUG: parseCall ':' tk2.type=SYMBOL value=;
+DEBUG: created LiteralExpr NUM val=16
+DEBUG: created LiteralExpr NUM val=0
+DEBUG: parseCall ':' nt.type=IDENT value=create
+DEBUG: parseCall ':' tk2.type=SYMBOL value=:
+DEBUG: created LiteralExpr NUM val=16
+DEBUG: parseCall ':' nt.type=IDENT value=create
+DEBUG: parseCall ':' tk2.type=SYMBOL value=:
+DEBUG: created LiteralExpr NUM val=16
+DEBUG: Creating method create
+DEBUG: parseCall ':' nt.type=IDENT value=int
+DEBUG: parseCall ':' tk2.type=OPERATOR value=<-
+DEBUG: created LiteralExpr NUM val=0
+DEBUG: parseCall ':' nt.type=KEYWORD value=unabstracted
+DEBUG: parseCall ':' tk2.type=SYMBOL value=:
+Error at line 24, col 46: Unexpected token ';'
+                  asm c: "bool match = false;";
+                                               ^
+Error at line 25, col 71: Unexpected token ';'
+                  asm c: "if (_Generic((key), char*: 1, default: 0)) {";
+                                                                        ^
+Error at line 26, col 89: Unexpected token ';'
+                  asm c: "  match = strcmp((char*)key, (char*)self->keys->data[i]) == 0;";
+                                                                                          ^
+Error at line 27, col 35: Unexpected token ';'
+                  asm c: "} else {";
+                                    ^
+Error at line 28, col 67: Unexpected token ';'
+                  asm c: "  match = key == (K)self->keys->data[i];";
+                                                                    ^
+Error at line 29, col 28: Unexpected token ';'
+                  asm c: "}";
+                             ^
+Error at line 30, col 87: Unexpected token ';'
+                  asm c: "if (match) { self->values->data[i] = (void*)value; return; }";
+                                                                                        ^
+DEBUG: created LiteralExpr NUM val=1
+Error: Invalid assignment target type ArrayAccess at line 40
+Error: Invalid assignment target type ArrayAccess at line 41
+DEBUG: created LiteralExpr NUM val=1
+DEBUG: Creating method set
+DEBUG: parseCall ':' nt.type=IDENT value=int
+DEBUG: parseCall ':' tk2.type=OPERATOR value=<-
+DEBUG: created LiteralExpr NUM val=0
+DEBUG: parseCall ':' nt.type=KEYWORD value=unabstracted
+DEBUG: parseCall ':' tk2.type=SYMBOL value=:
+Error at line 51, col 46: Unexpected token ';'
+                  asm c: "bool match = false;";
+                                               ^
+Error at line 52, col 71: Unexpected token ';'
+                  asm c: "if (_Generic((key), char*: 1, default: 0)) {";
+                                                                        ^
+Error at line 53, col 89: Unexpected token ';'
+                  asm c: "  match = strcmp((char*)key, (char*)self->keys->data[i]) == 0;";
+                                                                                          ^
+Error at line 54, col 35: Unexpected token ';'
+                  asm c: "} else {";
+                                    ^
+Error at line 55, col 67: Unexpected token ';'
+                  asm c: "  match = key == (K)self->keys->data[i];";
+                                                                    ^
+Error at line 56, col 28: Unexpected token ';'
+                  asm c: "}";
+                             ^
+Error at line 57, col 70: Unexpected token ';'
+                 

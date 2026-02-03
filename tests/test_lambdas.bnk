@@ -1,0 +1,16 @@
+module test_lambdas;
+
+Entity App:
+    has static method main:
+        # Test 1: Simple lambda with backslash syntax
+        doubler <- \x: int. x * 2.;
+        
+        # Test 2: Lambda with two parameters
+        adder <- \x: int, y: int. x + y.;
+        
+        # Test 3: Lambda with explicit types and trailing dot
+        multiplier <- \x: int, y: int. x * y.;
+        
+        print: "Lambda syntax test passed!";
+    end method.
+end Entity.

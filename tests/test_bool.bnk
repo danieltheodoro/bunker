@@ -1,0 +1,10 @@
+module TestBool;
+
+Entity App:
+    has method main:
+        t: bool <- 5 > 3;
+        f: bool <- 3 > 5;
+        print: t;
+        print: f;
+    end method.
+end Entity.

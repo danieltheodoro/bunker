@@ -1,0 +1,17 @@
+module test_array_literal;
+
+Entity App:
+    has static method main:
+        # Test 1: Integer Array
+        numbers <- [1, 2, 3, 4, 5];
+        
+        # Test 2: Variable in array
+        x <- 10;
+        values <- [x, x * 2, 30];
+        
+        # Note: Array access [0] is not implemented yet, so we can't inspect elements easily
+        # But if this compiles and runs, dynamic allocation works!
+        
+        print: "Array literal creation passed!";
+    end method.
+end Entity.

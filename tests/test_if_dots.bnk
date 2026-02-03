@@ -1,0 +1,18 @@
+module test_if_dots;
+
+Entity Main:
+    has static method run -> void:
+        x <- 10;
+        if:
+        condition:
+            return x > 5;
+        end condition.
+        then:
+            # should print this
+            print: "x is greater than 5";
+        end then.
+        else:
+            print: "x is not greater than 5";
+        .
+    end method.
+end Entity.

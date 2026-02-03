@@ -1,0 +1,50 @@
+module test_lambda_calls;
+
+Entity App:
+    has static method main:
+        # Test 1: Create and call a lambda
+        doubler <- \x: int. x * 2.;
+        result <- doubler: 5;
+        # Result should be 10
+        
+        # Test 2: Lambda with two parameters
+        adder <- \x: int, y: int. x + y.;
+        sum <- adder: 3, 7;
+        # Sum should be 10
+        
+        # Test 3: Use lambda result in expression
+        triple <- \x: int. x * 3.;
+        value <- triple: 4;
+        # Value should be 12
+        
+        # Test that results are correct by using them in conditionals
+        if:
+        condition:
+            return result == 10;
+        end condition.
+        then:
+            print: "Test 1 passed: doubler works!";
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return sum == 10;
+        end condition.
+        then:
+            print: "Test 2 passed: adder works!";
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return value == 12;
+        end condition.
+        then:
+            print: "Test 3 passed: triple works!";
+        end then.
+        end if.
+        
+        print: "All lambda call tests passed!";
+    end method.
+end Entity.

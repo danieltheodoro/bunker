@@ -1,0 +1,26 @@
+if:
+condition:
+    return x == 1;
+end condition.
+then:
+    y <- 2;
+end then.
+else:
+    y <- 3;
+end if.
+
+while x < 10:
+    x <- x + 1;
+end while.
+
+loop:
+    if:
+    condition:
+        return x > 100;
+    end condition.
+    then:
+        break;
+    end then.
+    end if.
+    x <- x + 1;
+end loop.

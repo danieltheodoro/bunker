@@ -1,0 +1,25 @@
+module TestMath;
+
+include bunker.std.math;
+
+Entity App:
+    has method main:
+        print: "Testing Math module...";
+        
+        let n: float <- 16.0;
+        let s: float <- Math : sqrt: n;
+        print: "sqrt(16.0) = ";
+        print: s;
+
+        let a: float <- -5.5;
+        let abs_a: float <- Math : abs: a;
+        print: "abs(-5.5) = ";
+        print: abs_a;
+
+        let p: float <- Math : pow: 2.0, 3.0;
+        print: "pow(2.0, 3.0) = ";
+        print: p;
+
+        print: "Math tests complete.";
+    end method.
+end Entity.

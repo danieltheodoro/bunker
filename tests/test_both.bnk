@@ -1,0 +1,16 @@
+module test_both;
+
+Entity App:
+    has static method main:
+        # Test non-closure lambda
+        doubler <- \x: int. x * 2.;
+        r1 <- doubler: 5;
+        
+        # Test closure lambda
+        multiplier <- 3;
+        tripler <- \x: int. x * multiplier.;
+        r2 <- tripler: 5;
+        
+        print: "Both lambda types work!";
+    end method.
+end Entity.

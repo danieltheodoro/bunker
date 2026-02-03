@@ -1,0 +1,15 @@
+module bunker.std.errors;
+
+# Structured error handling without generics (initially for int)
+Entity Result:
+    has public state value: int;
+    has public state errorMessage: string;
+    has public state isError: bool;
+
+    has static method ok: val: int -> Result:
+        # Native implementation handled in transpiler
+    .
+    has static method fail: msg: string -> Result:
+        # Native implementation handled in transpiler
+    ..
+.

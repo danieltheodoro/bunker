@@ -1,0 +1,35 @@
+             end condition.
+             then:
+                 self: advance;
+                 value <- self: parseAssignment: false;
+                 
+                 # VariableExpr or GetExpr (member access) are valid targets
+                 if:
+                 condition:
+                     return header.type == "VariableExpr";
+                 end condition.
+                 then:
+--
+                      return AssignExpr: new: "AssignExpr", expr, value.
+                 end then.
+                 else:
+                      if:
+                      condition:
+                          return header.type == "GetExpr";
+                      end condition.
+                      then:
+                           if:
+                           condition:
+                               return isLet;
+--
+                    return propTk.type == "IDENT";
+                end condition.
+                then:
+                    self: advance; # Consume '.'
+                    pTok: Token <- self: consume: "IDENT", "Expected property name.";
+                    getRec: GetExpr <- GetExpr: new: "GetExpr", expr, pTok;
+                    expr <- getRec;
+                    continue;
+                end then.
+                end if.
+            end then.

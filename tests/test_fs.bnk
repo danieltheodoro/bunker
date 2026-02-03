@@ -1,0 +1,89 @@
+module TestFS;
+
+include bunker.std.io;
+include bunker.std.fs;
+
+Entity App:
+    has method main:
+        print: "Testing File System...";
+        path: str <- "test_output.txt";
+
+        # 1. Cleanup if exists
+        if:
+        condition:
+            return (FileSystem : exists: path);
+        end condition.
+        then:
+             print: "Warning: File already exists, deleting...";
+             FileSystem : delete: path;
+        end then.
+        end if.
+
+        # 2. Create and Write
+        print: "Creating file...";
+        f: File <- File : create: path;
+        if:
+        condition:
+            return (f != nil);
+        end condition.
+        then:
+             f : writeString: "Hello from FS!";
+             f : close;
+             print: "File written.";
+        end then.
+        else:
+             print: "Failed to create file!";
+        end if.
+
+        # 3. Check Existence & Read
+        if:
+        condition:
+            return (FileSystem : exists: path);
+        end condition.
+        then:
+             print: "File exists confirmed.";
+             r: File <- File : open: path;
+             if:
+             condition:
+                 return (r != nil);
+             end condition.
+             then:
+                  content: str <- r : readToString;
+                  print: "Content read:";
+                  print: content;
+                  r : close;
+             end then.
+             else:
+                  print: "Failed to read back file!";
+             end if.
+             
+             # 4. Delete
+             print: "Deleting file...";
+             if:
+             condition:
+                 return (FileSystem : delete: path);
+             end condition.
+             then:
+                  print: "File deleted.";
+             end then.
+             else:
+                  print: "Failed to delete file!";
+             end if.
+             
+             # 5. Verify Deletion
+             if:
+             condition:
+                 return (FileSystem : exists: path);
+             end condition.
+             then:
+                  print: "Error: File still exists!";
+             end then.
+             else:
+                  print: "Deletion confirmed.";
+             end if.
+        end then.
+        else:
+             print: "Error: File was not created!";
+        end if.
+    end method.
+end Entity.

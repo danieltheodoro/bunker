@@ -1,0 +1,38 @@
+module test_closures;
+
+Entity App:
+    has static method main:
+        # Test 1: Simple closure - capture a variable
+        multiplier <- 3;
+        triple <- \x: int. x * multiplier.;
+        result <- triple: 5;
+        # Result should be 15 (5 * 3)
+        
+        if:
+        condition:
+            return result == 15;
+        end condition.
+        then:
+            print: "Test 1 passed: simple closure works!";
+        end then.
+        end if.
+        
+        # Test 2: Closure with multiple captured variables
+        a <- 2;
+        b <- 3;
+        compute <- \x: int. x * a + b.;
+        value <- compute: 4;
+        # Value should be 11 (4 * 2 + 3)
+        
+        if:
+        condition:
+            return value == 11;
+        end condition.
+        then:
+            print: "Test 2 passed: multiple captures work!";
+        end then.
+        end if.
+        
+        print: "All closure tests passed!";
+    end method.
+end Entity.

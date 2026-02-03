@@ -1,0 +1,14 @@
+# test_correct.bnk
+module TestCorrect;
+
+Entity Greeter:
+    has method greet: name: string -> void:
+        print: "Hello, " + name;
+    end method.
+
+    has method test: -> void:
+        let x: string <- "Bunker";
+        let y <- x + "!";
+        print: "Value: " + y;
+    end method.
+end Entity.

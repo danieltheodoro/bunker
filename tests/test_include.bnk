@@ -1,0 +1,11 @@
+
+module TestInclude;
+
+include included.bnk;
+
+Entity Main:
+    has static method main: argc: int, argv: void** -> int:
+        print: "Include Test";
+        return 0;
+    end method.
+end Entity.

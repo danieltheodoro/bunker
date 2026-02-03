@@ -1,0 +1,58 @@
+module test_collections_expansion;
+
+import bunker.std.io;
+import bunker.std.collections;
+
+Entity test_collections_expansion:
+    has public static method main:
+        print: "=== Bunker Collections Expansion Verification ===";
+
+        # 1. Map with Integer Keys
+        print: "Testing Map<int, string>...";
+        let m : Map<int, string> <- Map<int, string> : create;
+        m : set: 1, "one";
+        m : set: 2, "two";
+        m : set: 100, "hundred";
+
+        print: "Key 1: ";
+        print: m : get: 1;
+        print: "Key 100: ";
+        print: m : get: 100;
+
+        # 2. List of Strings
+        print: "Testing List<string>...";
+        let names : List<string> <- List<string> : create;
+        names : add: "Alice";
+        names : add: "Bob";
+        names : add: "Charlie";
+
+        print: "Size: ";
+        print: names : size;
+        print: "Second element: ";
+        print: names : get: 1;
+
+        # 3. List of Lists (Nested)
+        print: "Testing Nested Lists (List<List<int>>)...";
+        let matrix : List<List<int>> <- List<List<int>> : create;
+        
+        let row1 : List<int> <- List<int> : create;
+        row1 : add: 1;
+        row1 : add: 2;
+        
+        let row2 : List<int> <- List<int> : create;
+        row2 : add: 3;
+        row2 : add: 4;
+
+        matrix : add: row1;
+        matrix : add: row2;
+
+        print: "Matrix size: ";
+        print: matrix : size;
+        
+        let retrieved_row : List<int> <- matrix : get: 1;
+        print: "Matrix[1][0]: ";
+        print: retrieved_row : get: 0; # Should be 3
+
+        print: "=== Collections Expansion tests passed! ===";
+    end method.
+end Entity.

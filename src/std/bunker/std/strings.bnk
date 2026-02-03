@@ -1,0 +1,240 @@
+module bunker.std.strings;
+
+# String utility functions for text manipulation
+
+import bunker.std.collections;
+
+Entity Strings:
+    has public static method concat: s1: string, s2: string -> string:
+        unabstracted:
+            asm c: "
+                if (!s1) s1 = \"\";
+                if (!s2) s2 = \"\";
+                size_t len1 = strlen(s1);
+                size_t len2 = strlen(s2);
+                char* res = gc_alloc(len1 + len2 + 1);
+                strcpy(res, s1);
+                strcat(res, s2);
+                return res;
+            "
+        .
+    end method.
+    
+    has public static method length: s: string -> int:
+        unabstracted:
+            asm c: "return (long long)(s ? strlen(s) : 0);"
+        .
+    end method.
+    
+    has public static method substring: s: string, start: int, stop: int -> string:
+        unabstracted:
+            asm c: "
+                if (!s) return \"\";
+                size_t len = strlen(s);
+                if (start < 0) start = 0;
+                if (stop > (long long)len) stop = (long long)len;
+                if (start >= stop) return \"\";
+                size_t sub_len = (size_t)(stop - start);
+                char* res = gc_alloc(sub_len + 1);
+                strncpy(res, s + start, sub_len);
+                res[sub_len] = 0;
+                return res;
+            "
+        .
+    end method.
+    
+    has public static method charAt: s: string, i: int -> int:
+        unabstracted:
+            asm c: "return (long long)(s && i >= 0 ? (unsigned char)s[i] : 0);"
+        .
+    end method.
+    
+    has public static method charToString: c: int -> string:
+        unabstracted:
+            asm c: "
+                static char* cache[256] = {0};
+                if (c < 0 || c > 255) return \"\";
+                if (!cache[c]) {
+                    cache[c] = gc_alloc(2);
+                    cache[c][0] = (char)c;
+                    cache[c][1] = 0;
+                }
+                return cache[c];
+            "
+        .
+    end method.
+
+    has public static method startsWith: s: string, prefix: string -> bool:
+        unabstracted:
+            asm c: "
+                if (!s || !prefix) return false;
+                return strncmp(s, prefix, strlen(prefix)) == 0;
+            "
+        .
+    end method.
+    
+    
+    has public static method trim: s: string -> string:
+        unabstracted:
+            asm c: "
+                if (!s) return \"\";
+                while (isspace((unsigned char)*s)) s++;
+                if (*s == 0) return \"\";
+                char* end = s + strlen(s) - 1;
+                while (end > s && isspace((unsigned char)*end)) end--;
+                size_t len = (size_t)(end - s + 1);
+                char* res = gc_alloc(len + 1);
+                strncpy(res, s, len);
+                res[len] = 0;
+                return res;
+            "
+        .
+    end method.
+
+    has public static method toUpper: s: string -> string:
+        unabstracted:
+            asm c: "
+                if (!s) return \"\";
+                size_t len = strlen(s);
+                char* res = gc_alloc(len + 1);
+                for (size_t i = 0; i < len; i++) res[i] = toupper((unsigned char)s[i]);
+                res[len] = 0;
+                return res;
+            "
+        .
+    end method.
+
+    has public static method toLower: s: string -> string:
+        unabstracted:
+            asm c: "
+                if (!s) return \"\";
+                size_t len = strlen(s);
+                char* res = gc_alloc(len + 1);
+                for (size_t i = 0; i < len; i++) res[i] = tolower((unsigned char)s[i]);
+                res[len] = 0;
+                return res;
+            "
+        .
+    end method.
+
+    has public static method contains: s: string, substr: string -> bool:
+        unabstracted:
+            asm c: "
+                if (!s || !substr) return false;
+                return strstr(s, substr) != NULL;
+            "
+        .
+    end method.
+
+    has public static method indexOf: s: string, substr: string -> int:
+        unabstracted:
+            asm c: "
+                if (!s || !substr) return -1;
+                char* p = strstr(s, substr);
+                return p ? (long long)(p - s) : -1;
+            "
+        .
+    end method.
+
+    has public static method replace: s: string, old: string, new_str: string -> string:
+        unabstracted:
+            asm c: "
+                if (!s || !old || !new_str) return s;
+                size_t old_len = strlen(old);
+                if (old_len == 0) return s;
+                size_t new_len = strlen(new_str);
+                
+                #define MAX_REPLACE 1024
+                char* res = gc_alloc(MAX_REPLACE);
+                char* current = s;
+                char* dest = res;
+                size_t total_len = 0;
+
+                while (*current) {
+                    char* p = strstr(current, old);
+                    if (p) {
+                        size_t head_len = (size_t)(p - current);
+                        if (total_len + head_len + new_len >= MAX_REPLACE) break; 
+                        memcpy(dest, current, head_len);
+                        dest += head_len;
+                        memcpy(dest, new_str, new_len);
+                        dest += new_len;
+                        current = p + old_len;
+                        total_len += head_len + new_len;
+                    } else {
+                        size_t tail_len = strlen(current);
+                        if (total_len + tail_len >= MAX_REPLACE) break;
+                        memcpy(dest, current, tail_len);
+                        dest += tail_len;
+                        total_len += tail_len;
+                        break;
+                    }
+                }
+                *dest = 0;
+                return res;
+            "
+        .
+    end method.
+
+    has public static method toInt: s: string -> int:
+        unabstracted:
+            asm c: "return s ? (long long)atoll(s) : 0;"
+        .
+    end method.
+
+    has public static method toFloat: s: string -> float:
+        unabstracted:
+            asm c: "return s ? (double)atof(s) : 0.0;"
+        .
+    end method.
+
+    has public static method split: s: string, sep: string -> List<string>:
+        let res : List<string> <- List<string> : create;
+        unabstracted:
+            asm c: "
+                if (!s || !sep) return res; 
+                size_t sep_len = strlen(sep);
+                if (sep_len == 0) return res;
+                char* current = s;
+                while (*current) {
+                    char* p = strstr(current, sep);
+                    if (p) {
+                        size_t part_len = (size_t)(p - current);
+                        char* part = gc_alloc(part_len + 1);
+                        strncpy(part, current, part_len);
+                        part[part_len] = 0;
+                        List_string_add(res, part);
+                        current = p + sep_len;
+                    } else {
+                        List_string_add(res, current);
+                        break;
+                    }
+                }
+            "
+        .
+        return res;
+    end method.
+
+    has public static method join: list: List<string>, sep: string -> string:
+        unabstracted:
+            asm c: "
+                if (!list) return \"\";
+                int count = (int)List_string_size(list);
+                if (count == 0) return \"\";
+                
+                #define MAX_JOIN 2048
+                char* res = gc_alloc(MAX_JOIN);
+                res[0] = 0;
+                for (int i = 0; i < count; i++) {
+                    char* s = (char*)List_string_get(list, i);
+                    if (s) {
+                        if (strlen(res) + strlen(s) + strlen(sep) >= MAX_JOIN) break;
+                        strcat(res, s);
+                        if (i < count - 1) strcat(res, sep);
+                    }
+                }
+                return res;
+            "
+        .
+    end method.
+end Entity.

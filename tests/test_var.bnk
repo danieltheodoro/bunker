@@ -1,0 +1,8 @@
+module Test;
+
+Entity App:
+    has method main:
+        x: int <- 5;
+        print: x;
+    end method.
+end Entity.

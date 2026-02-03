@@ -1,0 +1,7 @@
+Entity Math:
+    has method add: a: int, b: int -> int:
+        return a + b;
+    end method.
+end Entity.
+
+x <- 42;

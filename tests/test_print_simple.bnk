@@ -1,0 +1,7 @@
+module test;
+
+Entity App:
+    has static method main:
+        print: "Hello";
+    end method.
+end Entity.

@@ -1,0 +1,268 @@
+module bunker;
+
+# --- AST Definitions ---
+include bunker.std.strings;
+
+# Simple Linked List for AST Nodes
+struct ASTList {
+    head: void*;
+    tail: void*;
+}
+
+struct ASTNode {
+    value: void*;
+    next: void*;
+}
+
+# Base Nodes (Convention: all start with type: string)
+
+struct Program {
+    type: string;
+    module: void*; # ModuleDecl*
+    stmts: void*; # ASTList*
+}
+
+struct LetStmt {
+    type: string;
+    name: Token;
+    typeHint: string;
+    initializer: void*; # Expr*
+}
+
+struct ReturnStmt {
+    type: string;
+    value: void*; # Expr*
+}
+
+struct ExprStmt {
+    type: string;
+    expr: void*; # Expr*
+}
+
+struct BinaryExpr {
+    type: string;
+    left: void*;
+    op: Token;
+    right: void*;
+}
+
+struct UnaryExpr {
+    type: string;
+    op: Token;
+    right: void*;
+}
+
+struct LiteralExpr {
+    type: string;
+    tok: Token;
+    literalType: string; # "int", "string", "bool"
+}
+
+struct VariableExpr {
+    type: string;
+    name: Token;
+}
+
+struct AssignExpr {
+    type: string;
+    target: void*; # Expr* (VariableExpr or GetExpr)
+    value: void*;
+}
+
+struct Block {
+    type: string;
+    stmts: void*; # ASTList*
+    terminatedByDot: bool;
+}
+
+struct IfStmt {
+    type: string;
+    condition: void*; # Expr*
+    thenBranch: void*; # Block*
+    elseBranch: void*; # Block* or IfStmt*
+}
+
+struct WhileStmt {
+    type: string;
+    condition: void*; # Expr*
+    body: void*; # Block*
+}
+
+struct GroupingExpr {
+    type: string;
+    expression: void*; # Expr*
+}
+
+struct MethodCall {
+    type: string;
+    receiver: void*; # Expr*
+    metTok: Token;
+    args: void*; # ASTList*
+}
+
+struct GetExpr {
+    type: string;
+    object: void*; # Expr*
+    nameTok: Token;
+}
+
+struct FieldDecl {
+    type: string;
+    name: string;
+    fieldType: string; # Store type name as string
+}
+
+struct MethodDecl {
+    type: string;
+    name: string;
+    isStatic: bool;
+    params: void*; # ASTList*
+    returnType: string;
+    body: void*; # Block*
+}
+
+struct StructDecl {
+    type: string;
+    name: string;
+    typeParams: void*; # ASTList* of Token (IDENT)
+    fields: void*; # ASTList*
+}
+
+struct EntityDecl {
+    type: string;
+    name: string;
+    typeParams: void*; # ASTList* of Token (IDENT)
+    implList: void*; # ASTList* of strings (type names)
+    fields: void*; # ASTList*
+    methods: void*; # ASTList*
+}
+
+struct ModuleDecl {
+    type: string;
+    name: string;
+}
+
+struct ImportDecl {
+    type: string;
+    name: string;
+}
+
+struct IncludeDecl {
+    type: string;
+    path: string;
+}
+
+struct LoopStmt {
+    type: string;
+    body: void*; # Block*
+}
+
+struct ScopedStmt {
+    type: string;
+    body: void*; # Block*
+}
+
+struct UnabstractedBlock {
+    type: string;
+    body: void*; # Block*
+}
+
+struct AsmStmt {
+    type: string;
+    target: string; # "c"
+    code: string;
+}
+
+# --- Lexer Definitions ---
+
+struct Token {
+    type: string;
+    value: string;
+    line: int;
+    column: int;
+    offset: int;
+}
+
+Entity ErrorReporter:
+    has static method report: msg: string, tok: Token, source: string -> void:
+        if:
+        condition:
+            return tok == nil;
+        end condition.
+        then:
+             print: "Error (Unknown Location): " + msg;
+             return;
+        end then.
+        end if.
+        # 1. Find start of line
+        let start: int <- tok.offset;
+        let c: string <- "";
+        loop:
+            if:
+            condition:
+                return start <= 0;
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            c <- Strings: substring: source, start - 1, start;
+            if:
+            condition:
+                return c == "\n";
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            start <- start - 1;
+        end loop.
+        
+        # 2. Find end of line
+        let endIdx: int <- tok.offset;
+        let len_src: int <- Strings: length: source;
+        loop:
+            if:
+            condition:
+                return endIdx >= len_src;
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            c <- Strings: substring: source, endIdx, endIdx + 1;
+            if:
+            condition:
+                return c == "\n";
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            endIdx <- endIdx + 1;
+        end loop.
+        
+        # 3. Extract and print line
+        let lineStr: string <- Strings: substring: source, start, endIdx;
+        print: "Error at line " + tok.line + ", col " + tok.column + ": " + msg;
+        print: "  " + lineStr;
+        
+        # 4. Print caret
+        let caretLine: string <- "  ";
+        let col: int <- 1;
+        loop:
+            if:
+            condition:
+                return col >= tok.column;
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            caretLine <- caretLine + " ";
+            col <- col + 1;
+        end loop.
+        caretLine <- caretLine + "^";
+        print: caretLine;
+    end method.
+end Entity.

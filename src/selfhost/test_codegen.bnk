@@ -1,0 +1,24 @@
+module main;
+
+if:
+condition:
+    return 1 == 1;
+end condition.
+then:
+   x : int <- 10;
+   y : int <- 20;
+   z : int <- x + y;
+   
+   print: "Result:";
+   print: z;
+   
+   if:
+   condition:
+       return z > 25;
+   end condition.
+   then:
+       print: "Greater than 25";
+   end then.
+   else:
+       print: "Less or equal";
+   end if.

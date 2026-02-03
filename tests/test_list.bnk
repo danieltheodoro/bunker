@@ -1,0 +1,35 @@
+module TestList;
+
+include bunker.std.collections;
+
+Entity App:
+    has method main:
+        print: "Testing List module...";
+        
+        let list: List<int> <- List<int> : create;
+        
+        print: "Adding elements...";
+        list : add: 10;
+        list : add: 20;
+        list : add: 30;
+        list : add: 40;
+        list : add: 50;
+        list : add: 60;
+        list : add: 70;
+        list : add: 80;
+        list : add: 90; # Should trigger resize (8 -> 16)
+        
+        print: "List size: ";
+        print: list : size;
+
+        print: "Elements:";
+        let i: int <- 0;
+        while i < list : size:
+            let val: int <- list : get: i;
+            print: val;
+            i <- i + 1;
+        .
+
+        print: "List test complete.";
+    end method.
+end Entity.

@@ -1,0 +1,7 @@
+Entity TestEntity:
+    has static method sayHello -> void:
+        print: "Hello from static method"
+    end method.
+end Entity.
+
+TestEntity:sayHello:

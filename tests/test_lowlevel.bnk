@@ -1,0 +1,42 @@
+module Test;
+
+Entity App:
+    has method main:
+        print: "=== Refined Low Level Test ===";
+        
+        unabstracted:
+            if:
+            condition:
+                return System : arch == "arm64";
+            end condition.
+            then:
+                  asm arm64: "nop";
+                  print: "Runtime Check inside Unabstracted: ARM64";
+            end then.
+            else:
+                  asm x86_64: "nop";
+                  print: "Runtime Check inside Unabstracted: Not ARM64";
+            end if.
+            
+            if:
+            condition:
+                return System : os == "macos";
+            end condition.
+            then:
+                  system darwin: "echo 'Hello macOS System (Conditional)'";
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return System : os == "windows";
+            end condition.
+            then:
+                   system windows: "echo 'Hello Windows System (Conditional)'";
+            end then.
+            end if.
+        end unabstracted.
+        
+        print: "=== Done ===";
+    end method.
+end Entity.

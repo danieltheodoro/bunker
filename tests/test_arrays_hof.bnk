@@ -1,0 +1,83 @@
+module test_arrays_hof;
+
+Entity App:
+    has static method main:
+        # Test 1: Integer array
+        numbers <- [1, 2, 3, 4, 5];
+        
+        # Test 2: Array access
+        first <- numbers[0];
+        if:
+        condition:
+            return first == 1;
+        end condition.
+        then:
+            print: "Array access works";
+        end then.
+        end if.
+        
+        # Test 3: Map
+        doubled <- numbers : map: \x: int. x * 2.;
+        d0 <- doubled[0];
+        d4 <- doubled[4];
+        if:
+        condition:
+            return d0 == 2;
+        end condition.
+        then:
+            if:
+            condition:
+                return d4 == 10;
+            end condition.
+            then:
+                print: "Map works";
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        # Test 4: Filter
+        evens <- numbers : filter: \x: int. x % 2 == 0.;
+        # evens should be [2, 4]
+        e0 <- evens[0];
+        e1 <- evens[1];
+        len <- evens.length;
+        
+        if:
+        condition:
+            return len == 2;
+        end condition.
+        then:
+            if:
+            condition:
+                return e0 == 2;
+            end condition.
+            then:
+                 if:
+                 condition:
+                     return e1 == 4;
+                 end condition.
+                 then:
+                     print: "Filter works";
+                 end then.
+                 end if.
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        # Test 5: Reduce
+        # Sum: 1+2+3+4+5 = 15
+        sum <- numbers : reduce: 0, \acc: int, x: int. acc + x.;
+        if:
+        condition:
+            return sum == 15;
+        end condition.
+        then:
+            print: "Reduce works";
+        end then.
+        end if.
+        
+        print: "All array tests passed!";
+    end method.
+end Entity.

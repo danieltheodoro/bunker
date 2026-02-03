@@ -1,0 +1,47 @@
+module TestErrors;
+
+include bunker.std.errors;
+
+Entity App:
+    has static method fail_if_zero: val: int -> void:
+        if:
+        condition:
+            return val == 0;
+        end condition.
+        then:
+            throw: "Zero Value Exception";
+        end then.
+        end if.
+        print: "Value is non-zero: " + val;
+    end method.
+
+    has method main:
+        print: "=== Error Handling Test ===";
+        
+        # Test Try-Catch
+        try:
+             print: "Inside Try Block";
+             App : fail_if_zero: 0;
+             print: "This should not print";
+        catch e:
+             print: "Caught Exception: " + e;
+        finally:
+             print: "Finally Block Executed";
+        end try.
+        
+        print: "=== Nested Try-Catch ===";
+        
+        try:
+            try:
+                throw: "Inner Error";
+            catch inner:
+                print: "Caught Inner: " + inner;
+                throw: "Rethrowing";
+            end try.
+        catch outer:
+            print: "Caught Outer (Rethrown): " + outer;
+        end try.
+        
+        print: "=== Done ===";
+    end method.
+end Entity.

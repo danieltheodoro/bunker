@@ -1,0 +1,61 @@
+module test_pointers;
+
+Entity App:
+    has static method main:
+        # Test 1: Address-of and Dereference
+        x <- 10;
+        ptr <- &x;
+        val <- *ptr;
+        
+        if:
+        condition:
+            return val == 10;
+        end condition.
+        then:
+            print: "Pointer dereference works";
+        end then.
+        end if.
+        
+        # Test 2: Double Pointer
+        ptr_ptr <- &ptr;
+        val_via_ptr_ptr <- **ptr_ptr;
+        if:
+        condition:
+            return val_via_ptr_ptr == 10;
+        end condition.
+        then:
+            print: "Double pointer dereference works";
+        end then.
+        end if.
+        
+        # Test 3: Manual Allocation
+        # Alloc 8 bytes (fits int)
+        mem <- Memory: alloc: 8;
+        print: "Allocated memory";
+        
+        # We can't cast yet, but let's assume we can treat as void* or cast in C
+        # Testing minimal alloc/free cycle
+        Memory: free: mem;
+        print: "Freed memory";
+        
+        # Test 4: Copy
+        src_val <- 42;
+        dest_val <- 0;
+        src_ptr <- &src_val;
+        dest_ptr <- &dest_val;
+        
+        # Copy 8 bytes (sizeof long long)
+        Memory: copy: dest_ptr, src_ptr, 8;
+        
+        if:
+        condition:
+            return dest_val == 42;
+        end condition.
+        then:
+            print: "Memory copy works";
+        end then.
+        end if.
+        
+        print: "All pointer tests passed!";
+    end method.
+end Entity.

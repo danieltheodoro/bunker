@@ -1,0 +1,912 @@
+module bunker;
+
+# --- Symbol Table Definitions ---
+
+struct Header {
+    type: string;
+}
+
+struct Symbol {
+    name: string;
+    type: string;
+    isDefined: bool;
+}
+
+struct Scope {
+    symbols: void*; # ASTList* of Symbol*
+    parent: void*;  # Scope* (nullable)
+}
+
+Entity SymbolTable:
+    has current: void*; # Scope*
+
+    has static method new -> SymbolTable:
+        st <- SymbolTable: alloc;
+        # Root scope
+        root <- Scope: alloc;
+        root.symbols <- ASTList: new: nil, nil;
+        root.parent <- nil;
+        
+        st.current <- root;
+        return st;
+    end method.
+
+    has method enterScope -> void:
+        newScope <- Scope: alloc;
+        newScope.symbols <- ASTList: new: nil, nil;
+        newScope.parent <- self.current;
+        self.current <- newScope;
+    end method.
+
+    has method exitScope -> void:
+        if:
+        condition:
+            return self.current == nil;
+        end condition.
+        then:
+            return;
+        end then.
+        end if.
+        
+        # Cast to Scope to access parent
+        scope: Scope <- self.current;
+        self.current <- scope.parent;
+    end method.
+
+    has method define: name: string, type: string -> void:
+        # Create symbol
+        sym <- Symbol: alloc;
+        sym.name <- name;
+        sym.type <- type;
+        sym.isDefined <- true;
+        
+        # Add to current scope's list
+        scope: Scope <- self.current;
+        list: ASTList <- scope.symbols;
+        
+        node <- ASTNode: new: sym, nil;
+        
+        if:
+        condition:
+            return list.head == nil;
+        end condition.
+        then:
+             list.head <- node;
+             list.tail <- node;
+        end then.
+        else:
+             tail: ASTNode <- list.tail;
+             tail.next <- node;
+             list.tail <- node;
+        end else.
+        end if.
+    end method.
+
+    has method resolve: name: string -> string:
+        curr: Scope <- self.current;
+        print: "DEBUG: Resolving symbol: " + name;
+        loop:
+             if:
+             condition:
+                 return curr == nil;
+             end condition.
+             then:
+                 break;
+             end then.
+             end if.
+             
+             # Search in current scope
+             list: ASTList <- curr.symbols;
+             node: ASTNode <- list.head;
+             
+             loop:
+                 if:
+                 condition:
+                     return node == nil;
+                 end condition.
+                 then:
+                     break;
+                 end then.
+                 end if.
+                 if:
+                 condition:
+                     return node.value == nil;
+                 end condition.
+                 then:
+                      node <- node.next;
+                      continue;
+                 end then.
+                 end if.
+                 
+                 sym: Symbol <- node.value;
+                 if:
+                 condition:
+                     return sym.name == name;
+                 end condition.
+                 then:
+                      # print: "DEBUG: Found " + name + " as " + sym.type;
+                      return sym.type;
+                 end then.
+                 end if.
+                 
+                 node <- node.next;
+             end loop.
+             
+             # Move to parent
+             curr <- curr.parent;
+        end loop.
+        
+        print: "DEBUG: Resolution FAILED for: " + name;
+        return "error";
+    end method.
+end Entity.
+
+Entity TypeChecker:
+    has parser: void*; # Parser*
+    has symbols: void*; # SymbolTable*
+    has source: string; # Source code for error reporting
+    has hadError: bool;
+    
+    has static method new: p: void*, src: string -> TypeChecker:
+        tc <- TypeChecker: alloc;
+        tc.parser <- p;
+        tc.source <- src;
+        tc.symbols <- SymbolTable: new;
+        tc.hadError <- false;
+        return tc;
+    end method.
+
+    has method reportError: msg: string, tok: Token -> void:
+        print: "TYPE ERROR: " + msg;
+        if:
+        condition:
+            return tok != nil;
+        end condition.
+        then:
+             print: "  at line " + tok.line + ", col " + tok.column + ": " + tok.value;
+        end then.
+        end if.
+        ErrorReporter: report: msg, tok, self.source;
+        self.hadError <- true;
+    end method.
+    
+    has method checkProgram: prog: void* -> void:
+         print: "Type Checking Program...";
+         
+         # Cast to Program (conceptually)
+         # In C transpilation, void* is fine. We access fields by casting or assuming layout;
+         # But in Bunker self-host, we need to know the structure to access fields if it's a struct;
+         # Actually, accessing fields on void* directly isn't supported by my transpiler unless cast;
+         
+         # Wait, Program is a struct? Let's check definition;
+         # struct Program { module: void*; imports: void*; stmts: void*; }
+         
+         p: Program <- prog;
+         
+         # 1. Check Module
+         if:
+         condition:
+             return p.module != nil;
+         end condition.
+         then:
+             self: checkModule: p.module;
+         end then.
+         end if.
+         
+         # 2. Check Imports (TODO)
+         
+         # 3. Check Statements
+         list: ASTList <- p.stmts;
+         if:
+         condition:
+             return list == nil;
+         end condition.
+         then:
+             return;
+         end then.
+         end if.
+         
+         node: ASTNode <- list.head;
+         loop:
+             if:
+             condition:
+                 return node == nil;
+             end condition.
+             then:
+                 break;
+             end then.
+             end if.
+             
+             stmt: void* <- node.value;
+             self: checkStatement: stmt;
+             
+             node <- node.next;
+         end loop.
+         
+         print: "Type Checking Complete.";
+    end method.
+
+    has method checkModule: mod: void* -> void:
+        # TODO: Register module name?
+        return;
+    end method.
+
+    has method checkStatement: stmt: void* -> void:
+        if:
+        condition:
+            return stmt == nil;
+        end condition.
+        then:
+            return;
+        end then.
+        end if.
+        
+        # Dispatch based on type field (all AST nodes have 'type' string first)
+        # We need a generic way to check type;
+        # Impl: Cast to generic struct with type field? Or just access .type if transpiler supports it on void* (it likely doesn't);
+        # Workaround: Cast to Token? No;
+        # We need a 'AnyNode' struct or similar?
+        # Actually, in Bunker `void*` field access is not allowed. We must cast;
+        # But we don't know the type yet!
+        # Solution: All AST nodes should start with `type: string`;
+        # We can cast to a dummy struct `Header { type: string }` to read the type;
+        
+        header: Header <- stmt; 
+        type <- header.type;
+        
+        # Declarations
+        if:
+        condition:
+            return type == "VariableDecl";
+        end condition.
+        then:
+            self: checkVarDecl: stmt; return;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "MethodDecl";
+        end condition.
+        then:
+            self: checkMethodDecl: stmt; return;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "StructDecl";
+        end condition.
+        then:
+            self: checkStructDecl: stmt; return;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "EntityDecl";
+        end condition.
+        then:
+             self: checkEntityDecl: stmt; return;
+        end then.
+        end if.
+        
+        # Statements
+        if:
+        condition:
+            return type == "Block";
+        end condition.
+        then:
+            self: checkBlock: stmt; return;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "IfStmt";
+        end condition.
+        then:
+            self: checkIf: stmt; return;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "WhileStmt";
+        end condition.
+        then:
+            self: checkWhile: stmt; return;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "LoopStmt";
+        end condition.
+        then:
+            self: checkLoop: stmt; return;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "ReturnStmt";
+        end condition.
+        then:
+            self: checkReturn: stmt; return;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "ExprStmt";
+        end condition.
+        then:
+            self: checkExprStmt: stmt; return;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "ScopedStmt";
+        end condition.
+        then:
+            self: checkScopedStmt: stmt; return;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "LetStmt";
+        end condition.
+        then:
+            self: checkVarDecl: stmt; return;
+        end then.
+        end if.
+        
+        # print: "Unknown statement type: " + type;
+    end method.
+
+    has method checkScopedStmt: stmt: void* -> void:
+        s: ScopedStmt <- stmt;
+        self: checkBlock: s.body;
+    end method.
+
+    has method checkBlock: stmt: void* -> void:
+        # Cast to Block
+        # struct Block { type: string; stmts: void*; }
+        # note: selfhost uses void* for list;
+        
+        blk: Block <- stmt;
+        st: SymbolTable <- self.symbols;
+        
+        st: enterScope;
+        
+        list: ASTList <- blk.stmts;
+        if:
+        condition:
+            return list != nil;
+        end condition.
+        then:
+             node: ASTNode <- list.head;
+             loop:
+                 if:
+                 condition:
+                     return node == nil;
+                 end condition.
+                 then:
+                     break;
+                 end then.
+                 end if.
+                 self: checkStatement: node.value;
+                 node <- node.next;
+             end loop.
+        end then.
+        end if.
+        
+        st: exitScope;
+    end method.
+
+    has method checkExpression: expr: void* -> string:
+        if:
+        condition:
+            return expr == nil;
+        end condition.
+        then:
+            return "void";
+        end then.
+        end if.
+        
+        header: Header <- expr;
+        type <- header.type;
+        
+        if:
+        condition:
+            return type == "LiteralExpr";
+        end condition.
+        then:
+            return self: checkLiteral: expr;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "VariableExpr";
+        end condition.
+        then:
+            return self: checkVariable: expr;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "AssignExpr";
+        end condition.
+        then:
+            return self: checkAssign: expr;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "BinaryExpr";
+        end condition.
+        then:
+            return self: checkBinary: expr;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "UnaryExpr";
+        end condition.
+        then:
+            return self: checkUnary: expr;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "MethodCall";
+        end condition.
+        then:
+            return self: checkCall: expr;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "LetStmt";
+        end condition.
+        then:
+            self: checkVarDecl: expr; return "void";
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "Block";
+        end condition.
+        then:
+             return self: checkBlockCondition: expr;
+        end then.
+        end if.
+        if:
+        condition:
+            return type == "ArrayAccess";
+        end condition.
+        then:
+            return self: checkArrayAccess: expr;
+        end then.
+        end if.
+        
+        return "error";
+    end method.
+
+    has method checkBlockCondition: stmt: void* -> string:
+        blk: Block <- stmt;
+        st: SymbolTable <- self.symbols;
+        st: enterScope;
+        
+        let resType: string <- "void";
+        list: ASTList <- blk.stmts;
+        if:
+        condition:
+            return list != nil;
+        end condition.
+        then:
+             node: ASTNode <- list.head;
+             loop:
+                 if:
+                 condition:
+                     return node == nil;
+                 end condition.
+                 then:
+                     break;
+                 end then.
+                 end if.
+                 
+                 header: Header <- node.value;
+                 if:
+                 condition:
+                     return header.type == "ReturnStmt";
+                 end condition.
+                 then:
+                      ret: ReturnStmt <- node.value;
+                      if:
+                      condition:
+                          return ret.value != nil;
+                      end condition.
+                      then:
+                           resType <- self: checkExpression: ret.value;
+                      end then.
+                      end if.
+                      # In condition blocks, return terminates and provides the value
+                      break;
+                 end then.
+                 end if.
+
+                 self: checkStatement: node.value;
+                 node <- node.next;
+             end loop.
+        end then.
+        end if.
+        
+        st: exitScope;
+        return resType;
+    end method.
+    
+    has method checkLiteral: expr: void* -> string:
+        lit: LiteralExpr <- expr;
+        return lit.literalType;
+    end method.
+    
+    has method checkVariable: expr: void* -> string:
+        var: VariableExpr <- Casts: toVariableExpr: expr;
+        tk <- var.name;
+        
+        st: SymbolTable <- self.symbols;
+        type: string <- st: resolve: tk.value;
+        
+        if:
+        condition:
+            return type == "error";
+        end condition.
+        then:
+             self: reportError: "Undefined variable '" + var.name.value + "'", var.name;
+             return "error";
+        end then.
+        end if.
+        return type;
+    end method.
+    
+    has method checkAssign: expr: void* -> string:
+        assign: AssignExpr <- expr;
+        
+        valueType <- self: checkExpression: assign.value;
+        
+        st: SymbolTable <- self.symbols;
+        header: Header <- assign.target;
+        
+        if:
+        condition:
+            return header.type == "VariableExpr";
+        end condition.
+        then:
+             var: VariableExpr <- assign.target;
+             name <- var.name.value;
+             varType <- st: resolve: name;
+             
+             if:
+             condition:
+                 return varType == "error";
+             end condition.
+             then:
+                  # Implicit Declaration
+                  st: define: name, valueType;
+                  return valueType;
+             end then.
+             end if.
+             
+             if:
+             condition:
+                 return varType != valueType;
+             end condition.
+             then:
+                  self: reportError: "Cannot assign " + valueType + " to variable '" + name + "' of type " + varType, var.name;
+             end then.
+             end if.
+             return varType;
+        end then.
+        else:
+             if:
+             condition:
+                 return header.type == "GetExpr" or header.type == "ArrayAccess";
+             end condition.
+             then:
+                  # Support member assignment. 
+                  # For now, we skip deep validation of property existence and just allow it.
+                  self: checkExpression: assign.target;
+                  return valueType;
+             end then.
+             else:
+                  if:
+                  condition:
+                      return header.type == "ArrayAccess";
+                  end condition.
+                  then:
+                       self: checkExpression: assign.target;
+                       return valueType;
+                  end then.
+                  end if.
+                  
+                  self: reportError: "Invalid assignment target type " + header.type, nil;
+                  return "error";
+             end else.
+             end if.
+        end else.
+        end if.
+    end method.
+    
+    has method checkExprStmt: stmt: void* -> void:
+        es: ExprStmt <- stmt;
+        self: checkExpression: es.expr;
+    end method.
+
+
+    has method checkVarDecl: stmt: void* -> void:
+        # Re-implementing checkVarDecl
+        decl: LetStmt <- stmt;
+        
+        # Determine type
+        declaredType: string <- decl.typeHint;
+        
+        if:
+        condition:
+            return decl.initializer != nil;
+        end condition.
+        then:
+             inferredType: string <- self: checkExpression: decl.initializer;
+             if:
+             condition:
+                 return declaredType == "";
+             end condition.
+             then:
+                 declaredType <- inferredType;
+             end then.
+             else:
+                  if:
+                  condition:
+                      return declaredType != inferredType;
+                  end condition.
+                  then:
+                      self: reportError: "Variable '" + decl.name.value + "' expects " + declaredType + " but got " + inferredType, decl.name;
+                  end then.
+                  end if.
+             end else.
+             end if.
+        end then.
+        end if.
+        
+        st: SymbolTable <- self.symbols;
+        st: define: decl.name.value, declaredType;
+    end method.
+
+    has method checkMethodDecl: stmt: void* -> void:
+        decl: MethodDecl <- stmt;
+        st: SymbolTable <- self.symbols;
+        
+        # Define method in current scope (global)
+        st: define: decl.name, "method"; # TODO: function type signature
+        
+        # Enter method scope
+        st: enterScope;
+        
+        # Define parameters
+        args: ASTList <- decl.params;
+        if:
+        condition:
+            return args != nil;
+        end condition.
+        then:
+            node: ASTNode <- args.head;
+            loop:
+                if:
+                condition:
+                    return node == nil;
+                end condition.
+                then:
+                    break;
+                end then.
+                end if.
+                
+                param: FieldDecl <- node.value;
+                # Params are FieldDecl with name/type
+                st: define: param.name, param.fieldType;
+                
+                node <- node.next;
+            end loop.
+        end then.
+        end if.
+        
+        # Check body
+        self: checkBlock: decl.body;
+        
+        st: exitScope;
+    end method.
+
+    has method checkReturn: stmt: void* -> void:
+        ret: ReturnStmt <- stmt;
+        if:
+        condition:
+            return ret.value != nil;
+        end condition.
+        then:
+             self: checkExpression: ret.value;
+             # TODO: Check against enclosing method return type
+        end then.
+        end if.
+    end method.
+
+    has method checkIf: stmt: void* -> void:
+        ifStmt: IfStmt <- stmt;
+        condType <- self: checkExpression: ifStmt.condition;
+        if:
+        condition:
+            return condType != "bool";
+        end condition.
+        then:
+             self: reportError: "If condition must be bool, got " + condType, nil; 
+        end then.
+        end if.
+        
+        self: checkBlock: ifStmt.thenBranch;
+        if:
+        condition:
+            return ifStmt.elseBranch != nil;
+        end condition.
+        then:
+             # elseBranch can be Block or IfStmt (for else if)
+             # We need to dispatch checkStatement to handle both recursion or block
+             self: checkStatement: ifStmt.elseBranch;
+        end then.
+        end if.
+    end method.
+    
+    has method checkWhile: stmt: void* -> void:
+        w: WhileStmt <- stmt;
+        condType <- self: checkExpression: w.condition;
+        if:
+        condition:
+            return condType != "bool";
+        end condition.
+        then:
+             self: reportError: "While condition must be bool, got " + condType, nil;
+        end then.
+        end if.
+        self: checkBlock: w.body;
+    end method.
+
+    has method checkLoop: stmt: void* -> void:
+        l: LoopStmt <- stmt;
+        self: checkBlock: l.body;
+    end method.
+
+    has method checkBinary: expr: void* -> string:
+        bin: BinaryExpr <- expr;
+        leftType <- self: checkExpression: bin.left;
+        rightType <- self: checkExpression: bin.right;
+        
+        if:
+        condition:
+            return leftType != rightType;
+        end condition.
+        then:
+             self: reportError: "Binary operand mismatch " + leftType + " vs " + rightType, bin.op;
+             return "error";
+        end then.
+        end if.
+        
+        op <- bin.op.value;
+        if:
+        condition:
+            return op == "==" or op == "!=" or op == "<" or op == ">" or op == "<=" or op == ">=";
+        end condition.
+        then:
+             return "bool";
+        end then.
+        end if.
+        
+        return leftType;
+    end method.
+
+    has method checkUnary: expr: void* -> string:
+        un: UnaryExpr <- expr;
+        return self: checkExpression: un.right;
+    end method.
+    
+    has method checkCall: expr: void* -> string:
+        call: MethodCall <- expr;
+        
+        # Check receiver
+        # For now, assume receiver is implicit 'self' or explicit?
+        # Receiver logic is complex in self-hosted;
+        # But we verify args at least;
+        
+        args: ASTList <- call.args;
+        if:
+        condition:
+            return args != nil;
+        end condition.
+        then:
+            node: ASTNode <- args.head;
+            loop:
+                if:
+                condition:
+                    return node == nil;
+                end condition.
+                then:
+                    break;
+                end then.
+                end if.
+                self: checkExpression: node.value;
+                node <- node.next;
+            end loop.
+        end then.
+        end if.
+        
+        # Helper: resolve method return type from symbol table if possible?
+        # Or hardcode for known methods;
+        # For this stage, just return "void" or "unknown" to avoid crashing
+        return "void"; 
+    end method.
+
+    has method checkArrayAccess: expr: void* -> string:
+        aa: ArrayAccess <- expr;
+        self: checkExpression: aa.target;
+        self: checkExpression: aa.index;
+        return "void"; # Placeholder for element type
+    end method.
+    
+    has method checkStructDecl: stmt: void* -> void:
+        let decl: StructDecl <- stmt;
+        let st: SymbolTable <- self.symbols;
+        st: define: decl.name, "struct";
+    end method.
+
+    has method checkEntityDecl: stmt: void* -> void:
+        let decl: EntityDecl <- stmt;
+        let st: SymbolTable <- self.symbols;
+        
+        # Register Entity Name
+        st: define: decl.name, "entity";
+        
+        # Check Methods
+        let list: ASTList <- decl.methods;
+        if:
+        condition:
+            return list != nil;
+        end condition.
+        then:
+             let node: ASTNode <- list.head;
+             loop:
+                 if:
+                 condition:
+                     return node == nil;
+                 end condition.
+                 then:
+                     break;
+                 end then.
+                 end if.
+                 self: checkMethodDecl: node.value;
+                 node <- node.next;
+             end loop.
+        end then.
+        end if.
+    end method.
+
+    has method check: program: void* -> void:
+        prog: Program <- program;
+        if:
+        condition:
+            return prog == nil;
+        end condition.
+        then:
+            return;
+        end then.
+        end if.
+        
+        print: "DEBUG: TypeChecker: Starting check";
+        # Module
+        self: checkModule: prog.module;
+        print: "DEBUG: TypeChecker: Module checked";
+        
+        # Statements
+        self: checkBlock: prog.stmts;
+        print: "DEBUG: TypeChecker: Program checked";
+    end method.
+
+end Entity.

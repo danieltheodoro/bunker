@@ -1,0 +1,30 @@
+module test_new_if;
+
+Entity App:
+    has static method main:
+        x: int <- 10;
+        
+        if:
+        condition:
+            return x > 5;
+        end condition.
+        then:
+            print: "x is greater than 5";
+        end then.
+        end if.
+        
+        if:
+        condition:
+            y: int <- 20;
+            return y < 15;
+        end condition.
+        then:
+            print: "y is less than 15";
+        end then.
+        else:
+            print: "y is not less than 15";
+        end if.
+        
+        print: "Done";
+    end method.
+end Entity.

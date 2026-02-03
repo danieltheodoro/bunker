@@ -1,0 +1,10 @@
+module Test;
+
+include bunker.std.io;
+
+Entity App:
+    has method main:
+        x: int <- 5;
+        print: x;
+    end method.
+end Entity.

@@ -1,0 +1,2234 @@
+#!/usr/bin/env python3
+import sys
+import os
+import re
+import subprocess
+from typing import List, Optional, Any, Tuple
+from dataclasses import dataclass
+import copy
+
+# ==========================================
+# 1. AST NODES
+# ==========================================
+
+class Node:
+    pass
+
+@dataclass
+class Program(Node):
+    module: str
+    stmts: List[Node]
+
+@dataclass
+class EntityDecl(Node):
+    name: str
+    members: List[Node]
+    type_params: List[str] = None # e.g. ['T', 'U']
+
+@dataclass
+class MethodDecl(Node):
+    name: str
+    is_public: bool
+    is_static: bool
+    params: List[Tuple[str, str]] # List of (name, type)
+    return_type: Optional[str]
+    body: List[Node]
+
+@dataclass
+class FieldDecl(Node):
+    name: str
+    type: str
+    is_public: bool
+    is_static: bool
+
+@dataclass
+class UnabstractedBlock(Node):
+    stmts: List['AsmStmt']
+
+@dataclass
+class AsmStmt(Node):
+    arch: str # 'x86_64', 'c', etc
+    code: str
+
+@dataclass
+class ForeignDecl(Node):
+    abi: str # 'c23' etc
+    funcs: List['ForeignFuncDecl']
+
+@dataclass
+class ForeignFuncDecl(Node):
+    name: str # Bunker name (usually same as C)
+    real_name: str # C name
+    params: List[Tuple[str, str]]
+    return_type: str
+
+@dataclass
+class StructDecl(Node):
+    name: str
+    fields: List['FieldDecl']
+    type_params: List[str] = None
+
+@dataclass
+class MethodCall(Node):
+    target: Optional['Expr']  # None for implicit 'this' or global
+    method: str
+    args: List['Expr']
+
+@dataclass
+class StringLiteral(Node):
+    value: str
+
+@dataclass
+class IntegerLiteral(Node):
+    value: int
+
+@dataclass
+class FloatLiteral(Node):
+    value: float
+
+@dataclass
+class NilLiteral(Node):
+    pass
+
+@dataclass
+class Block(Node):
+    stmts: List[Node]
+
+@dataclass
+class IfStmt(Node):
+    condition: Node
+    then_branch: Node
+    else_branch: Optional[Node] = None
+
+@dataclass
+class WhileStmt(Node):
+    condition: Node
+    body: Node
+
+@dataclass
+class UnaryExpr(Node):
+    op: str
+    expr: Node
+
+
+@dataclass
+class BinaryExpr(Node):
+    left: Node
+    op: str
+    right: Node
+
+@dataclass
+class ReturnStmt(Node):
+    expr: Node
+
+@dataclass
+class PanicStmt(Node):
+    message: Node
+
+@dataclass
+class FieldAccess(Node):
+    target: Node
+    field: str
+
+@dataclass
+class Variable(Node):
+    name: str
+
+@dataclass
+class AssignStmt(Node):
+    name: str
+    expr: Node
+    type_hint: Optional[str] = None
+
+# ==========================================
+# 2. LEXER
+# ==========================================
+
+class TokenType:
+    KEYWORD = 'KEYWORD'
+    IDENT = 'IDENT'
+    STRING = 'STRING'
+    INTEGER = 'INTEGER'
+    FLOAT = 'FLOAT'
+    SYMBOL = 'SYMBOL'
+    OPERATOR = 'OPERATOR'
+    ASSIGN = 'ASSIGN'
+    EOF = 'EOF'
+
+@dataclass
+class Token:
+    type: str
+    value: str
+    line: int
+
+class Lexer:
+    def __init__(self, source: str):
+        self.source = source
+        self.pos = 0
+        self.line = 1
+        self.tokens = []
+        self._tokenize()
+
+    def _tokenize(self):
+        # Regex patterns
+        patterns = [
+            ('COMMENT', r'#.*'),
+            (TokenType.STRING, r'"(?:[^"\\]|\\.)*"'),
+            (TokenType.KEYWORD, r'\b(module|Entity|Struct|has|public|private|method|return|if|else|while|nil|import|include|panic|static|unabstracted|foreign|asm|func)\b'),
+            (TokenType.ASSIGN, r'<-'),
+            (TokenType.OPERATOR, r'==|!=|>=|<=|->|[\+\-\*\/<>=!]'), # Split operators to support generic nested brackets
+            (TokenType.FLOAT, r'\d+\.\d+'),
+            (TokenType.INTEGER, r'\d+'),
+            (TokenType.IDENT, r'[a-zA-Z_][a-zA-Z0-9_]*'),
+            (TokenType.SYMBOL, r'[:\.\(\),\[\];]'),
+            ('WHITESPACE', r'\s+'),
+        ]
+        
+        full_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in patterns)
+        
+        for match in re.finditer(full_regex, self.source):
+            kind = match.lastgroup
+            value = match.group()
+            
+            if kind == 'WHITESPACE' or kind == 'COMMENT':
+                self.line += value.count('\n')
+                continue
+            
+            if kind == TokenType.STRING:
+                value = value[1:-1] # Strip quotes
+                # Unescape escaped quotes so they don't break logic later? 
+                # Actually, simply treating as raw content is fine, but for unabstracted we stripped, so we might need care.
+                # However, for now, just regex fix allows capture.
+                
+            self.tokens.append(Token(kind, value, self.line))
+        
+        self.tokens.append(Token(TokenType.EOF, '', self.line))
+
+# ==========================================
+# 3. PARSER (Recursive Descent)
+# ==========================================
+
+class Parser:
+    def __init__(self, tokens: List[Token]):
+        self.tokens = tokens
+        self.pos = 0
+
+    def peek(self) -> Token:
+        return self.tokens[self.pos]
+
+    def peek_next(self) -> Token:
+        if self.pos + 1 < len(self.tokens):
+            return self.tokens[self.pos + 1]
+        return Token(TokenType.EOF, '', self.line)
+
+    def consume(self, expected_type: str = None, expected_value: str = None) -> Token:
+        token = self.peek()
+        if expected_type and token.type != expected_type:
+            raise SyntaxError(f"Expected {expected_type}, got {token.type} '{token.value}' at line {token.line}")
+        if expected_value and token.value != expected_value:
+            raise SyntaxError(f"Expected '{expected_value}', got '{token.value}' at line {token.line}")
+        self.pos += 1
+        return token
+
+    def parse_type_ref(self) -> str:
+        name = self.consume(TokenType.IDENT).value
+        # Check for generics <T, U>
+        if self.peek().type == TokenType.OPERATOR and self.peek().value == '<':
+            self.consume(TokenType.OPERATOR, '<')
+            args = []
+            while True:
+                args.append(self.parse_type_ref())
+                if self.peek().type == TokenType.SYMBOL and self.peek().value == ',':
+                    self.consume(TokenType.SYMBOL, ',')
+                    continue
+                break
+            
+            self.consume(TokenType.OPERATOR, '>')
+            return f"{name}<{', '.join(args)}>"
+        return name
+
+    def parse_program(self) -> Program:
+        # module name
+        self.consume(TokenType.KEYWORD, 'module')
+        module_name = self.consume(TokenType.IDENT).value
+        # Handle multipart: .sub.name
+        while self.peek().value == '.':
+             self.consume(TokenType.SYMBOL, '.')
+             if self.peek().type == TokenType.IDENT:
+                 module_name += "." + self.consume(TokenType.IDENT).value
+             else:
+                 # Trailing dot terminator
+                 break
+        self.consume(TokenType.SYMBOL, ';')
+        
+        stmts = []
+        
+        # Parse Imports
+        while self.peek().type == TokenType.KEYWORD:
+             if self.peek().value == 'import' or self.peek().value == 'include':
+                 self.consume() # keyword
+                 # Parse module path a.b.c
+                 path_str = self.consume(TokenType.IDENT).value
+                 while self.peek().value == '.':
+                     # Check if separator
+                     if self.peek_next().type == TokenType.IDENT:
+                         self.consume(TokenType.SYMBOL, '.')
+                         path_str += "." + self.consume(TokenType.IDENT).value
+                     else:
+                         break
+                 
+                 # Consume trailing delimiter (statement end)
+                 self.consume(TokenType.SYMBOL, ';')
+                 
+                 # Optional : Alias
+                 if self.peek().value == ':':
+                     self.consume(TokenType.SYMBOL, ':')
+                     self.consume(TokenType.IDENT) # alias
+                 
+                 # Recursive Load
+                 # Check local or std
+                 candidates = [
+                     path_str.replace('.', '/') + ".bnk",
+                     os.path.join("src/std", path_str.replace('.', '/') + ".bnk")
+                 ]
+                 
+                 loaded = False
+                 for filepath in candidates:
+                     print(f"DEBUG: Checking candidate {filepath}")
+                     if os.path.exists(filepath):
+                          print(f"DEBUG: Found {filepath}")
+                          # Prevent circular? Naive check
+                          with open(filepath, 'r') as f:
+                              src = f.read()
+                          l = Lexer(src)
+                          p = Parser(l.tokens)
+                          print(f"DEBUG: Parsing imported tokens: {len(l.tokens)} tokens")
+                          imported_prog = p.parse_program()
+                          # Append imported entities to current scope
+                          print(f"DEBUG: Note: Imported entities: {[s.name for s in imported_prog.stmts if hasattr(s, 'name')]}")
+                          stmts.extend(imported_prog.stmts)
+                          # print(f"DEBUG: Imported {len(imported_prog.stmts)} stmts from {filepath}")
+                          loaded = True
+                          break
+                 
+                 if not loaded:
+                     print(f"Warning: Could not resolve import '{path_str}'")
+
+             else:
+                 break
+
+        while self.peek().type != TokenType.EOF:
+            if self.peek().type == TokenType.KEYWORD:
+                if self.peek().value == 'Entity':
+                    stmts.append(self.parse_entity())
+                elif self.peek().value == 'Struct':
+                    stmts.append(self.parse_struct())
+                elif self.peek().value == 'foreign':
+                    stmts.append(self.parse_foreign())
+                else:
+                    self.consume()
+            else:
+                self.consume()
+        
+        return Program(module_name, stmts)
+
+    def parse_entity(self) -> EntityDecl:
+        self.consume(TokenType.KEYWORD, 'Entity')
+        name = self.consume(TokenType.IDENT).value
+        
+        type_params = []
+        if self.peek().type == TokenType.OPERATOR and self.peek().value == '<':
+            self.consume(TokenType.OPERATOR, '<')
+            while True:
+                type_params.append(self.consume(TokenType.IDENT).value)
+                if self.peek().value == ',': 
+                    self.consume(TokenType.SYMBOL, ',')
+                    continue
+                break
+            self.consume(TokenType.OPERATOR, '>')
+        
+        self.consume(TokenType.SYMBOL, ':')
+        
+        members = []
+        # Support 'has a method...'
+        while self.peek().value == 'has':
+            self.consume(TokenType.KEYWORD, 'has')
+            is_public = False
+            is_static = False
+            while self.peek().value in ['a', 'an', 'public', 'private', 'static']:
+                if self.peek().value == 'public':
+                    is_public = True
+                if self.peek().value == 'static':
+                    is_static = True
+                self.consume()
+            
+            if self.peek().value == 'method':
+                method_decl = self.parse_method(is_public, is_static)
+                members.append(method_decl)
+            elif self.peek().value == 'state' or self.peek().type == TokenType.IDENT:
+                # Handle state or field
+                if self.peek().value == 'state':
+                    self.consume()
+                
+                field_name = self.consume(TokenType.IDENT).value
+                self.consume(TokenType.SYMBOL, ':')
+                # Use generic type ref
+                field_type = self.parse_type_ref()
+                members.append(FieldDecl(field_name, field_type, is_public, is_static))
+                
+                # Semicolon separator for fields
+                if self.peek().value == ';':
+                    self.consume(TokenType.SYMBOL, ';')
+            else:
+                raise SyntaxError(f"Unexpected token in entity: {self.peek()}")
+        
+        # Closing dot for the EntityDecl construct itself
+        self.consume(TokenType.SYMBOL, '.')
+        return EntityDecl(name, members, type_params)
+
+    def parse_struct(self) -> StructDecl:
+        self.consume(TokenType.KEYWORD, 'Struct')
+        name = self.consume(TokenType.IDENT).value
+        
+        type_params = []
+        if self.peek().type == TokenType.OPERATOR and self.peek().value == '<':
+            self.consume(TokenType.OPERATOR, '<')
+            while True:
+                type_params.append(self.consume(TokenType.IDENT).value)
+                if self.peek().value == ',': 
+                    self.consume(TokenType.SYMBOL, ',')
+                    continue
+                break
+            self.consume(TokenType.OPERATOR, '>')
+        
+        self.consume(TokenType.SYMBOL, ':')
+        
+        fields = []
+        while self.peek().value != '.':
+            field_name = self.consume(TokenType.IDENT).value
+            self.consume(TokenType.SYMBOL, ':')
+            # Use generic type ref
+            field_type = self.parse_type_ref()
+            self.consume(TokenType.SYMBOL, ';')
+            
+            fields.append(FieldDecl(field_name, field_type, True, False)) # All struct fields public/instance
+            
+        self.consume(TokenType.SYMBOL, '.')
+        return StructDecl(name, fields, type_params)
+
+        self.consume(TokenType.SYMBOL, '.')
+        return StructDecl(name, fields)
+
+    def parse_foreign(self) -> ForeignDecl:
+        self.consume(TokenType.KEYWORD, 'foreign')
+        abi = self.consume(TokenType.IDENT).value # e.g. c23
+        self.consume(TokenType.SYMBOL, ':')
+        
+        funcs = []
+        while self.peek().value != '.':
+            # func "name" (args) -> ret
+            self.consume(TokenType.KEYWORD, 'func')
+            real_name_token = self.consume(TokenType.STRING)
+            real_name = real_name_token.value.strip('"') 
+            
+            # Param list (arg: type, arg: type)
+            self.consume(TokenType.SYMBOL, '(')
+            params = []
+            if self.peek().value != ')':
+                while True:
+                    p_name = self.consume(TokenType.IDENT).value
+                    self.consume(TokenType.SYMBOL, ':')
+                    p_type = self.consume(TokenType.IDENT).value
+                    params.append((p_name, p_type))
+                    if self.peek().value == ',':
+                        self.consume(TokenType.SYMBOL, ',')
+                    else:
+                        break
+            self.consume(TokenType.SYMBOL, ')')
+            
+            # Return type
+            return_type = "void"
+            if self.peek().value == '->':
+                self.consume(TokenType.OPERATOR, '->')
+                return_type = self.consume(TokenType.IDENT).value
+                
+            funcs.append(ForeignFuncDecl(real_name, real_name, params, return_type))
+            
+            # Allow optional semicolon
+            if self.peek().value == ';':
+                self.consume(TokenType.SYMBOL, ';')
+            
+            # Optional terminator for function decl? For now no, just next line
+            # But wait, grammar usually requires separators. Let's assume newline/start of next func implies it, or create strict rule later.
+            # Spec example: func "sys" (...). NO DOT on func line, only at end of foreign block.
+            
+        self.consume(TokenType.SYMBOL, '.')
+        return ForeignDecl(abi, funcs)
+
+    def parse_method(self, is_public: bool, is_static: bool) -> MethodDecl:
+        self.consume(TokenType.KEYWORD, 'method')
+        name = self.consume(TokenType.IDENT).value
+        
+        params = []
+        return_type = "void*"
+        
+        # Robust Parameter Parsing
+        if self.peek().value == ':' or self.peek().value == '->' or self.peek().value == '-':
+            if self.peek().value == ':':
+                self.consume(TokenType.SYMBOL, ':')
+            
+            should_parse_params = False
+            token = self.peek()
+            if token.type == TokenType.IDENT:
+                 if self.pos+1 < len(self.tokens) and self.tokens[self.pos+1].value == ':':
+                      should_parse_params = True
+            
+            if token.type == TokenType.OPERATOR and (token.value == '->' or token.value == '-'):
+                 should_parse_params = True
+
+            if should_parse_params:
+                while self.peek().value != '.':
+                     token = self.peek()
+                     if token.value == ':': break
+                     
+                     if token.type == TokenType.OPERATOR and (token.value == '->' or token.value == '-'):
+                          if token.value == '-':
+                               self.consume()
+                               if self.peek().value == '>': self.consume()
+                          else: self.consume()
+                          return_type = self.parse_type_ref()
+                          break
+                     
+                     if token.type == TokenType.IDENT:
+                          if self.pos+1 < len(self.tokens) and self.tokens[self.pos+1].value == ':':
+                               param_start = self.pos
+                               try:
+                                   p_name = self.consume(TokenType.IDENT).value
+                                   self.consume(TokenType.SYMBOL, ':')
+                                   if self.peek().type != TokenType.IDENT:
+                                        raise Exception("Not a type")
+                                   p_type = self.parse_type_ref()
+                                   params.append((p_name, p_type))
+                                   if self.peek().value == ',': self.consume()
+                                   continue
+                               except:
+                                   self.pos = param_start
+                                   break
+                          else:
+                               break
+                     
+                     # Not a parameter? Stop parsing.
+                     break
+                
+                if self.peek().value == ':': self.consume(TokenType.SYMBOL, ':')
+        
+        body = self.parse_block_body()
+        # Method construct consumes its own dot
+        self.consume(TokenType.SYMBOL, '.')
+        
+        return MethodDecl(name, is_public, is_static, params, return_type, body)
+
+    def parse_block_body(self) -> List[Node]:
+        stmts = []
+        if self.peek().value == '.':
+            # Empty block
+            return stmts
+            
+        while True:
+            # STOP tokens for a block body
+            # A dot '.' means the current block is over.
+            # An 'else' means we encountered a nested 'else' action within an 'if' block.
+            if self.peek().value in ['.', 'else'] or self.peek().type == TokenType.EOF:
+                break
+
+            stmt = self.parse_stmt()
+            stmts.append(stmt)
+            
+            # Terminator/Separator check
+            curr = self.peek()
+            if curr.value == ';':
+                self.consume(TokenType.SYMBOL, ';')
+            elif curr.value == '.':
+                # Block terminator seen, stop parsing statements for THIS block.
+                break
+            elif curr.value == 'else':
+                # Semicolon is required before 'else' if it follows another statement
+                # But here we just break to let parse_if handle it.
+                break
+            else:
+                # If next is EOF or something else, let the loop condition handle it.
+                pass
+        return stmts
+
+    def parse_stmt(self) -> Node:
+        # Check for IF / WHILE / RETURN / PANIC
+        if self.peek().type == TokenType.KEYWORD:
+            kw = self.peek().value
+            if kw == 'if': return self.parse_if()
+            if kw == 'while': return self.parse_while()
+            if kw == 'unabstracted': return self.parse_unabstracted()
+            if kw == 'return':
+                self.consume(TokenType.KEYWORD, 'return')
+                if self.peek().value == ':': self.consume(TokenType.SYMBOL, ':')
+                # Optional expr
+                if self.peek().value not in [';', '.', 'else', 'has']:
+                     expr = self.parse_expr()
+                     return ReturnStmt(expr) 
+                return ReturnStmt(NilLiteral())
+            if kw == 'panic':
+                self.consume(TokenType.KEYWORD, 'panic')
+                if self.peek().value == ':': self.consume(TokenType.SYMBOL, ':')
+                message = self.parse_expr()
+                return PanicStmt(message)
+            if kw == 'nil':
+                 self.consume(TokenType.KEYWORD, 'nil')
+                 return NilLiteral()
+                
+                
+        if self.peek().type == TokenType.IDENT or (self.peek().type == TokenType.KEYWORD and self.peek().value == 'foreign'):
+             return self.parse_assign_or_expr_stmt()
+             
+        raise SyntaxError(f"Unexpected token {self.peek()} in stmt")
+
+    def parse_unabstracted(self) -> UnabstractedBlock:
+        self.consume(TokenType.KEYWORD, 'unabstracted')
+        self.consume(TokenType.SYMBOL, ':')
+        
+        stmts = []
+        while self.peek().value != '.':
+            # asm x86_64: "code"
+            if self.peek().value == 'asm':
+                self.consume(TokenType.KEYWORD, 'asm')
+                arch = self.consume(TokenType.IDENT).value
+                self.consume(TokenType.SYMBOL, ':')
+                code_token = self.consume(TokenType.STRING)
+                # Unescape quotes for code content: \" -> "
+                code = code_token.value.strip('"').replace('\\"', '"')
+                
+                # Check for optional terminator?
+                if self.peek().value == ';': self.consume()
+                elif self.peek().value == '.': break # End of block
+                elif self.peek().value == 'asm': pass # Next asm stmt
+                
+                stmts.append(AsmStmt(arch, code))
+            else:
+                self.consume() # Skip unknown?
+                
+        self.consume(TokenType.SYMBOL, '.')
+        return UnabstractedBlock(stmts)
+
+    def parse_assign_or_expr_stmt(self) -> Node:
+        # print(f"DEBUG: parse_assign {self.peek()}")
+        start_pos = self.pos
+        # 1. Assignment or Method Call
+        if self.peek().type == TokenType.IDENT or (self.peek().type == TokenType.KEYWORD and self.peek().value == 'foreign'):
+            start_pos = self.pos
+            if self.peek().type == TokenType.KEYWORD:
+                name_token = self.consume(TokenType.KEYWORD, 'foreign')
+            else:
+                name_token = self.consume(TokenType.IDENT)
+            
+            # Special Case: print: ...
+            if name_token.value == 'print' and self.peek().value == ':':
+                self.pos = start_pos
+                return self.parse_method_call()
+
+            # Case: x <- ...
+            if self.peek().value == '<-':
+                self.consume(TokenType.ASSIGN)
+                expr = self.parse_expr()
+                return AssignStmt(name_token.value, expr, None)
+
+            # Case: x : type <- ... OR target : method
+            if self.peek().value == ':':
+                self.consume(TokenType.SYMBOL, ':')
+                
+                # Attempt to parse as variable declaration with type
+                # We save position to backtrack if it turns out to be a method call
+                backtrack_pos = self.pos
+                is_var_decl = False
+                type_hint = None
+                
+                try:
+                     # Check if lookahead even looks like a type start?
+                     if self.peek().type == TokenType.IDENT:
+                          type_hint = self.parse_type_ref()
+                          # After type, MUST be assignment or terminator
+                          if self.peek().value == '<-':
+                               self.consume(TokenType.ASSIGN)
+                               expr = self.parse_expr()
+                               return AssignStmt(name_token.value, expr, type_hint)
+                          elif self.peek().value in [';', '.']:
+                               return AssignStmt(name_token.value, NilLiteral(), type_hint)
+                except Exception:
+                     pass # Syntax error in type or mismatch
+                
+                # Fallback: It was not a variable declaration. Backtrack and parse as method call.
+                # Note: parse_method_call expects to consume the name!
+                # But we entered this block after consuming name_token at line 625.
+                # So we reset to START_POS (line 618) which is *before* name_token.
+                self.pos = start_pos
+                return self.parse_method_call()
+
+                # If we are here, it's probably a method call: target : method
+                self.pos = start_pos
+                return self.parse_method_call()
+            
+            # Fallback to general method call
+            self.pos = start_pos
+            return self.parse_method_call()
+        
+        raise SyntaxError(f"Unexpected token {self.peek()} in stmt")
+
+    def parse_if(self) -> IfStmt:
+        self.consume(TokenType.KEYWORD, 'if')
+        condition = self.parse_expr()
+        self.consume(TokenType.SYMBOL, ':')
+        
+        then_stmts = self.parse_block_body()
+        then_branch = Block(then_stmts)
+        else_branch = None
+        
+        if self.peek().value == 'else':
+            # Correctly consuming 'else' as a nested part of 'if'
+            self.consume(TokenType.KEYWORD, 'else')
+            self.consume(TokenType.SYMBOL, ':')
+            else_stmts = self.parse_block_body()
+            else_branch = Block(else_stmts)
+            # Each 'else' (nested in 'if') should consume precisely ONE dot
+            self.consume(TokenType.SYMBOL, '.')
+            
+        # Consume exactly one dot to close the 'if' construct itself
+        self.consume(TokenType.SYMBOL, '.')
+        return IfStmt(condition, then_branch, else_branch)
+
+    def parse_while(self) -> WhileStmt:
+        self.consume(TokenType.KEYWORD, 'while')
+        condition = self.parse_expr()
+        self.consume(TokenType.SYMBOL, ':')
+        
+        stmts = self.parse_block_body()
+        # Each 'while' structure consumes exactly one dot
+        self.consume(TokenType.SYMBOL, '.')
+        
+        return WhileStmt(condition, Block(stmts))
+
+    def parse_method_call(self) -> MethodCall:
+        if self.peek().type == TokenType.KEYWORD and self.peek().value == 'foreign':
+            name_token = self.consume(TokenType.KEYWORD, 'foreign')
+        else:
+            name_token = self.consume(TokenType.IDENT)
+        name = name_token.value
+        
+        target = None
+        method_name = name
+        args = []
+        
+        if self.peek().value == ':':
+            self.consume(TokenType.SYMBOL, ':')
+            # Lookahead: is this 'target : method' or 'method : arg'?
+            if self.peek().type == TokenType.IDENT and name != 'print':
+                # Case: target: method: args
+                if self.pos+1 < len(self.tokens) and self.tokens[self.pos+1].value == ':':
+                    target = Variable(name)
+                    method_name = self.consume(TokenType.IDENT).value
+                    self.consume(TokenType.SYMBOL, ':')
+                elif name[0].isupper(): # Static call Entity: method
+                    target = Variable(name)
+                    method_name = self.consume(TokenType.IDENT).value
+                    if self.peek().value == ':': self.consume(TokenType.SYMBOL, ':')
+                else:
+                    # Global or implicit this: print: arg (where arg is IDENT)
+                    pass
+            
+            # Parse arguments
+            if self.peek().value not in ['.', ';', 'else', 'has']:
+                args.append(self.parse_expr())
+                while self.peek().value == ',':
+                    self.consume(TokenType.SYMBOL, ',')
+                    if self.peek().value not in ['.', ';', 'else', 'has']:
+                         args.append(self.parse_expr())
+                    
+        return MethodCall(target, method_name, args)
+
+    def parse_expr(self) -> Node:
+        return self.parse_additive()
+
+    def parse_additive(self) -> Node:
+        left = self.parse_multiplicative()
+        while self.peek().type == TokenType.OPERATOR and self.peek().value in ['+', '-', '>', '<', '==', '!=']:
+            op = self.consume(TokenType.OPERATOR).value
+            right = self.parse_multiplicative()
+            left = BinaryExpr(left, op, right)
+        return left
+
+    def parse_multiplicative(self) -> Node:
+        left = self.parse_unary()
+        while self.peek().type == TokenType.OPERATOR and self.peek().value in ['*', '/']:
+            op = self.consume(TokenType.OPERATOR).value
+            right = self.parse_unary()
+            left = BinaryExpr(left, op, right)
+        return left
+
+    def parse_unary(self) -> Node:
+        if self.peek().type == TokenType.OPERATOR and self.peek().value in ['-', '+', '!']:
+            op = self.consume(TokenType.OPERATOR).value
+            expr = self.parse_unary()
+            return UnaryExpr(op, expr)
+        return self.parse_primary()
+
+    def parse_primary(self) -> Node:
+        token = self.peek()
+        if token.type == TokenType.INTEGER:
+            self.consume()
+            return IntegerLiteral(int(token.value))
+        if token.type == TokenType.FLOAT:
+            self.consume()
+            return FloatLiteral(float(token.value))
+        if token.type == TokenType.STRING:
+            self.consume()
+            return StringLiteral(token.value)
+        if token.type == TokenType.KEYWORD and token.value == 'nil':
+            self.consume()
+            return NilLiteral()
+        if token.type == TokenType.IDENT:
+            self.consume()
+            # Check for Method Call 'Target : Method : args'
+            # Disambiguate with 'if cond:' by checking if ':' and method name are on same line
+            if self.peek().value == ':' and self.pos + 1 < len(self.tokens) and \
+               self.tokens[self.pos+1].type == TokenType.IDENT and \
+               self.peek().line == token.line and self.tokens[self.pos+1].line == token.line:
+                 self.consume(TokenType.SYMBOL, ':')
+                 method_name = self.consume(TokenType.IDENT).value
+                 args = []
+                 if self.peek().value == ':': # Args?
+                      # Ensure arg is on same line to avoid consuming block start ':' using heuristic
+                      # If next token (Arg) is on next line, do not consume ':'
+                      if self.pos+1 < len(self.tokens) and self.tokens[self.pos+1].line == token.line:
+                           self.consume(TokenType.SYMBOL, ':')
+                           # Parse first argument
+                           args.append(self.parse_expr())
+                           # Parse additional comma-separated arguments
+                           while self.peek().value == ',':
+                                self.consume(TokenType.SYMBOL, ',')
+                                if self.peek().value not in [';', '.']:
+                                     args.append(self.parse_expr())
+                 return MethodCall(Variable(token.value), method_name, args)
+            # Check for Field Access: var.field - ensures dot and field are on same line
+            if self.peek().value == '.' and self.pos + 1 < len(self.tokens) and \
+               self.tokens[self.pos+1].type == TokenType.IDENT and \
+               self.peek().line == self.tokens[self.pos+1].line:
+                 self.consume(TokenType.SYMBOL, '.')
+                 field_name = self.consume(TokenType.IDENT).value
+                 return FieldAccess(Variable(token.value), field_name)
+            
+            return Variable(token.value)
+        if token.type == TokenType.KEYWORD and token.value == 'foreign':
+             self.consume()
+             # Check for foreign call in expr
+             if self.peek().value == ':' and self.pos + 1 < len(self.tokens):
+                 self.consume(TokenType.SYMBOL, ':')
+                 method_name = self.consume(TokenType.IDENT).value
+                 args = []
+                 if self.peek().value == ':': 
+                      if self.pos+1 < len(self.tokens) and self.tokens[self.pos+1].line == token.line:
+                           self.consume(TokenType.SYMBOL, ':')
+                           args.append(self.parse_expr())
+                           while self.peek().value == ',':
+                                self.consume(TokenType.SYMBOL, ',')
+                                if self.peek().value not in [';', '.']:
+                                     args.append(self.parse_expr())
+                 return MethodCall(Variable("foreign"), method_name, args)
+             return Variable("foreign")
+        if token.value == '(':
+            self.consume(TokenType.SYMBOL, '(')
+            expr = self.parse_expr()
+            self.consume(TokenType.SYMBOL, ')')
+            return expr
+        raise SyntaxError(f"Unexpected token in expr: {token}")
+
+# ==========================================
+# 4. CODE GEN (C11)
+# ==========================================
+
+class CTranspiler:
+    def __init__(self):
+        self.code = []
+        self.headers = [
+            "#include <stdio.h>", "#include <stdlib.h>", "#include <stdbool.h>", 
+            "#include <unistd.h>", "#include <string.h>", "#include <math.h>",
+            "typedef struct { long long value; char* errorMessage; bool isError; } BunkerResult;"
+        ]
+        self.indent_level = 0
+        self.vars = {} # name -> c_type
+        self.foreign_func_types = {}
+
+    def emit(self, line: str):
+        indent = "    " * self.indent_level
+        self.code.append(f"{indent}{line}")
+
+    def mangle_type_name(self, t: str) -> str:
+        if '<' in t:
+             base = t.split('<')[0]
+             args = t[len(base)+1:-1]
+             flat = args.replace('<','_').replace('>','_').replace(',','_').replace(' ','')
+             return f"{base}_{flat}"
+        return t
+
+    def map_type(self, t: str) -> str:
+        if t == 'int': return "long long"
+        if t == 'float': return "double"
+        if t in ['string', 'str']: return "char*"
+        if t == 'bool': return "bool"
+        if t in ['void', 'nil']: return "void" 
+        if t == 'void*': return "void*"
+        
+        mangled = self.mangle_type_name(t)
+        return f"{mangled}*"
+
+
+    def transpile_struct_decl(self, node: StructDecl):
+        # 1. Emit typedef struct
+        self.emit(f"typedef struct {{")
+        self.indent_level += 1
+        for field in node.fields:
+             c_type = self.map_type(field.type)
+             self.emit(f"{c_type} {field.name};")
+        self.indent_level -= 1
+        self.emit(f"}} {node.name};")
+        
+        # 2. Emit Constructor using static method convention: Name_new
+        args_str_list = []
+        for field in node.fields:
+             c_type = self.map_type(field.type)
+             args_str_list.append(f"{c_type} {field.name}")
+        
+        # Dummy "self" arg for static dispatch consistency
+        params = ["void* _dummy"] + args_str_list
+        params_str = ", ".join(params)
+        
+        self.emit(f"void* {node.name}_new({params_str}) {{")
+        self.indent_level += 1
+        self.emit(f"{node.name}* _inst = malloc(sizeof({node.name}));")
+        for field in node.fields:
+             self.emit(f"_inst->{field.name} = {field.name};")
+        self.emit("return _inst;")
+        self.indent_level -= 1
+        self.emit("}")
+
+    def transpile_foreign_decl(self, node: ForeignDecl):
+        for func in node.funcs:
+            # Record type for expression resolution
+            self.foreign_func_types[func.name] = func.return_type
+            
+            c_ret = self.map_type(func.return_type)
+            
+            c_args = []
+            for p_name, p_type in func.params:
+                c_p_type = self.map_type(p_type)
+                c_args.append(f"{c_p_type} {p_name}")
+            
+            args_str = ", ".join(c_args)
+            args_str = ", ".join(c_args)
+            sig = f"extern {c_ret} {func.real_name}({args_str});"
+            if func.real_name in ['system', 'printf', 'malloc', 'free', 'exit']:
+                pass # Don't redeclare standard functions
+            elif sig not in self.headers:
+                self.headers.append(sig)
+
+    def emit_method_prototype(self, node: MethodDecl, entity_name: str):
+        if node.name == 'main': return
+        if entity_name in ['File', 'FileSystem', 'Strings', 'Math', 'Result', 'List', 'Map']: return
+
+        ret_c_type = self.map_type(node.return_type) if node.return_type else "void*"
+        
+        c_params = ["void* _self"]
+        for p_name, p_type in node.params:
+             p_c_type = self.map_type(p_type)
+             c_params.append(f"{p_c_type} {p_name}")
+        
+        c_name = f"{entity_name}_{node.name}"
+        self.emit(f"{ret_c_type} {c_name}({', '.join(c_params)});")
+
+    def transpile(self, node: Node):
+        if isinstance(node, Program):
+            # Pass 0: Register all declared functions/structs?
+            
+            # Pass 0.5: Emit Entity Forward Typedefs
+            for stmt in node.stmts:
+                if isinstance(stmt, EntityDecl):
+                     self.emit(f"typedef struct {stmt.name} {stmt.name};")
+
+            # Pass 1: Emit Struct Definitions and Foreign Decls
+            for stmt in node.stmts:
+                if isinstance(stmt, StructDecl):
+                     self.transpile_struct_decl(stmt)
+                elif isinstance(stmt, ForeignDecl):
+                     self.transpile_foreign_decl(stmt)
+            
+            # Pass 1.5: Emit Method Prototypes for Entities
+            for stmt in node.stmts:
+                if isinstance(stmt, EntityDecl):
+                     for member in stmt.members:
+                          if isinstance(member, MethodDecl):
+                               self.emit_method_prototype(member, stmt.name)
+
+            # Pass 2: Emit Implementations
+            for stmt in node.stmts:
+                if not isinstance(stmt, StructDecl) and not isinstance(stmt, ForeignDecl):
+                    self.transpile(stmt)
+                
+        elif isinstance(node, EntityDecl):
+            # Flatten methods
+            for member in node.members:
+                if isinstance(member, MethodDecl):
+                    self.transpile_method(member, node.name)
+        
+        elif isinstance(node, MethodDecl):
+            pass # Handled above
+
+    def transpile_method(self, node: MethodDecl, entity_name: str):
+        # Native handling for StdLib
+        if entity_name == 'File':
+            c_name = f"File_{node.name}"
+            if node.name == 'open':
+                 # File open: path -> result
+                 self.emit("void* File_open(char* path) {")
+                 self.emit("    FILE* f = fopen(path, \"r\");")
+                 self.emit("    return f;") 
+                 self.emit("}")
+                 return
+            elif node.name == 'create':
+                 # File create -> opened for write
+                 self.emit("void* File_create(char* path) {")
+                 self.emit("    FILE* f = fopen(path, \"w\");")
+                 self.emit("    return f;") 
+                 self.emit("}")
+                 return
+            elif node.name == 'writeString':
+                 # File writeString(f, str)
+                 self.emit("void File_writeString(void* f, char* s) {")
+                 self.emit("    if (f && s) {")
+                 self.emit("        fputs(s, (FILE*)f);")
+                 self.emit("        fflush((FILE*)f);")  # Flush immediately since close might not be called
+                 self.emit("    }")
+                 self.emit("}")
+                 return
+            elif node.name == 'readToString':
+                 # File readToString -> str (malloc'd)
+                 self.emit("char* File_readToString(void* f) {")
+                 self.emit("    FILE* file = (FILE*)f;")
+                 self.emit("    if (!file) return \"\";")
+                 self.emit("    fseek(file, 0, SEEK_END);")
+                 self.emit("    long length = ftell(file);")
+                 self.emit("    fseek(file, 0, SEEK_SET);")
+                 self.emit("    char* buffer = malloc(length + 1);")
+                 self.emit("    if (buffer) {")
+                 self.emit("        fread(buffer, 1, length, file);")
+                 self.emit("        buffer[length] = '\\0';")
+                 self.emit("    } else { return \"\"; }")
+                 self.emit("    return buffer;")
+                 self.emit("}")
+                 return
+            elif node.name == 'close':
+                 self.emit("void File_close(void* f) {")
+                 self.emit("    if (f) fclose((FILE*)f);")
+                 self.emit("}")
+                 return
+
+        elif entity_name == 'FileSystem':
+            c_name = f"FileSystem_{node.name}"
+            if node.name == 'exists':
+                 self.emit("bool FileSystem_exists(void* _self, char* path) {")
+                 self.emit("    return access(path, F_OK) != -1;")
+                 self.emit("}")
+                 return
+            elif node.name == 'delete':
+                 self.emit("bool FileSystem_delete(void* _self, char* path) {")
+                 self.emit("    return remove(path) == 0;")
+                 self.emit("}")
+                 return
+
+        elif entity_name == 'Strings':
+            c_name = f"Strings_{node.name}"
+            if node.name == 'concat':
+                 self.emit("char* Strings_concat(void* _self, char* s1, char* s2) {")
+                 self.emit("    size_t len1 = strlen(s1);")
+                 self.emit("    size_t len2 = strlen(s2);")
+                 self.emit("    char* result = malloc(len1 + len2 + 1);")
+                 self.emit("    strcpy(result, s1);")
+                 self.emit("    strcat(result, s2);")
+                 self.emit("    return result;")
+                 self.emit("}")
+                 return
+            elif node.name == 'length':
+                 self.emit("long long Strings_length(void* _self, char* s) {")
+                 self.emit("    return (long long)strlen(s);")
+                 self.emit("}")
+                 return
+            elif node.name == 'substring':
+                 self.emit("char* Strings_substring(void* _self, char* s, long long start, long long end) {")
+                 self.emit("    size_t len = strlen(s);")
+                 self.emit("    if (start < 0) start = 0;")
+                 self.emit("    if (end > len) end = len;")
+                 self.emit("    if (start >= end) return strdup(\"\");")
+                 self.emit("    size_t sub_len = end - start;")
+                 self.emit("    char* result = malloc(sub_len + 1);")
+                 self.emit("    strncpy(result, s + start, sub_len);")
+                 self.emit("    result[sub_len] = '\\0';")
+                 self.emit("    return result;")
+                 self.emit("}")
+                 return
+            elif node.name == 'startsWith':
+                 self.emit("bool Strings_startsWith(void* _self, char* s, char* prefix) {")
+                 self.emit("    return strncmp(s, prefix, strlen(prefix)) == 0;")
+                 self.emit("}")
+                 return
+            elif node.name == 'endsWith':
+                 self.emit("bool Strings_endsWith(void* _self, char* s, char* suffix) {")
+                 self.emit("    size_t s_len = strlen(s);")
+                 self.emit("    size_t suffix_len = strlen(suffix);")
+                 self.emit("    if (suffix_len > s_len) return false;")
+                 self.emit("    return strcmp(s + (s_len - suffix_len), suffix) == 0;")
+                 self.emit("}")
+                 return
+
+        elif entity_name == 'List':
+            if node.name == 'create':
+                 self.emit("void* List_create(void* _self) {")
+                 self.emit("    typedef struct { long long* data; size_t size; size_t capacity; } BunkerList;")
+                 self.emit("    BunkerList* list = malloc(sizeof(BunkerList));")
+                 self.emit("    list->data = malloc(sizeof(long long) * 4);")
+                 self.emit("    list->size = 0;")
+                 self.emit("    list->capacity = 4;")
+                 self.emit("    return list;")
+                 self.emit("}")
+                 return
+            elif node.name == 'append':
+                 self.emit("void List_append(void* _list, long long value) {")
+                 self.emit("    typedef struct { long long* data; size_t size; size_t capacity; } BunkerList;")
+                 self.emit("    BunkerList* list = (BunkerList*)_list;")
+                 self.emit("    if (list->size >= list->capacity) {")
+                 self.emit("        list->capacity *= 2;")
+                 self.emit("        list->data = realloc(list->data, sizeof(long long) * list->capacity);")
+                 self.emit("    }")
+                 self.emit("    list->data[list->size++] = value;")
+                 self.emit("}")
+                 return
+            elif node.name == 'get':
+                 self.emit("long long List_get(void* _list, long long index) {")
+                 self.emit("    typedef struct { long long* data; size_t size; size_t capacity; } BunkerList;")
+                 self.emit("    BunkerList* list = (BunkerList*)_list;")
+                 self.emit("    if (index < 0 || index >= list->size) return -1;")
+                 self.emit("    return list->data[index];")
+                 self.emit("}")
+                 return
+            elif node.name == 'size':
+                 self.emit("long long List_size(void* _list) {")
+                 self.emit("    typedef struct { long long* data; size_t size; size_t capacity; } BunkerList;")
+                 self.emit("    BunkerList* list = (BunkerList*)_list;")
+                 self.emit("    return (long long)list->size;")
+                 self.emit("}")
+                 return
+            elif node.name == 'remove':
+                 self.emit("void List_remove(void* _list, long long index) {")
+                 self.emit("    typedef struct { long long* data; size_t size; size_t capacity; } BunkerList;")
+                 self.emit("    BunkerList* list = (BunkerList*)_list;")
+                 self.emit("    if (index < 0 || index >= list->size) return;")
+                 self.emit("    for (size_t i = index; i < list->size - 1; i++) {")
+                 self.emit("        list->data[i] = list->data[i + 1];")
+                 self.emit("    }")
+                 self.emit("    list->size--;")
+                 self.emit("}")
+                 return
+
+        elif entity_name == 'Map':
+            if node.name == 'create':
+                 self.emit("void* Map_create(void* _self) {")
+                 self.emit("    typedef struct { char** keys; long long* values; size_t size; size_t capacity; } BunkerMap;")
+                 self.emit("    BunkerMap* map = malloc(sizeof(BunkerMap));")
+                 self.emit("    map->keys = malloc(sizeof(char*) * 4);")
+                 self.emit("    map->values = malloc(sizeof(long long) * 4);")
+                 self.emit("    map->size = 0;")
+                 self.emit("    map->capacity = 4;")
+                 self.emit("    return map;")
+                 self.emit("}")
+                 return
+            elif node.name == 'put':
+                 self.emit("void Map_put(void* _map, char* key, long long value) {")
+                 self.emit("    typedef struct { char** keys; long long* values; size_t size; size_t capacity; } BunkerMap;")
+                 self.emit("    BunkerMap* map = (BunkerMap*)_map;")
+                 self.emit("    for (size_t i = 0; i < map->size; i++) {")
+                 self.emit("        if (strcmp(map->keys[i], key) == 0) {")
+                 self.emit("            map->values[i] = value;")
+                 self.emit("            return;")
+                 self.emit("        }")
+                 self.emit("    }")
+                 self.emit("    if (map->size >= map->capacity) {")
+                 self.emit("        map->capacity *= 2;")
+                 self.emit("        map->keys = realloc(map->keys, sizeof(char*) * map->capacity);")
+                 self.emit("        map->values = realloc(map->values, sizeof(long long) * map->capacity);")
+                 self.emit("    }")
+                 self.emit("    map->keys[map->size] = strdup(key);")
+                 self.emit("    map->values[map->size] = value;")
+                 self.emit("    map->size++;")
+                 self.emit("}")
+                 return
+            elif node.name == 'get':
+                 self.emit("long long Map_get(void* _map, char* key) {")
+                 self.emit("    typedef struct { char** keys; long long* values; size_t size; size_t capacity; } BunkerMap;")
+                 self.emit("    BunkerMap* map = (BunkerMap*)_map;")
+                 self.emit("    for (size_t i = 0; i < map->size; i++) {")
+                 self.emit("        if (strcmp(map->keys[i], key) == 0) {")
+                 self.emit("            return map->values[i];")
+                 self.emit("        }")
+                 self.emit("    }")
+                 self.emit("    return -1;")
+                 self.emit("}")
+                 return
+            elif node.name == 'contains':
+                 self.emit("bool Map_contains(void* _map, char* key) {")
+                 self.emit("    typedef struct { char** keys; long long* values; size_t size; size_t capacity; } BunkerMap;")
+                 self.emit("    BunkerMap* map = (BunkerMap*)_map;")
+                 self.emit("    for (size_t i = 0; i < map->size; i++) {")
+                 self.emit("        if (strcmp(map->keys[i], key) == 0) {")
+                 self.emit("            return true;")
+                 self.emit("        }")
+                 self.emit("    }")
+                 self.emit("    return false;")
+                 self.emit("}")
+                 return
+            elif node.name == 'remove':
+                 self.emit("void Map_remove(void* _map, char* key) {")
+                 self.emit("    typedef struct { char** keys; long long* values; size_t size; size_t capacity; } BunkerMap;")
+                 self.emit("    BunkerMap* map = (BunkerMap*)_map;")
+                 self.emit("    for (size_t i = 0; i < map->size; i++) {")
+                 self.emit("        if (strcmp(map->keys[i], key) == 0) {")
+                 self.emit("            free(map->keys[i]);")
+                 self.emit("            for (size_t j = i; j < map->size - 1; j++) {")
+                 self.emit("                map->keys[j] = map->keys[j + 1];")
+                 self.emit("                map->values[j] = map->values[j + 1];")
+                 self.emit("            }")
+                 self.emit("            map->size--;")
+                 self.emit("            return;")
+                 self.emit("        }")
+                 self.emit("    }")
+                 self.emit("}")
+                 return
+
+        elif entity_name == 'Math':
+            if node.name == 'abs':
+                 self.emit("double Math_abs(void* _self, double x) {")
+                 self.emit("    return fabs(x);")
+                 self.emit("}")
+                 return
+            elif node.name == 'sqrt':
+                 self.emit("double Math_sqrt(void* _self, double x) {")
+                 self.emit("    return sqrt(x);")
+                 self.emit("}")
+                 return
+            elif node.name == 'pow':
+                 self.emit("double Math_pow(void* _self, double base, double exp) {")
+                 self.emit("    return pow(base, exp);")
+                 self.emit("}")
+                 return
+            elif node.name == 'sin':
+                 self.emit("double Math_sin(void* _self, double x) {")
+                 self.emit("    return sin(x);")
+                 self.emit("}")
+                 return
+            elif node.name == 'cos':
+                 self.emit("double Math_cos(void* _self, double x) {")
+                 self.emit("    return cos(x);")
+                 self.emit("}")
+                 return
+
+        elif entity_name == 'Result':
+            if node.name == 'ok':
+                 self.emit("void* Result_ok(void* _self, long long val) {")
+                 self.emit("    BunkerResult* res = malloc(sizeof(BunkerResult));")
+                 self.emit("    res->value = val;")
+                 self.emit("    res->errorMessage = NULL;")
+                 self.emit("    res->isError = false;")
+                 self.emit("    return res;")
+                 self.emit("}")
+                 return
+            elif node.name == 'fail':
+                 self.emit("void* Result_fail(void* _self, char* msg) {")
+                 self.emit("    BunkerResult* res = malloc(sizeof(BunkerResult));")
+                 self.emit("    res->value = 0;")
+                 self.emit("    res->errorMessage = strdup(msg);")
+                 self.emit("    res->isError = true;")
+                 self.emit("    return res;")
+                 self.emit("}")
+                 return
+
+        c_name = f"{entity_name}_{node.name}"
+        if node.name == 'main':
+             c_name = 'main'
+             self.emit("int main(int argc, char** argv) {")
+        else:
+             print(f"DEBUG: Transpiling {c_name}, body len: {len(node.body)}")
+             if len(node.body) > 0:
+                 print(f"DEBUG: First stmt type: {type(node.body[0])}")
+                 pass
+             
+             # Map Bunker types to C types
+             ret_c_type = self.map_type(node.return_type) if node.return_type else "void*"
+             
+             # Build C parameter list (always include _self for Stage 0)
+             c_params = ["void* _self"]
+             for p_name, p_type in node.params:
+                 p_c_type = self.map_type(p_type)
+                 c_params.append(f"{p_c_type} {p_name}")
+             
+             self.emit(f"{ret_c_type} {c_name}({', '.join(c_params)}) {{")
+        
+        self.indent_level += 1
+        
+        # Reset vars for local scope and inject parameters
+        self.vars = {}
+        for p_name, p_type in node.params:
+            self.vars[p_name] = p_type
+            
+        # Declare _ret if method has a return type (except main)
+        if node.name != 'main' and node.return_type and node.return_type != 'void':
+            ret_c_type = self.map_type(node.return_type)
+            self.emit(f"{ret_c_type} _ret = 0;")
+        
+        for stmt in node.body:
+            self.transpile_stmt(stmt)
+            
+        if node.name == 'main':
+            self.emit("return 0;")
+        else:
+            if node.return_type and node.return_type != 'void':
+                self.emit("return _ret;")
+            else:
+                self.emit("return 0;")
+        
+        self.indent_level -= 1
+        self.emit("}")
+
+    def transpile_stmt(self, node: Node):
+        if isinstance(node, MethodCall):
+
+            if node.method == 'print':
+                arg = node.args[0]
+                val_code, val_type = self.transpile_expr(arg)
+                if val_type == 'int':
+                    self.emit(f'printf("%lld\\n", (long long){val_code});')
+                elif val_type in ['string', 'str']:
+                    self.emit(f'printf("%s\\n", {val_code});')
+                elif val_type == 'bool':
+                    self.emit(f'printf("%s\\n", {val_code} ? "true" : "false");')
+                elif val_type in ['float', 'double']:
+                    self.emit(f'printf("%g\\n", {val_code});')
+                elif val_type == 'nil':
+                    self.emit('printf("nil\\n");')
+                else:
+                    self.emit(f'printf("Unknown type: %s\\n", "{val_type}");')
+            
+            # General Method Call: target_method(args)
+            elif node.target:
+                 # target : method : args
+                 # Map to TargetType_method(target, args)
+                 # Since we don't have full type info here, we rely on Entity naming convention
+                 # If target is a variable 'f' of type 'File', we call File_method(f, ...)
+                 
+                 t_code, t_type = self.transpile_expr(node.target)
+                  
+                 # Foreign Call
+                 if t_code == 'foreign':
+                     arg_codes = [self.transpile_expr(arg)[0] for arg in node.args]
+                     args_str = ", ".join(arg_codes)
+                     self.emit(f"{node.method}({args_str});")
+                     return
+
+                 # Resolve C function name
+                 c_func = f"{self.mangle_type_name(t_type)}_{node.method}"
+                 
+                 # Args
+                 arg_codes = []
+                 arg_codes.append(t_code) # 'this'
+                 for arg in node.args:
+                     a_c, _ = self.transpile_expr(arg)
+                     arg_codes.append(a_c)
+                 args_str = ", ".join(arg_codes)
+                 self.emit(f"{c_func}({args_str});")
+
+            else:
+                 # Self call or Global?
+                 # Assume global or implicit this, skip for now unless it's a known global
+                 pass
+        
+        elif isinstance(node, UnabstractedBlock):
+            print(f"DEBUG: UnabstractedBlock with {len(node.stmts)} asm stmts")
+            for asm in node.stmts:
+                print(f"DEBUG: asm.arch = {asm.arch}, code length = {len(asm.code)}")
+                if asm.arch == 'c':
+                    # Raw C code insertion - emit line by line
+                    code_lines = asm.code.strip().split('\n')
+                    for line in code_lines:
+                        if line.strip():  # Skip empty lines
+                            self.emit(line)
+                else:
+                    # Assembly code: wrap in __asm__
+                    # Note: Simple wrapper, might need escaping for quotes
+                    code_escaped = asm.code.replace('"', '\\"')
+                    self.emit(f'__asm__("{code_escaped}");')
+
+        elif isinstance(node, PanicStmt):
+            msg_code, _ = self.transpile_expr(node.message)
+            self.emit(f'printf("PANIC: %s\\n", {msg_code});')
+            self.emit('exit(1);')
+
+        elif isinstance(node, AssignStmt):
+            expr_code, expr_type = self.transpile_expr(node.expr)
+            
+            # Use type hint if available
+            final_type = node.type_hint if node.type_hint else expr_type
+            
+            c_type = self.map_type(final_type)
+            
+            if node.name not in self.vars:
+                # Declare
+                self.emit(f"{c_type} {node.name} = {expr_code};")
+                self.vars[node.name] = final_type
+            else:
+                # Assign
+                self.emit(f"{node.name} = {expr_code};")
+                if node.type_hint and self.vars[node.name] != node.type_hint:
+                     # Update type if strictly hinted?
+                     self.vars[node.name] = node.type_hint
+        
+        elif isinstance(node, IfStmt):
+            cond_code, _ = self.transpile_expr(node.condition)
+            self.emit(f"if ({cond_code}) {{")
+            self.indent_level += 1
+            self.transpile_block(node.then_branch)
+            self.indent_level -= 1
+            
+            if node.else_branch:
+                self.emit("} else {")
+                self.indent_level += 1
+                self.transpile_block(node.else_branch)
+                self.indent_level -= 1
+            self.emit("}")
+
+        elif isinstance(node, WhileStmt):
+            cond_code, _ = self.transpile_expr(node.condition)
+            self.emit(f"while ({cond_code}) {{")
+            self.indent_level += 1
+            self.transpile_block(node.body)
+            self.indent_level -= 1
+            self.emit("}")
+            
+        elif isinstance(node, ReturnStmt):
+            expr_code, _ = self.transpile_expr(node.expr)
+            self.emit(f"_ret = {expr_code};")
+            self.emit("return _ret;")
+
+    def transpile_block(self, node: Block):
+        for stmt in node.stmts:
+            self.transpile_stmt(stmt)
+
+    def transpile_expr(self, node: Node) -> Tuple[str, str]:
+        # Returns (c_code, bnk_type)
+        if isinstance(node, IntegerLiteral):
+            return str(node.value), 'int'
+        
+        if isinstance(node, FloatLiteral):
+            return str(node.value), "float"
+            
+        if isinstance(node, StringLiteral):
+            return f'"{node.value}"', 'string'
+            
+        if isinstance(node, NilLiteral):
+            return "NULL", 'nil'
+
+        if isinstance(node, Variable):
+            type_name = self.vars.get(node.name, 'unknown')
+            # Check if it is a known Entity Name (Static Access) or User Entity (UpperCamelCase)
+            if type_name == 'unknown' and (node.name in ['File', 'FileSystem', 'Strings', 'List', 'Map', 'Math', 'Result'] or node.name[0].isupper()):
+                 return node.name, node.name # Type, Type
+            return node.name, type_name
+
+        if isinstance(node, UnaryExpr):
+            code, t = self.transpile_expr(node.expr)
+            return f"({node.op}{code})", t
+
+        if isinstance(node, BinaryExpr):
+            left_code, left_type = self.transpile_expr(node.left)
+            right_code, right_type = self.transpile_expr(node.right)
+            
+            res_type = ""
+            if left_type != right_type:
+                # Implicit coercion in C: int -> double
+                if (left_type == 'int' and right_type == 'float') or (left_type == 'float' and right_type == 'int'):
+                     res_type = "float"
+                else:
+                     res_type = left_type 
+            else:
+                res_type = left_type
+            
+            # Logic for comparison ops returning bool
+            if node.op in ['>', '<', '==', '!=']:
+                res_type = 'bool'
+                
+            return f"({left_code} {node.op} {right_code})", res_type
+                
+        if isinstance(node, FieldAccess):
+            target_code, target_type = self.transpile_expr(node.target)
+            # Emit: ((StructName*)ptr)->field
+            return f"(({target_type}*){target_code})->{node.field}", "unknown_field_type" # Type checker handled types, we might need to lookup field type again or assume basic? For C gen it matters if we use it in printf. But here we return expr string.
+
+        if isinstance(node, MethodCall):
+            # Target : Method
+            method_code = ""
+            ret_type = "void*"
+            
+            if node.target and isinstance(node.target, Variable):
+                t_code, t_type = self.transpile_expr(node.target)
+                
+                # Foreign Call check (Priority)
+                if node.target.name == 'foreign' or t_code == 'foreign':
+                      # Foreign call: direct C function
+                      args_code = [self.transpile_expr(arg)[0] for arg in node.args]
+                      args_str = ", ".join(args_code)
+                      ret_type = self.foreign_func_types.get(node.method, 'void*')
+                      return f"{node.method}({args_str})", ret_type
+                
+                # Check if this is a static call (target is an Entity name, not a variable instance)
+                # We assume Static Call if code matches type name (e.g. "File" : open)
+                if t_type[0].isupper() and t_code == t_type:
+                    # Foreign check removed (handled above)
+                    
+                    if t_type == 'Math':
+                         c_func = f"Math_{node.method}"
+                         args_code = [self.transpile_expr(a)[0] for a in node.args]
+                         args_str = "NULL, " + ", ".join(args_code) # Dummy self
+                         return f"{c_func}({args_str})", "float"
+
+                    if t_type == 'File':
+                        if node.method == 'open':
+                            arg_code, _ = self.transpile_expr(node.args[0])
+                            return f"File_open({arg_code})", "File"
+                        elif node.method == 'create':
+                            arg_code, _ = self.transpile_expr(node.args[0])
+                            return f"File_create({arg_code})", "File"
+                    elif t_type == 'Strings':
+                        # All Strings methods are static utility functions
+                        c_func = f"Strings_{node.method}"
+                        args_code = [self.transpile_expr(a)[0] for a in node.args]
+                        args_str = "NULL, " + ", ".join(args_code)  # Add dummy self parameter
+                        
+                        # Determine return type
+                        if node.method == 'concat':
+                            return f"{c_func}({args_str})", "string"
+                        elif node.method == 'length':
+                            return f"{c_func}({args_str})", "int"
+                        elif node.method == 'substring':
+                            return f"{c_func}({args_str})", "string"
+                        elif node.method in ['startsWith', 'endsWith']:
+                            return f"{c_func}({args_str})", "bool"
+                    elif t_type == 'List':
+                        if node.method == 'create':
+                            return "List_create(NULL)", "List"
+                    elif t_type == 'Map':
+                        if node.method == 'create':
+                            return "Map_create(NULL)", "Map"
+                        return f"{c_func}({args_str})", "float"
+                    elif t_type == 'Result':
+                        c_func = f"Result_{node.method}"
+                        args_code = [self.transpile_expr(a)[0] for a in node.args]
+                        args_str = "NULL, " + ", ".join(args_code)
+                        return f"{c_func}({args_str})", "Result"
+                    else:
+                        # Struct Instantiation: Struct : new
+                        if node.method == 'new':
+                            c_func = f"{self.mangle_type_name(t_type)}_{node.method}"
+                            args_code = [self.transpile_expr(a)[0] for a in node.args]
+                            args_str = "NULL, " + ", ".join(args_code) # Dummy self
+                            return f"{c_func}({args_str})", t_type
+                            
+                        # General static call for user-defined entities
+                        c_func = f"{self.mangle_type_name(t_type)}_{node.method}"
+                        args_code = [self.transpile_expr(a)[0] for a in node.args]
+                        args_str = "NULL, " + ", ".join(args_code) # Dummy self
+                        return f"{c_func}({args_str})", "void*" # Default return
+                
+                # Instance method call: variable : method : args
+                # Map to Type_method(variable, args)
+                c_func = f"{self.mangle_type_name(t_type)}_{node.method}"
+                args = [t_code] + [self.transpile_expr(a)[0] for a in node.args]
+                args_str = ", ".join(args)
+                
+                # Determine return type based on method
+                ret_type = "void*"  # default
+                if t_type == 'File':
+                    if node.method == 'readToString':
+                        ret_type = "string"
+                    elif node.method in ['close', 'writeString']:
+                        ret_type = "void"
+                elif t_type == 'FileSystem':
+                    if node.method in ['exists', 'delete']:
+                        ret_type = "bool"
+                elif t_type == 'List':
+                    if node.method in ['append', 'remove']:
+                        ret_type = "void"
+                    elif node.method in ['get', 'size']:
+                        ret_type = "int"
+                elif t_type == 'Map':
+                    if node.method in ['put', 'remove']:
+                        ret_type = "void"
+                    elif node.method == 'get':
+                        ret_type = "int"
+                    elif node.method == 'contains':
+                        ret_type = "bool"
+                elif t_type == 'Result':
+                    # Member access pattern result : value
+                    # In Bunker v0.1.0 we map properties to fields
+                    # typedef struct { long long value; char* errorMessage; bool isError; } BunkerResult;
+                    if node.method == 'value': return f"((BunkerResult*){t_code})->value", "int"
+                    if node.method == 'errorMessage': return f"((BunkerResult*){t_code})->errorMessage", "string"
+                    if node.method == 'isError': return f"((BunkerResult*){t_code})->isError", "bool"
+                
+                return f"{c_func}({args_str})", ret_type
+            
+            return "0", "int" # Fallback for void call in expr?
+                
+        return "", "unknown"
+ 
+
+    def get_source(self) -> str:
+        return '\n'.join(self.headers + self.code)
+
+# ==========================================
+# 5. TYPE CHECKER (Static Analysis)
+# ==========================================
+
+class TypeError(Exception):
+    pass
+
+class TypeChecker:
+    def __init__(self):
+        self.stmts = []
+        # Map variable name -> type (str)
+        # We start with global scope
+        self.env = {} 
+        self.env = {} 
+        self.structs = {} # Map struct_name -> list of fields  
+        self.templates = {} # name -> Node (Entity/Struct with type_params)
+        self.instantiated_names = set()
+        self.program_node = None # Reference to append generic instantiations
+
+    def ensure_type_instantiated(self, type_name: str):
+        if '<' not in type_name: return
+        
+        base, args = self.parse_generic_type_str(type_name)
+        if base in self.templates:
+             mangled = self.mangle_name(base, args)
+             if mangled not in self.instantiated_names:
+                  self.instantiate_template(base, args, mangled)
+
+    def parse_generic_type_str(self, t: str):
+        if '<' not in t: return t, []
+        base = t.split('<')[0]
+        args_str = t[len(base)+1:-1]
+        args = []
+        depth = 0
+        current = ""
+        for char in args_str:
+            if char == '<': depth += 1
+            elif char == '>': depth -= 1
+            
+            if char == ',' and depth == 0:
+                args.append(current.strip())
+                current = ""
+            else:
+                current += char
+        if current: args.append(current.strip())
+        return base, args
+
+    def mangle_name(self, base: str, args: List[str]) -> str:
+        # Simple mangling: List<int> -> List_int
+        # Map<str, int> -> Map_str_int
+        flat_args = [a.replace('<','_').replace('>','_').replace(',','_').replace(' ','') for a in args]
+        return f"{base}_{'_'.join(flat_args)}"
+
+    def instantiate_template(self, base: str, args: List[str], mangled_name: str):
+        template = self.templates[base]
+        print(f"DEBUG: Instantiating {base} as {mangled_name} with args {args}")
+        print(f"DEBUG: Template has {len(template.members)} members")
+        if len(template.members) > 0:
+            first_member = template.members[0]
+            print(f"DEBUG: First member type: {type(first_member)}")
+            if hasattr(first_member, 'body'):
+                print(f"DEBUG: First member body len: {len(first_member.body)}")
+                if len(first_member.body) > 0:
+                    print(f"DEBUG: First body stmt type: {type(first_member.body[0])}")
+                    if hasattr(first_member.body[0], 'stmts'):
+                        print(f"DEBUG: UnabstractedBlock has {len(first_member.body[0].stmts)} stmts BEFORE deepcopy")
+        
+        inst = copy.deepcopy(template)
+        
+        if len(inst.members) > 0 and hasattr(inst.members[0], 'body') and len(inst.members[0].body) > 0:
+            if hasattr(inst.members[0].body[0], 'stmts'):
+                print(f"DEBUG: UnabstractedBlock has {len(inst.members[0].body[0].stmts)} stmts AFTER deepcopy")
+        
+        inst.name = mangled_name
+        inst.type_params = [] # Concrete now
+        
+        param_map = dict(zip(template.type_params, args))
+        
+        # Recursive replace
+        self.replace_types(inst, param_map)
+        
+        self.instantiated_names.add(mangled_name)
+        
+        if self.program_node:
+             self.program_node.stmts.append(inst)
+             # Note: Transpiler iterates stmts, so it will pick this up.
+             # But TypeChecker loop also needs to check this new instance?
+             # My check logic uses index loop, so yes, it will pick it up.
+
+    def replace_types(self, node: Any, mapping: dict):
+        # Helper to replace type strings in AST
+        if isinstance(node, list):
+            for x in node: self.replace_types(x, mapping)
+        elif isinstance(node, FieldDecl):
+            node.type = self.substitute_type(node.type, mapping)
+        elif isinstance(node, MethodDecl):
+            node.return_type = self.substitute_type(node.return_type, mapping)
+            new_params = []
+            for name, t in node.params:
+                 new_params.append((name, self.substitute_type(t, mapping)))
+            node.params = new_params
+            self.replace_types(node.body, mapping)
+        elif isinstance(node, AssignStmt):
+            if node.type_hint:
+                 node.type_hint = self.substitute_type(node.type_hint, mapping)
+        elif isinstance(node, (EntityDecl, StructDecl)):
+             if hasattr(node, 'members'): self.replace_types(node.members, mapping)
+             if hasattr(node, 'fields'): self.replace_types(node.fields, mapping)
+        elif isinstance(node, Block):
+             self.replace_types(node.stmts, mapping)
+        elif isinstance(node, IfStmt):
+             self.replace_types(node.then_branch, mapping)
+             if node.else_branch: self.replace_types(node.else_branch, mapping)
+        elif isinstance(node, WhileStmt):
+             self.replace_types(node.body, mapping)
+        # Other nodes might contain types? MethodCall args are expressions.
+        # But maybe type casts or 'new T' calls?
+        # Check MethodCall target if it is variable reference to a type? (Entity : method)
+        elif isinstance(node, MethodCall):
+             # Ensure generic args in method calls are also replaced?
+             pass 
+        elif isinstance(node, UnabstractedBlock):
+             self.replace_types(node.stmts, mapping)
+        elif isinstance(node, AsmStmt):
+             for t_param, t_arg in mapping.items():
+                  c_type = "long long" if t_arg == 'int' else "double" if t_arg == 'float' else "char*" if t_arg in ['string', 'str'] else "bool" if t_arg == 'bool' else "void*"
+                  if t_arg == 'void*': c_type = 'void*'
+                  if t_arg not in ['int', 'float', 'string', 'str', 'bool', 'void*', 'void']:
+                       if '<' in t_arg:
+                             base = t_arg.split('<')[0]
+                             args = t_arg[len(base)+1:-1]
+                             flat = args.replace('<','_').replace('>','_').replace(',','_').replace(' ','')
+                             c_type = f"{base}_{flat}*"
+                       else:
+                             c_type = f"{t_arg}*"
+                  
+                  import re
+                  node.code = re.sub(f"\\b{t_param}\\b", c_type, node.code) 
+
+    def substitute_type(self, t: str, mapping: dict) -> str:
+        # Replace T with int
+        # Replace List<T> with List<int>
+        # Check full match first
+        if t in mapping: return mapping[t]
+        
+        # Check partial match for generics
+        if '<' in t:
+             base, args = self.parse_generic_type_str(t)
+             new_args = [self.substitute_type(a, mapping) for a in args]
+             return f"{base}<{', '.join(new_args)}>"
+             
+        return t
+        self.templates = {} # name -> Node (Entity/Struct with type_params)
+        self.instantiated_names = set()
+        self.program_node = None # Reference to append generic instantiations
+
+    def ensure_type_instantiated(self, type_name: str):
+        if '<' not in type_name: return
+        
+        base, args = self.parse_generic_type_str(type_name)
+        if base in self.templates:
+             mangled = self.mangle_name(base, args)
+             if mangled not in self.instantiated_names:
+                  self.instantiate_template(base, args, mangled)
+
+    def parse_generic_type_str(self, t: str):
+        if '<' not in t: return t, []
+        base = t.split('<')[0]
+        args_str = t[len(base)+1:-1]
+        args = []
+        depth = 0
+        current = ""
+        for char in args_str:
+            if char == '<': depth += 1
+            elif char == '>': depth -= 1
+            
+            if char == ',' and depth == 0:
+                args.append(current.strip())
+                current = ""
+            else:
+                current += char
+        if current: args.append(current.strip())
+        return base, args
+
+    def mangle_name(self, base: str, args: List[str]) -> str:
+        # Simple mangling: List<int> -> List_int
+        # Map<str, int> -> Map_str_int
+        flat_args = [a.replace('<','_').replace('>','_').replace(',','_').replace(' ','') for a in args]
+        return f"{base}_{'_'.join(flat_args)}"
+
+    def instantiate_template(self, base: str, args: List[str], mangled_name: str):
+        template = self.templates[base]
+        # print(f"DEBUG: Instantiating {base} as {mangled_name} with args {args}")
+        
+        inst = copy.deepcopy(template)
+        inst.name = mangled_name
+        inst.type_params = [] # Concrete now
+        
+        param_map = dict(zip(template.type_params, args))
+        
+        # Recursive replace
+        self.replace_types(inst, param_map)
+        
+        self.instantiated_names.add(mangled_name)
+        
+        if self.program_node:
+             self.program_node.stmts.append(inst)
+
+    def replace_types(self, node: Any, mapping: dict):
+        # Helper to replace type strings in AST
+        if isinstance(node, list):
+            for x in node: self.replace_types(x, mapping)
+        elif isinstance(node, FieldDecl):
+            node.type = self.substitute_type(node.type, mapping)
+        elif isinstance(node, MethodDecl):
+            node.return_type = self.substitute_type(node.return_type, mapping)
+            new_params = []
+            for name, t in node.params:
+                 new_params.append((name, self.substitute_type(t, mapping)))
+            node.params = new_params
+            self.replace_types(node.body, mapping)
+        elif isinstance(node, AssignStmt):
+            if node.type_hint:
+                 node.type_hint = self.substitute_type(node.type_hint, mapping)
+        elif isinstance(node, (EntityDecl, StructDecl)):
+             if hasattr(node, 'members'): self.replace_types(node.members, mapping)
+             if hasattr(node, 'fields'): self.replace_types(node.fields, mapping)
+        elif isinstance(node, Block):
+             self.replace_types(node.stmts, mapping)
+        elif isinstance(node, IfStmt):
+             self.replace_types(node.then_branch, mapping)
+             if node.else_branch: self.replace_types(node.else_branch, mapping)
+        elif isinstance(node, WhileStmt):
+             self.replace_types(node.body, mapping)
+        # Other nodes might contain types? MethodCall args are expressions.
+        # But maybe type casts or 'new T' calls?
+        # Check MethodCall target if it is variable reference to a type? (Entity : method)
+        elif isinstance(node, MethodCall):
+             # Ensure generic args in method calls are also replaced?
+             pass 
+
+    def substitute_type(self, t: str, mapping: dict) -> str:
+        # Replace T with int
+        # Replace List<T> with List<int>
+        # Check full match first
+        if t in mapping: return mapping[t]
+        
+        # Check partial match for generics
+        if '<' in t:
+             base, args = self.parse_generic_type_str(t)
+             new_args = [self.substitute_type(a, mapping) for a in args]
+             return f"{base}<{', '.join(new_args)}>"
+             
+        return t
+
+    def check(self, node: Node):
+        if isinstance(node, Program):
+            self.program_node = node
+            # Loop with index to handle appended stmts during instantiation
+            i = 0
+            while i < len(node.stmts):
+                self.check(node.stmts[i])
+                i += 1
+                
+        elif isinstance(node, Block):
+            for stmt in node.stmts:
+                self.check(stmt)
+
+        elif isinstance(node, StructDecl):
+            if node.type_params:
+                self.templates[node.name] = node
+                return
+            # print(f"DEBUG: Registering struct {node.name}")
+            self.structs[node.name] = node.fields
+
+        elif isinstance(node, ForeignDecl):
+            for func in node.funcs:
+                # Register foreign function: global or namespaced?
+                # For now, let's register as "foreign.funcName" or check "foreign" target in method call
+                self.foreign_funcs[func.name] = func.return_type
+
+        elif isinstance(node, EntityDecl):
+            if node.type_params:
+                self.templates[node.name] = node
+                return
+            # Register Entity type
+            self.env[node.name] = node.name 
+            
+            # Check members
+            for member in node.members:
+                self.check(member)
+
+        elif isinstance(node, MethodDecl):
+            # Check body
+            self.check(Block(node.body)) # Wrap in block to reuse loop
+
+        elif isinstance(node, IfStmt):
+            self.check(node.condition)
+            self.check(node.then_branch)
+            if node.else_branch:
+                self.check(node.else_branch)
+        
+        elif isinstance(node, WhileStmt):
+            self.check(node.condition)
+            self.check(node.body)
+
+        elif isinstance(node, AssignStmt):
+            # 1. Check expr type
+            expr_type = self.resolve_type(node.expr)
+            
+            # 2. Check type hint compatibility
+            if node.type_hint:
+                # INSTANTIATION TRIGGER
+                self.ensure_type_instantiated(node.type_hint)
+                
+                # Loose check for now
+                if node.type_hint != expr_type and expr_type != 'nil':
+                    pass # Only warn in strict mode. Allow Map <- Map_int etc
+            
+            # 3. Check existing variable consistency (if exists)
+            if node.name in self.env:
+                existing_type = self.env[node.name]
+                if node.type_hint and existing_type != node.type_hint:
+                     # Warn or implicit re-assign?
+                     pass
+            
+            # 4. Register
+            self.env[node.name] = node.type_hint if node.type_hint else expr_type
+            
+        elif isinstance(node, MethodCall):
+             for arg in node.args:
+                 self.check(arg) # or resolve_type?
+
+    def resolve_type(self, node: Node) -> str:
+        if isinstance(node, IntegerLiteral):
+            return "int"
+        if isinstance(node, FloatLiteral):
+            return "float"
+        if isinstance(node, StringLiteral):
+            return "string"
+        if isinstance(node, NilLiteral):
+            return "nil"
+            
+        if isinstance(node, Variable):
+            if node.name not in self.env:
+                # Check for capitalized static target
+                if node.name[0].isupper():
+                    return node.name
+                raise TypeError(f"Undefined variable '{node.name}'")
+            return self.env[node.name]
+            
+        if isinstance(node, UnaryExpr):
+            return self.resolve_type(node.expr)
+            
+        if isinstance(node, BinaryExpr):
+            left_t = self.resolve_type(node.left)
+            right_t = self.resolve_type(node.right)
+            
+            if left_t != right_t:
+                # Implicit coercion: int -> float
+                if (left_t == 'int' and right_t == 'float') or (left_t == 'float' and right_t == 'int'):
+                    resolved_t = "float"
+                # Allow comp with nil
+                elif (left_t == 'nil' or right_t == 'nil') and node.op in ['==', '!=']:
+                     return "bool"
+                else:
+                    # Basic rule: strict matching for now
+                    raise TypeError(f"Binary operator '{node.op}' cannot match types {left_t} and {right_t}")
+            else:
+                resolved_t = left_t
+            
+            # Check operator validity
+            if node.op in ['+', '-', '*', '/']:
+                if resolved_t not in ['int', 'float']:
+                    raise TypeError(f"Operator '{node.op}' requires int or float, got {resolved_t}")
+                return resolved_t
+            
+            if node.op in ['>', '<', '==', '!=']:
+                # Allow comparison? For now only same types
+                return "bool" # We don't have true/false keywords yet but resolving to logical type
+                
+            return left_t
+
+        if isinstance(node, FieldAccess):
+            target_type = self.resolve_type(node.target)
+            if target_type in self.structs:
+                fields = self.structs[target_type]
+                for f in fields:
+                    if f.name == node.field:
+                        return f.type
+                raise TypeError(f"Struct '{target_type}' has no field '{node.field}'")
+            raise TypeError(f"Type '{target_type}' is not a struct, cannot access field '{node.field}'")
+
+        if isinstance(node, MethodCall):
+            # Known StdLib types
+            if node.target and isinstance(node.target, Variable):
+                 # Struct Instantiation: Struct : new
+                 if node.target.name in self.structs and node.method == 'new':
+                      return node.target.name
+
+                 if node.target.name == 'File' and node.method == 'open':
+                      return "File"
+                 if node.target.name == 'Result':
+                      if node.method in ['ok', 'fail']: return "Result"
+                 
+                 # Check if target is a variable of type File
+                 v_type = self.resolve_type(node.target)
+                 
+                 # Check for Foreign Call: foreign : func(...)
+                 if node.target.name == 'foreign' or v_type == 'foreign':
+                     if node.method in self.foreign_funcs:
+                         return self.foreign_funcs[node.method]
+                     raise TypeError(f"Undefined foreign function '{node.method}'")
+
+                 if v_type == 'File':
+                      if node.method == 'readFile': return "string"
+                      if node.method == 'readToString': return "int"
+                 if v_type == 'Result':
+                      if node.method == 'value': return "int"
+                      if node.method == 'errorMessage': return "string"
+                      if node.method == 'isError': return "bool"
+            
+            # For now assume void or dynamic?
+            # We don't have return types for methods yet in this prototype
+            return "void"
+            
+        raise TypeError(f"Cannot resolve type for {node}")
+
+# ==========================================
+# 6. INTERPRETER (REPL)
+# ==========================================
+
+class Interpreter:
+    def __init__(self):
+        self.env = {}
+        # We can integrate TypeChecker here too for REPL safety?
+        # Ideally REPL should typecheck BEFORE interpret.
+        pass
+
+    def evaluate(self, node: Node):
+        if isinstance(node, Block):
+            res = None
+            for stmt in node.stmts:
+                res = self.evaluate(stmt)
+            return res 
+
+        elif isinstance(node, IfStmt):
+            cond = self.evaluate(node.condition)
+            if cond:
+                return self.evaluate(node.then_branch)
+            elif node.else_branch:
+                return self.evaluate(node.else_branch)
+        
+        elif isinstance(node, WhileStmt):
+            last_res = None
+            while self.evaluate(node.condition):
+                last_res = self.evaluate(node.body)
+            return last_res
+
+        elif isinstance(node, AssignStmt):
+            val = self.evaluate(node.expr)
+            self.env[node.name] = val
+            return val
+        elif isinstance(node, Variable):
+            return self.env.get(node.name, f"Error: '{node.name}' undefined")
+        elif isinstance(node, IntegerLiteral):
+            return node.value
+        elif isinstance(node, FloatLiteral):
+            return node.value
+        elif isinstance(node, StringLiteral):
+            return node.value
+        elif isinstance(node, NilLiteral):
+            return "nil"
+        elif isinstance(node, UnaryExpr):
+            val = self.evaluate(node.expr)
+            if node.op == '-': return -val
+            if node.op == '+': return +val
+            if node.op == '!': return not val
+            return val
+        elif isinstance(node, BinaryExpr):
+            l, r = self.evaluate(node.left), self.evaluate(node.right)
+            if (isinstance(l, (int, float))) and (isinstance(r, (int, float))):
+                if node.op == '+': return l + r
+                if node.op == '-': return l - r
+                if node.op == '*': return l * r
+                if node.op == '/': 
+                    if isinstance(l, int) and isinstance(r, int):
+                        return l // r
+                    return l / r
+                if node.op == '>': return l > r
+                if node.op == '<': return l < r
+                if node.op == '==': return l == r
+                if node.op == '!=': return l != r
+            return "Type Error"
+        elif isinstance(node, MethodCall):
+            if node.method == 'print':
+                val = self.evaluate(node.args[0])
+                print(val)
+                return val
+        elif isinstance(node, PanicStmt):
+            msg = self.evaluate(node.message)
+            print(f"PANIC: {msg}")
+            sys.exit(1)
+
+    def repl_loop(self):
+        print("Bunker REPL v2.6.0")
+        print("Type 'exit' or 'quit' to close.")
+        print("-" * 20)
+        
+        buffer = ""
+        in_multiline = False
+        
+        while True:
+            try:
+                prompt = "... " if in_multiline else ">> "
+                line = input(prompt)
+                if not line and not in_multiline: continue
+                if line in ['exit', 'quit']: break
+                
+                buffer += line + " "
+
+                stripped = line.strip()
+                if stripped.endswith(':'):
+                    in_multiline = True
+                    continue
+                
+                if in_multiline:
+                    if stripped.endswith('.'):
+                        # Simple heuristic: if it ends in dot, it might be closing.
+                        # But we keep going until a line is JUST '.' or '..' etc.
+                        if stripped.strip('.') == '':
+                            in_multiline = False
+                        else:
+                            continue
+                    else:
+                        continue
+                else:
+                    if not buffer.strip().endswith('.'):
+                        buffer += '.'
+                
+                lexer = Lexer(buffer)
+                parser = Parser(lexer.tokens)
+                try:
+                    stmt = parser.parse_stmt()
+                    
+                    # TYPE CHECK
+                    # We need a persistent type checker for the REPL session
+                    if not hasattr(self, 'type_checker'):
+                        self.type_checker = TypeChecker()
+                    
+                    try:
+                        self.type_checker.check(stmt)
+                    except TypeError as te:
+                        print(f"Type Error: {te}")
+                        buffer = ""
+                        in_multiline = False
+                        continue
+                        
+                    res = self.evaluate(stmt)
+                    if isinstance(stmt, (BinaryExpr, Variable, IntegerLiteral)):
+                        print(res)
+                except SyntaxError as e:
+                    print(f"Syntax Error: {e}")
+                    
+                buffer = ""
+                in_multiline = False
+            except (EOFError, KeyboardInterrupt):
+                break
+
+# ==========================================
+# 5. DRIVER
+# ==========================================
+
+def main():
+    import traceback
+    if len(sys.argv) < 2:
+        print("Usage: bunkerc <source.bnk> [-o <output>]")
+        sys.exit(1)
+        
+    if sys.argv[1] == '--repl':
+        interpreter = Interpreter()
+        interpreter.repl_loop()
+        sys.exit(0)
+
+    source_path = sys.argv[1]
+    with open(source_path, 'r') as f:
+        source = f.read()
+
+    # 2. LEXER
+    lexer = Lexer(source)
+    
+    # 3. PARSER
+    parser = Parser(lexer.tokens)
+    
+    try:
+        ast = parser.parse_program()
+        
+        # 4. TYPE CHECKER
+        checker = TypeChecker()
+        checker.check(ast)
+        
+        # 5. TRANSPILER
+        transpiler = CTranspiler()
+        transpiler.transpile(ast)
+        c_source = transpiler.get_source()
+        
+        # 6. COMPILE C
+        output_bin = "output"
+        if "-o" in sys.argv:
+            try:
+                idx = sys.argv.index("-o")
+                output_bin = sys.argv[idx+1]
+            except:
+                pass
+                
+        c_file = output_bin + ".c"
+        with open(c_file, 'w') as f:
+            f.write(c_source)
+            
+        subprocess.run(["gcc", c_file, "-o", output_bin], check=True)
+        # print(f"Compiled successfully to {output_bin}")
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        traceback.print_exc()
+
+if __name__ == '__main__':
+    main()

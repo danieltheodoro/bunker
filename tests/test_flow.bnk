@@ -1,0 +1,20 @@
+module Test;
+Entity App:
+    has method main:
+        x: int <- 0;
+        while x < 3:
+            if:
+            condition:
+                return x == 1;
+            end condition.
+            then:
+                print: "One";
+            end then.
+            else:
+                print: x;
+            end if.
+            x <- x + 1;
+        end while.
+        print: "Done";
+    end method.
+end Entity.

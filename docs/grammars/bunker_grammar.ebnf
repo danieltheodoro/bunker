@@ -1,0 +1,748 @@
+(* ============================================ *)
+(* BUNKER LANGUAGE - COMPLETE EBNF GRAMMAR     *)
+(* Version 2.3.0                                *)
+(* ============================================ *)
+
+(* ===== PROGRAM STRUCTURE ===== *)
+
+program = module_declaration, { import_statement }, { top_level_declaration } ;
+
+module_declaration = "module", qualified_identifier ;
+
+import_statement = ( "include" | "import" ), qualified_identifier, [ ":", identifier_list ] ;
+
+top_level_declaration = entity_declaration
+                      | interface_declaration
+                      | export_declaration
+                      | foreign_declaration ;
+
+export_declaration = "export", identifier ;
+
+(* ===== IDENTIFIERS ===== *)
+
+identifier = letter, { letter | digit | "_" } ;
+
+qualified_identifier = identifier, { ".", identifier } ;
+
+identifier_list = identifier, { ",", identifier } ;
+
+label = "'", identifier ;
+
+(* ===== ENTITY DECLARATION ===== *)
+
+entity_declaration = [ visibility ], "Entity", identifier,
+                     [ generic_params ],
+                     [ inheritance ],
+                     [ traits ],
+                     [ entity_modifiers ],
+                     [ at_clause ],
+                     ":",
+                     { entity_member },
+                     "." ;
+
+visibility = "private" | "protected" | "shared" | "public" ;
+
+generic_params = "generic", type_param_list, [ where_clause ] ;
+
+type_param_list = type_param, { ",", type_param } ;
+
+type_param = identifier ;
+
+where_clause = "where", constraint_list ;
+
+constraint_list = constraint, { ",", constraint } ;
+
+constraint = type_param, ( "is", trait_name
+                         | "has", "method", method_signature
+                         | "act", "as", ( "a" | "an" ), trait_name ) ;
+
+inheritance = "is", ( "a" | "an" ), type_name ;
+
+traits = "act", "as", ( "a" | "an" ), trait_list ;
+
+trait_list = trait_name, { ",", trait_name } ;
+
+trait_name = identifier ;
+
+entity_modifiers = ( "packed" | "align", integer | "cstruct" ), { entity_modifiers } ;
+
+at_clause = "at", "offset", hex_literal ;
+
+(* ===== ENTITY MEMBERS ===== *)
+
+entity_member = state_declaration
+              | method_declaration
+              | sub_entity_declaration
+              | uses_declaration
+              | delegates_declaration
+              | type_alias_declaration ;
+
+(* ----- STATE DECLARATION ----- *)
+
+state_declaration = "has", ( "a" | "an" ), [ visibility ],
+                    [ state_modifiers ],
+                    "state", identifier,
+                    state_type_spec,
+                    [ initial_value ],
+                    [ in_clause ] ;
+
+state_modifiers = ( "necessary" | "optional"
+                  | "intrinsic" | "external"
+                  | "replaceable" | "fixed"
+                  | "atomic"
+                  | "volatile" ), { state_modifiers } ;
+
+state_type_spec = ":", type_expression
+                | "set", ":", set_body
+                | "union", ":", union_body ;
+
+set_body = set_member, { ";", set_member }, [ ";" ] ;
+
+set_member = ".", identifier, [ ":", expression ] ;
+
+union_body = union_variant, { ";", union_variant }, [ ";" ] ;
+
+union_variant = identifier, ":", type_expression ;
+
+in_clause = "in", "offset", hex_literal ;
+
+initial_value = ":", expression ;
+
+(* ----- METHOD DECLARATION ----- *)
+
+method_declaration = "has", ( "a" | "an" ), [ visibility ],
+                     [ "async" ],
+                     "method", identifier,
+                     [ generic_params ],
+                     [ parameter_list ],
+                     [ return_type ],
+                     ":",
+                     block_body,
+                     "." ;
+
+parameter_list = ":", parameter, { ",", parameter } ;
+
+parameter = [ param_label, ":" ], identifier, [ ":", type_expression ] ;
+
+param_label = identifier ;
+
+return_type = "->", ( type_expression
+                    | named_return_list ) ;
+
+named_return_list = identifier, ":", type_expression,
+                    { ",", identifier, ":", type_expression } ;
+
+(* ----- SUB-ENTITY DECLARATION ----- *)
+
+sub_entity_declaration = "has", ( "a" | "an" ), [ visibility ],
+                         identifier,
+                         [ "necessary" | "optional" ],
+                         [ "intrinsic" | "external" ],
+                         [ "replaceable" | "fixed" ] ;
+
+(* ----- USES DECLARATION ----- *)
+
+uses_declaration = "uses", ( "a" | "an" ), type_name,
+                   [ "from", "Core" ],
+                   "as", identifier,
+                   [ using_clause ] ;
+
+using_clause = "using", hex_literal ;
+
+(* ----- DELEGATES DECLARATION ----- *)
+
+delegates_declaration = "delegates", identifier, "to", identifier ;
+
+(* ----- TYPE ALIAS ----- *)
+
+type_alias_declaration = "type", identifier, ":", type_expression ;
+
+(* ===== INTERFACE DECLARATION ===== *)
+
+interface_declaration = "Interface", identifier,
+                        [ generic_params ],
+                        ":",
+                        { interface_member },
+                        "." ;
+
+interface_member = method_signature
+                 | type_alias_declaration ;
+
+method_signature = "has", ( "a" | "an" ), "method", identifier,
+                   [ parameter_list ],
+                   [ return_type ] ;
+
+(* ===== TYPE EXPRESSIONS ===== *)
+
+type_expression = primitive_type
+                | wrapper_type
+                | composite_type
+                | type_name
+                | generic_instantiation
+                | function_type
+                | array_type
+                | dynamic_array_type
+                | slice_type
+                | optional_type
+                | result_type
+                | range_type ;
+
+primitive_type = "word_8" | "word_16" | "word_32" | "word_64" | "word_128" ;
+
+wrapper_type = "int" | "float" | "bool" | "str" | "pointer" | "void" ;
+
+composite_type = type_expression, ",", wrapper_type ;
+
+type_name = qualified_identifier ;
+
+generic_instantiation = type_name, "of", type_argument_list ;
+
+type_argument_list = type_expression, { ",", type_expression } ;
+
+function_type = "function", [ calling_convention ], ":",
+                [ function_param_types ],
+                [ "->", type_expression ] ;
+
+calling_convention = "cdecl" | "stdcall" | "fastcall" | "sysv" | "win64" ;
+
+function_param_types = type_expression, { ",", type_expression } ;
+
+array_type = "array", "[", dimension_list, "]", "of", type_expression ;
+
+dimension_list = expression, { ",", expression } ;
+
+dynamic_array_type = "dynamic", "array", "of", type_expression ;
+
+slice_type = "slice", "of", type_expression ;
+
+optional_type = "optional", type_expression ;
+
+result_type = "result", "of", type_expression, "or", type_expression ;
+
+range_type = "range", "from", expression, ( "to" | "until" ), expression ;
+
+(* ===== STATEMENTS ===== *)
+
+statement = assignment_statement
+          | method_call_statement
+          | return_statement
+          | break_statement
+          | continue_statement
+          | yield_statement
+          | throw_statement
+          | if_statement
+          | while_statement
+          | do_while_statement
+          | loop_statement
+          | for_statement
+          | match_statement
+          | switch_statement
+          | guard_statement
+          | defer_statement
+          | try_statement
+          | block_statement
+          | expression_statement
+          | empty_statement ;
+
+(* ----- ASSIGNMENT ----- *)
+
+assignment_statement = identifier, assignment_operator, expression ;
+
+assignment_operator = "<-" | "+=" | "-=" | "*=" | "/=" | "%=" ;
+
+(* ----- METHOD CALL ----- *)
+
+method_call_statement = expression, ":", identifier,
+                        [ ":", argument_list ] ;
+
+argument_list = expression, { ",", expression } ;
+
+(* ----- RETURN ----- *)
+
+return_statement = "return", [ expression ] ;
+
+(* ----- BREAK / CONTINUE ----- *)
+
+break_statement = "break", [ label ], [ expression ] ;
+
+continue_statement = "continue", [ label ] ;
+
+(* ----- YIELD ----- *)
+
+yield_statement = "yield", expression ;
+
+(* ----- THROW ----- *)
+
+throw_statement = "throw", expression ;
+
+(* ----- IF STATEMENT ----- *)
+
+if_statement = "if", expression, ":", block_body,
+               { else_if_clause },
+               [ else_clause ],
+               "." ;
+
+else_if_clause = "else", "if", expression, ":", block_body ;
+
+else_clause = "else", ":", block_body ;
+
+(* ----- WHILE ----- *)
+
+while_statement = [ label, ":" ], "while", expression, ":",
+                  block_body,
+                  [ else_clause ],
+                  "." ;
+
+(* ----- DO-WHILE ----- *)
+
+do_while_statement = [ label, ":" ], "do", ":",
+                     block_body,
+                     "while", expression,
+                     "." ;
+
+(* ----- LOOP ----- *)
+
+loop_statement = [ label, ":" ], "loop", ":",
+                 block_body,
+                 "." ;
+
+(* ----- FOR ----- *)
+
+for_statement = [ label, ":" ], "for", for_pattern, "in", expression, ":",
+                block_body,
+                [ else_clause ],
+                "." ;
+
+for_pattern = identifier, [ ",", identifier ] ;
+
+(* ----- MATCH ----- *)
+
+match_statement = "match", expression_list, ":",
+                  { match_arm },
+                  "." ;
+
+expression_list = expression, { ",", expression } ;
+
+match_arm = pattern, [ guard_condition ], ":", block_body ;
+
+pattern = literal_pattern
+        | identifier_pattern
+        | wildcard_pattern
+        | range_pattern
+        | union_pattern
+        | set_pattern
+        | tuple_pattern ;
+
+literal_pattern = literal ;
+
+identifier_pattern = identifier ;
+
+wildcard_pattern = "_" ;
+
+range_pattern = expression, ( "to" | "until" ), expression ;
+
+union_pattern = "is", identifier, [ "as", identifier ] ;
+
+set_pattern = ".", identifier ;
+
+tuple_pattern = "[", pattern, { ",", pattern }, "]" ;
+
+guard_condition = "if", expression ;
+
+(* ----- SWITCH ----- *)
+
+switch_statement = "switch", expression, ":",
+                   { switch_case },
+                   [ default_case ],
+                   "." ;
+
+switch_case = "case", case_value_list, ":",
+              block_body,
+              [ fallthrough ] ;
+
+case_value_list = case_value, { ",", case_value } ;
+
+case_value = expression | range_pattern ;
+
+fallthrough = "fallthrough" ;
+
+default_case = "default", ":", block_body ;
+
+(* ----- GUARD ----- *)
+
+guard_statement = "guard", expression, "else", ":",
+                  block_body,
+                  "." ;
+
+(* ----- DEFER ----- *)
+
+defer_statement = "defer", ":", block_body, "." ;
+
+(* ----- TRY/CATCH ----- *)
+
+try_statement = "try", ":",
+                block_body,
+                { catch_clause },
+                [ finally_clause ],
+                "." ;
+
+catch_clause = "catch", [ "error", [ "as", type_name ] ], ":",
+               block_body ;
+
+finally_clause = "finally", ":", block_body ;
+
+(* ----- BLOCK ----- *)
+
+block_statement = "{", { statement }, "}" ;
+
+block_body = { statement } ;
+
+(* ----- EXPRESSION STATEMENT ----- *)
+
+expression_statement = expression ;
+
+empty_statement = ";" ;
+
+(* ===== EXPRESSIONS ===== *)
+
+expression = ternary_expression ;
+
+ternary_expression = logical_or_expression,
+                     [ "if", expression, "else", ":", expression ] ;
+
+logical_or_expression = logical_and_expression,
+                        { "or", logical_and_expression } ;
+
+logical_and_expression = bitwise_or_expression,
+                         { "and", bitwise_or_expression } ;
+
+bitwise_or_expression = bitwise_xor_expression,
+                        { "bor", bitwise_xor_expression } ;
+
+bitwise_xor_expression = bitwise_and_expression,
+                         { "bxor", bitwise_and_expression } ;
+
+bitwise_and_expression = equality_expression,
+                         { "band", equality_expression } ;
+
+equality_expression = relational_expression,
+                      { ( "==" | "!=" ), relational_expression } ;
+
+relational_expression = shift_expression,
+                        { ( "<" | ">" | "<=" | ">=" ), shift_expression } ;
+
+shift_expression = additive_expression,
+                   { ( "shl" | "shr" ), additive_expression } ;
+
+additive_expression = multiplicative_expression,
+                      { ( "+" | "-" ), multiplicative_expression } ;
+
+multiplicative_expression = unary_expression,
+                            { ( "*" | "/" | "%" ), unary_expression } ;
+
+unary_expression = [ unary_operator ], postfix_expression ;
+
+unary_operator = "-" | "not" | "bnot" | "move" | "borrow", [ "mut" ] ;
+
+postfix_expression = primary_expression,
+                     { postfix_operator } ;
+
+postfix_operator = member_access
+                 | method_call
+                 | array_subscript
+                 | try_operator
+                 | propagate_operator
+                 | composition_operator ;
+
+member_access = ":", identifier ;
+
+method_call = ":", identifier, [ ":", argument_list ] ;
+
+array_subscript = "[", expression, { ",", expression }, "]" ;
+
+try_operator = "try" ;
+
+propagate_operator = "?" ;
+
+composition_operator = ( "<<" | ">>" ), expression ;
+
+primary_expression = literal
+                   | identifier
+                   | lambda_expression
+                   | parenthesized_expression
+                   | array_literal
+                   | if_expression
+                   | match_expression
+                   | await_expression
+                   | comptime_expression
+                   | unabstracted_block
+                   | this_keyword
+                   | nil_keyword
+                   | set_member_ref ;
+
+(* ----- LAMBDA ----- *)
+
+lambda_expression = "/", [ capture_list ], [ lambda_params ], ".", lambda_body ;
+
+capture_list = "[", capture, { ",", capture }, "]" ;
+
+capture = [ "ref" ], identifier ;
+
+lambda_params = identifier, { ",", identifier } ;
+
+lambda_body = expression | ( ":", block_body ) ;
+
+(* ----- LITERALS ----- *)
+
+literal = integer_literal
+        | float_literal
+        | string_literal
+        | boolean_literal
+        | character_literal ;
+
+integer_literal = decimal_literal | hex_literal | octal_literal | binary_literal ;
+
+decimal_literal = digit, { digit | "_" } ;
+
+hex_literal = "0x", hex_digit, { hex_digit | "_" } ;
+
+octal_literal = "0o", octal_digit, { octal_digit | "_" } ;
+
+binary_literal = "0b", binary_digit, { binary_digit | "_" } ;
+
+float_literal = decimal_literal, [ ".", decimal_literal ],
+                [ exponent ] ;
+
+exponent = ( "e" | "E" ), [ "+" | "-" ], decimal_literal ;
+
+string_literal = '"', { string_char }, '"'
+               | 'r"', { raw_string_char }, '"'
+               | '"""', { multiline_string_char }, '"""' ;
+
+string_char = ? any character except '"' or '\' ?
+            | escape_sequence ;
+
+raw_string_char = ? any character except '"' ? ;
+
+multiline_string_char = ? any character ? ;
+
+escape_sequence = "\n" | "\t" | "\r" | '\"' | "\\" | "\u{", hex_digit, { hex_digit }, "}" ;
+
+boolean_literal = "true" | "false" ;
+
+character_literal = "'", ( ? any character ? | escape_sequence ), "'" ;
+
+(* ----- ARRAY LITERAL ----- *)
+
+array_literal = "[", [ expression_list ], "]" ;
+
+(* ----- IF EXPRESSION ----- *)
+
+if_expression = "if", expression, ":", expression,
+                "else", ":", expression ;
+
+(* ----- MATCH EXPRESSION ----- *)
+
+match_expression = "match", expression, ":",
+                   { match_arm },
+                   "." ;
+
+(* ----- AWAIT ----- *)
+
+await_expression = "await", expression ;
+
+(* ----- COMPTIME ----- *)
+
+comptime_expression = "comptime", ":", block_body, "." ;
+
+(* ----- PARENTHESIZED ----- *)
+
+parenthesized_expression = "(", expression, ")" ;
+
+(* ----- KEYWORDS ----- *)
+
+this_keyword = "this" ;
+
+nil_keyword = "nil" ;
+
+set_member_ref = ".", identifier ;
+
+(* ===== FOREIGN DECLARATIONS ===== *)
+
+foreign_declaration = "foreign", foreign_spec, ":",
+                      { foreign_item },
+                      "." ;
+
+foreign_spec = c_version, [ "convention", calling_convention ],
+               [ "acts", "as", ( "a" | "an" ), trait_name ],
+               [ "from", string_literal ],
+               [ "inline" ] ;
+
+c_version = "c17" | "c23" | "c26" ;
+
+foreign_item = foreign_function
+             | foreign_type
+             | foreign_variable ;
+
+foreign_function = "func", string_literal,
+                   "(", [ foreign_param_list ], ")",
+                   [ "->", type_expression ] ;
+
+foreign_param_list = foreign_param, { ",", foreign_param } ;
+
+foreign_param = identifier, ":", type_expression ;
+
+foreign_type = "type", identifier, ":", type_expression ;
+
+foreign_variable = "var", string_literal, ":", type_expression ;
+
+(* ===== UNABSTRACTED BLOCK ===== *)
+
+unabstracted_block = "unabstracted", ":",
+                     asm_block,
+                     "." ;
+
+asm_block = "asm", architecture, ":",
+            { asm_instruction, ";" },
+            "." ;
+
+architecture = "x86_64" | "arm64" | "armv7" | "riscv64" | "riscv32" ;
+
+asm_instruction = string_literal ;
+
+(* ===== LEXICAL ELEMENTS ===== *)
+
+letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" |
+         "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" |
+         "U" | "V" | "W" | "X" | "Y" | "Z" |
+         "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" |
+         "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" |
+         "u" | "v" | "w" | "x" | "y" | "z" ;
+
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+hex_digit = digit | "A" | "B" | "C" | "D" | "E" | "F" |
+                    "a" | "b" | "c" | "d" | "e" | "f" ;
+
+octal_digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" ;
+
+binary_digit = "0" | "1" ;
+
+(* ===== COMMENTS ===== *)
+
+comment = line_comment | block_comment ;
+
+line_comment = "#", { ? any character except newline ? } ;
+
+block_comment = "/*", { ? any character ? }, "*/" ;
+
+(* ===== WHITESPACE ===== *)
+
+whitespace = " " | "\t" | "\n" | "\r" ;
+
+(* ===== UNSAFE ===== *)
+
+unsafe_block = "unsafe", ":", block_body, "." ;
+
+unsafe_function = "unsafe", "has", "a", "method", identifier,
+                  [ parameter_list ], [ return_type ], ":",
+                  block_body, "." ;
+
+unsafe_trait = "unsafe", "Interface", identifier,
+               [ generic_params ], ":",
+               { interface_member },
+               "." ;
+
+unsafe_impl = "unsafe", "Entity", identifier,
+              "acts", "as", "a", trait_name, ":",
+              { entity_member },
+              "." ;
+
+(* ===== VARIANCE ===== *)
+
+variance_modifier = "covariant" | "contravariant" | "invariant" ;
+
+generic_with_variance = "generic", type_param, variance_modifier,
+                        { ",", type_param, variance_modifier } ;
+
+(* ===== PIN ===== *)
+
+pin_type = "Pin", "of", type_expression ;
+
+unpin_trait = "Unpin" ;
+
+(* ===== ALLOCATORS ===== *)
+
+allocator_param = ",", identifier, "where", identifier, "acts", "as", "a", "Allocator" ;
+
+(* ===== MAYBEUNINIT ===== *)
+
+uninit_type = "MaybeUninit", "of", type_expression ;
+
+uninit_expr = identifier, ":", "uninit" ;
+
+(* ===== ATTRIBUTES (EXPANDED) ===== *)
+
+attribute_list = attribute, { attribute } ;
+
+attribute = "#[", attribute_inner, "]" ;
+
+attribute_inner = "inline", "(", inline_option, ")"
+                | "cold"
+                | "hot"
+                | "target_feature", "(", feature_spec, ")"
+                | "deprecated", [ "(", deprecated_args, ")" ]
+                | "must_use", [ "=", string_literal ]
+                | "link", "(", link_args, ")"
+                | "export_name", "=", string_literal
+                | "no_mangle"
+                | "repr", "(", repr_args, ")"
+                | "abi", "(", abi_version, ")"
+                | "non_exhaustive"
+                | "drop_order", "(", identifier_list, ")"
+                | "global_allocator"
+                | "derive", "(", trait_list, ")" ;
+
+inline_option = "always" | "never" ;
+
+feature_spec = "enable", "=", string_literal ;
+
+deprecated_args = [ "since", "=", string_literal ],
+                  [ ",", "note", "=", string_literal ] ;
+
+link_args = "name", "=", string_literal,
+            [ ",", "kind", "=", link_kind ] ;
+
+link_kind = "static" | "dylib" | "framework" ;
+
+repr_args = "C" | "packed" | "transparent" | "align", "(", integer, ")" ;
+
+abi_version = string_literal ;
+
+(* ===== INLINE ASSEMBLY (EXPANDED) ===== *)
+
+asm_statement = "asm", architecture, ":",
+                string_literal,
+                [ ":", "output", ":", output_operands ],
+                [ ":", "input", ":", input_operands ],
+                [ ":", "clobbers", ":", clobber_list ],
+                [ ":", "options", ":", option_list ],
+                "." ;
+
+output_operands = output_operand, { ",", output_operand } ;
+
+output_operand = identifier, "=", constraint ;
+
+input_operands = input_operand, { ",", input_operand } ;
+
+input_operand = identifier, "=", constraint, [ "(", expression, ")" ] ;
+
+constraint = string_literal ;
+
+clobber_list = string_literal, { ",", string_literal } ;
+
+option_list = string_literal, { ",", string_literal } ;
+
+(* ============================================ *)
+(* END OF BUNKER EBNF GRAMMAR v2.6.0           *)
+(* ============================================ *)

@@ -1,0 +1,51 @@
+module test_array_access;
+
+Entity App:
+    has static method main:
+        numbers <- [10, 20, 30];
+        
+        # Test Length
+        len <- numbers.length;
+        if:
+        condition:
+            return len == 3;
+        end condition.
+        then:
+            print: "Length is correct";
+        end then.
+        end if.
+        
+        # Test Index Access
+        first <- numbers[0];
+        if:
+        condition:
+            return first == 10;
+        end condition.
+        then:
+            print: "Access [0] is correct";
+        end then.
+        end if.
+        
+        mid <- numbers[1];
+        if:
+        condition:
+            return mid == 20;
+        end condition.
+        then:
+            print: "Access [1] is correct";
+        end then.
+        end if.
+        
+        last <- numbers[2];
+        if:
+        condition:
+            return last == 30;
+        end condition.
+        then:
+            print: "Access [2] is correct";
+        end then.
+        end if.
+        
+        print: "All array access tests passed!";
+    end method.
+end Entity.

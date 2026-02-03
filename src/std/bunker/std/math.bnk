@@ -1,0 +1,63 @@
+module bunker.std.math;
+
+Entity Math:
+    has public static method sqrt: n: float -> float:
+        unabstracted:
+            asm c: "return sqrt(n);";
+        .
+    .
+
+    has public static method abs: n: float -> float:
+        unabstracted:
+            asm c: "return fabs(n);";
+        .
+    .
+
+    has public static method sin: n: float -> float:
+        unabstracted:
+            asm c: "return sin(n);";
+        .
+    .
+
+    has public static method cos: n: float -> float:
+        unabstracted:
+            asm c: "return cos(n);";
+        .
+    .
+
+    has public static method tan: n: float -> float:
+        unabstracted:
+            asm c: "return tan(n);";
+        .
+    .
+
+    has public static method log: n: float -> float:
+        unabstracted:
+            asm c: "return log(n);";
+        .
+    .
+
+    has public static method exp: n: float -> float:
+        unabstracted:
+            asm c: "return exp(n);";
+        .
+    .
+
+    has public static method pow: base: float, exp: float -> float:
+        unabstracted:
+            asm c: "return pow(base, exp);";
+        .
+    .
+
+    has public static method floor: n: float -> float:
+        unabstracted:
+            asm c: "return floor(n);";
+        .
+    .
+
+    has public static method ceil: n: float -> float:
+        unabstracted:
+            asm c: "return ceil(n);";
+        .
+    .
+end Entity.

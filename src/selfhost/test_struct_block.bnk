@@ -1,0 +1,6 @@
+struct MyData:
+    x: int;
+    y: int;
+end struct.
+
+x <- 42;

@@ -1,0 +1,42 @@
+module TestStructs;
+
+Struct Point:
+    x: int;
+    y: int;
+end Struct.
+
+Struct User:
+    id: int;
+    active: bool;
+end Struct.
+
+Entity App:
+    has method main:
+        print: "=== Struct Test ===";
+        
+        # Instantiate
+        p: Point <- Point : new: 10, 20;
+        print: "Point created.";
+        
+        # Read fields
+        px: int <- p.x;
+        py: int <- p.y;
+        
+        print: "p.x:";
+        print: px;
+        print: "p.y:";
+        print: py;
+        
+        # Another struct
+        u: User <- User : new: 42, true;
+        uid: int <- u.id;
+        uactive: bool <- u.active;
+        
+        print: "User ID:";
+        print: uid;
+        print: "User Active:";
+        print: uactive;
+        
+        print: "=== Done ===";
+    end method.
+end Entity.

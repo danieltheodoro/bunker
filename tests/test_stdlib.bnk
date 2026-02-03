@@ -1,0 +1,97 @@
+module test_stdlib;
+
+Entity App:
+    has static method main:
+        print: "--- Testing Strings ---";
+        
+        # Split (Strings: split: str, delim)
+        parts <- Strings: split: "a,b,c", ",";
+        print: "Split count: " + parts.length;
+        # Checking parts content
+        p0 <- parts[0];
+        print: "Part 0: " + p0;
+        if:
+        condition:
+            return p0 == "a";
+        end condition.
+        then:
+            print: "Split OK";
+        end then.
+        end if.
+        
+        # Conversions
+        num <- Strings: toInt: "123";
+        print: "toInt: " + num;
+        if:
+        condition:
+            return num == 123;
+        end condition.
+        then:
+            print: "toInt OK";
+        end then.
+        end if.
+        
+        f <- Strings: toFloat: "3.14";
+        print: "toFloat: " + f;
+        if:
+        condition:
+            return f > 3.0;
+        end condition.
+        then:
+            print: "toFloat OK";
+        end then.
+        end if.
+        
+        print: "--- Testing Math ---";
+        
+        # Method call with no args? Strings: random
+        r <- Math: random;
+        print: "Random: " + r;
+        
+        m <- Math: min: 10.0, 5.0;
+        print: "Min: " + m;
+        if:
+        condition:
+            return m == 5.0;
+        end condition.
+        then:
+            print: "Min OK";
+        end then.
+        end if.
+        
+        print: "--- Testing IO ---";
+        
+        # Create a dummy file for reading
+        fileObj <- File: create: "test_io.txt";
+        File: writeString: fileObj, "Line 1\nLine 2\nLine 3";
+        File: close: fileObj;
+        
+        # IO: readFileLines: path
+        lines <- IO: readFileLines: "test_io.txt";
+        print: "Read lines: " + lines.length;
+        l0 <- lines[0];
+        print: "Line 0: " + l0;
+        
+        len <- lines.length;
+        if:
+        condition:
+            return len == 3;
+        end condition.
+        then:
+             l1 <- lines[1];
+             if:
+             condition:
+                 return l1 == "Line 2";
+             end condition.
+             then:
+                 print: "IO Read OK";
+             end then.
+             end if.
+        end then.
+        end if.
+        
+        FileSystem: delete: "test_io.txt";
+        
+        print: "All StdLib tests passed";
+    end method.
+end Entity.

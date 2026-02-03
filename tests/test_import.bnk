@@ -1,0 +1,11 @@
+module TestImport;
+import pkg.Math;
+
+Entity Main:
+    has method main: argc: int, argv: void** -> int:
+        print: "Testing import...";
+        let res: int <- Math: add: 10, 20;
+        print: res;
+        return 0;
+    end method.
+end Entity.

@@ -1,0 +1,31 @@
+module TestSystem;
+
+include bunker.std.system;
+
+Entity App:
+    has method main:
+        print: "Testing System module...";
+        
+        let path: string <- System : getenv: "PATH";
+        if:
+        condition:
+            return path;
+        end condition.
+        then:
+            print: "PATH environment variable found.";
+        end then.
+        else:
+            print: "PATH not found (unexpected).";
+        .
+
+        let now: int <- System : time;
+        print: "Current timestamp: ";
+        print: now;
+
+        print: "Exiting with code 0...";
+        System : exit: 0;
+        
+        # This should not be reached
+        print: "FAILED: exit did not work.";
+    end method.
+end Entity.

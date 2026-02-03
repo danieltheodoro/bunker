@@ -1,0 +1,4478 @@
+--- Building Stage 0 (Bootstrap) ---
+python3 src/bootstrap/bunkerc.py src/selfhost/bunker.bnk -o bin/bunker-stage0
+DEBUG: Checking candidate src/selfhost/ast.bnk
+DEBUG: Found src/selfhost/ast.bnk
+DEBUG: Parsing imported tokens: 871 tokens
+DEBUG: Checking candidate bunker/std/strings.bnk
+DEBUG: Checking candidate src/std/bunker/std/strings.bnk
+DEBUG: Found src/std/bunker/std/strings.bnk
+DEBUG: Parsing imported tokens: 441 tokens
+DEBUG: Checking candidate bunker/std/collections.bnk
+DEBUG: Checking candidate src/std/bunker/std/collections.bnk
+DEBUG: Found src/std/bunker/std/collections.bnk
+DEBUG: Parsing imported tokens: 603 tokens
+DEBUG: Entering parse_entity Map
+DEBUG: Entering parse_method
+DEBUG: Parsing method create
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=19)
+DEBUG: Entering parse_method
+DEBUG: Parsing method set
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 7 stmts
+DEBUG: parse_if started (NEW SYNTAX) at line 35
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=47)
+DEBUG: Entering parse_method
+DEBUG: Parsing method get
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 7 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=63)
+DEBUG: Entering parse_entity List
+DEBUG: Entering parse_method
+DEBUG: Parsing method create
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=78)
+DEBUG: Entering parse_method
+DEBUG: Parsing method add
+DEBUG: parse_if started (NEW SYNTAX) at line 79
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=91)
+DEBUG: Entering parse_method
+DEBUG: Parsing method get
+DEBUG: parse_if started (NEW SYNTAX) at line 92
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=103)
+DEBUG: Entering parse_method
+DEBUG: Parsing method size
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=107)
+DEBUG: Entering parse_method
+DEBUG: Parsing method _resize
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=118)
+DEBUG: Note: Imported entities: ['Map', 'List']
+DEBUG: Entering parse_entity Strings
+DEBUG: Entering parse_method
+DEBUG: Parsing method concat
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=23)
+DEBUG: Entering parse_method
+DEBUG: Parsing method length
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=29)
+DEBUG: Entering parse_method
+DEBUG: Parsing method substring
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=46)
+DEBUG: Entering parse_method
+DEBUG: Parsing method charAt
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=52)
+DEBUG: Entering parse_method
+DEBUG: Parsing method charToString
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=67)
+DEBUG: Entering parse_method
+DEBUG: Parsing method startsWith
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=77)
+DEBUG: Entering parse_method
+DEBUG: Parsing method trim
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=94)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toUpper
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=107)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toLower
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=120)
+DEBUG: Entering parse_method
+DEBUG: Parsing method contains
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=129)
+DEBUG: Entering parse_method
+DEBUG: Parsing method indexOf
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=139)
+DEBUG: Entering parse_method
+DEBUG: Parsing method replace
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=179)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toInt
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=185)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toFloat
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=191)
+DEBUG: Entering parse_method
+DEBUG: Parsing method split
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=218)
+DEBUG: Entering parse_method
+DEBUG: Parsing method join
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=240)
+DEBUG: Note: Imported entities: ['Map', 'List', 'Strings']
+DEBUG: Entering parse_entity ErrorReporter
+DEBUG: Entering parse_method
+DEBUG: Parsing method report
+DEBUG: parse_if started (NEW SYNTAX) at line 196
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 209
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='start', line=217)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='start', line=217)
+DEBUG: parse_if started (NEW SYNTAX) at line 218
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=227)
+DEBUG: parse_if started (NEW SYNTAX) at line 233
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='endIdx', line=241)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='endIdx', line=241)
+DEBUG: parse_if started (NEW SYNTAX) at line 242
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=251)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='start', line=254)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='endIdx', line=254)
+DEBUG: parse_if started (NEW SYNTAX) at line 262
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=272)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=276)
+DEBUG: Note: Imported entities: ['Map', 'List', 'Strings', 'ASTList', 'ASTNode', 'Program', 'LetStmt', 'ReturnStmt', 'ExprStmt', 'BinaryExpr', 'UnaryExpr', 'LiteralExpr', 'VariableExpr', 'AssignExpr', 'Block', 'IfStmt', 'WhileStmt', 'GroupingExpr', 'MethodCall', 'GetExpr', 'ArrayAccess', 'FieldDecl', 'MethodDecl', 'StructDecl', 'EntityDecl', 'ModuleDecl', 'ImportDecl', 'IncludeDecl', 'LoopStmt', 'ScopedStmt', 'UnabstractedBlock', 'AsmStmt', 'Token', 'ErrorReporter']
+DEBUG: Checking candidate src/selfhost/typechecker.bnk
+DEBUG: Found src/selfhost/typechecker.bnk
+DEBUG: Parsing imported tokens: 3018 tokens
+DEBUG: Entering parse_entity SymbolTable
+DEBUG: Entering parse_method
+DEBUG: Parsing method new
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=27)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=34)
+DEBUG: Entering parse_method
+DEBUG: Parsing method enterScope
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=36)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=41)
+DEBUG: Entering parse_method
+DEBUG: Parsing method exitScope
+DEBUG: parse_if started (NEW SYNTAX) at line 42
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=56)
+DEBUG: Entering parse_method
+DEBUG: Parsing method define
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=67)
+DEBUG: parse_if started (NEW SYNTAX) at line 69
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=85)
+DEBUG: Entering parse_method
+DEBUG: Parsing method resolve
+DEBUG: parse_if started (NEW SYNTAX) at line 89
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 103
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 113
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=123)
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=127)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=131)
+DEBUG: Entering parse_entity TypeChecker
+DEBUG: Entering parse_method
+DEBUG: Parsing method new
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=148)
+DEBUG: Entering parse_method
+DEBUG: Parsing method reportError
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tok', line=149)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=149)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=153)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkProgram
+DEBUG: parse_if started (NEW SYNTAX) at line 167
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 180
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 191
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=204)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=209)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkModule
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=214)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkStatement
+DEBUG: parse_if started (NEW SYNTAX) at line 215
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 238
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 246
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 254
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 262
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 272
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 280
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 288
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 296
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 304
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 312
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 320
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 328
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=340)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkScopedStmt
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=345)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkBlock
+DEBUG: parse_if started (NEW SYNTAX) at line 356
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 363
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=373)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=380)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkExpression
+DEBUG: parse_if started (NEW SYNTAX) at line 381
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 393
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 401
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 409
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 417
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 425
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 433
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 441
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 449
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=461)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkLiteral
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=466)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkVariable
+DEBUG: parse_if started (NEW SYNTAX) at line 473
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='var', line=478)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=485)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkAssign
+DEBUG: parse_if started (NEW SYNTAX) at line 493
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 502
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='valueType', line=508)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 513
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='var', line=518)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 524
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 535
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=545)
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=553)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkExprStmt
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=559)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkVarDecl
+DEBUG: parse_if started (NEW SYNTAX) at line 566
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 572
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 580
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='decl', line=585)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='declaredType', line=594)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=597)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkMethodDecl
+DEBUG: Found comma in args. Next: Token(type='STRING', value='method', line=602)
+DEBUG: parse_if started (NEW SYNTAX) at line 609
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 616
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='param', line=627)
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=630)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=640)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkReturn
+DEBUG: parse_if started (NEW SYNTAX) at line 642
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=653)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkIf
+DEBUG: parse_if started (NEW SYNTAX) at line 656
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='ifStmt', line=661)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 668
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=680)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkWhile
+DEBUG: parse_if started (NEW SYNTAX) at line 683
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='w', line=688)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=694)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkLoop
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=699)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkBinary
+DEBUG: parse_if started (NEW SYNTAX) at line 704
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='bin', line=709)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 715
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=727)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkUnary
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=732)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkCall
+DEBUG: parse_if started (NEW SYNTAX) at line 741
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 748
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=758)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=768)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkArrayAccess
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=775)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkStructDecl
+DEBUG: Found comma in args. Next: Token(type='STRING', value='struct', line=778)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=781)
+DEBUG: Entering parse_method
+DEBUG: Parsing method checkEntityDecl
+DEBUG: Found comma in args. Next: Token(type='STRING', value='entity', line=786)
+DEBUG: parse_if started (NEW SYNTAX) at line 790
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 797
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=807)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=812)
+DEBUG: Entering parse_method
+DEBUG: Parsing method check
+DEBUG: parse_if started (NEW SYNTAX) at line 814
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=833)
+DEBUG: Note: Imported entities: ['Header', 'Symbol', 'Scope', 'SymbolTable', 'TypeChecker']
+DEBUG: Checking candidate src/selfhost/transpiler.bnk
+DEBUG: Found src/selfhost/transpiler.bnk
+DEBUG: Parsing imported tokens: 4313 tokens
+DEBUG: Checking candidate src/selfhost/ast.bnk
+DEBUG: Found src/selfhost/ast.bnk
+DEBUG: Parsing imported tokens: 871 tokens
+DEBUG: Checking candidate bunker/std/strings.bnk
+DEBUG: Checking candidate src/std/bunker/std/strings.bnk
+DEBUG: Found src/std/bunker/std/strings.bnk
+DEBUG: Parsing imported tokens: 441 tokens
+DEBUG: Checking candidate bunker/std/collections.bnk
+DEBUG: Checking candidate src/std/bunker/std/collections.bnk
+DEBUG: Found src/std/bunker/std/collections.bnk
+DEBUG: Parsing imported tokens: 603 tokens
+DEBUG: Entering parse_entity Map
+DEBUG: Entering parse_method
+DEBUG: Parsing method create
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=19)
+DEBUG: Entering parse_method
+DEBUG: Parsing method set
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 7 stmts
+DEBUG: parse_if started (NEW SYNTAX) at line 35
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=47)
+DEBUG: Entering parse_method
+DEBUG: Parsing method get
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 7 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=63)
+DEBUG: Entering parse_entity List
+DEBUG: Entering parse_method
+DEBUG: Parsing method create
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=78)
+DEBUG: Entering parse_method
+DEBUG: Parsing method add
+DEBUG: parse_if started (NEW SYNTAX) at line 79
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=91)
+DEBUG: Entering parse_method
+DEBUG: Parsing method get
+DEBUG: parse_if started (NEW SYNTAX) at line 92
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=103)
+DEBUG: Entering parse_method
+DEBUG: Parsing method size
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=107)
+DEBUG: Entering parse_method
+DEBUG: Parsing method _resize
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=118)
+DEBUG: Note: Imported entities: ['Map', 'List']
+DEBUG: Entering parse_entity Strings
+DEBUG: Entering parse_method
+DEBUG: Parsing method concat
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=23)
+DEBUG: Entering parse_method
+DEBUG: Parsing method length
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=29)
+DEBUG: Entering parse_method
+DEBUG: Parsing method substring
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=46)
+DEBUG: Entering parse_method
+DEBUG: Parsing method charAt
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=52)
+DEBUG: Entering parse_method
+DEBUG: Parsing method charToString
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=67)
+DEBUG: Entering parse_method
+DEBUG: Parsing method startsWith
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=77)
+DEBUG: Entering parse_method
+DEBUG: Parsing method trim
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=94)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toUpper
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=107)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toLower
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=120)
+DEBUG: Entering parse_method
+DEBUG: Parsing method contains
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=129)
+DEBUG: Entering parse_method
+DEBUG: Parsing method indexOf
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=139)
+DEBUG: Entering parse_method
+DEBUG: Parsing method replace
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=179)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toInt
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=185)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toFloat
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=191)
+DEBUG: Entering parse_method
+DEBUG: Parsing method split
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=218)
+DEBUG: Entering parse_method
+DEBUG: Parsing method join
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=240)
+DEBUG: Note: Imported entities: ['Map', 'List', 'Strings']
+DEBUG: Entering parse_entity ErrorReporter
+DEBUG: Entering parse_method
+DEBUG: Parsing method report
+DEBUG: parse_if started (NEW SYNTAX) at line 196
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 209
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='start', line=217)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='start', line=217)
+DEBUG: parse_if started (NEW SYNTAX) at line 218
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=227)
+DEBUG: parse_if started (NEW SYNTAX) at line 233
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='endIdx', line=241)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='endIdx', line=241)
+DEBUG: parse_if started (NEW SYNTAX) at line 242
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=251)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='start', line=254)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='endIdx', line=254)
+DEBUG: parse_if started (NEW SYNTAX) at line 262
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=272)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=276)
+DEBUG: Note: Imported entities: ['Map', 'List', 'Strings', 'ASTList', 'ASTNode', 'Program', 'LetStmt', 'ReturnStmt', 'ExprStmt', 'BinaryExpr', 'UnaryExpr', 'LiteralExpr', 'VariableExpr', 'AssignExpr', 'Block', 'IfStmt', 'WhileStmt', 'GroupingExpr', 'MethodCall', 'GetExpr', 'ArrayAccess', 'FieldDecl', 'MethodDecl', 'StructDecl', 'EntityDecl', 'ModuleDecl', 'ImportDecl', 'IncludeDecl', 'LoopStmt', 'ScopedStmt', 'UnabstractedBlock', 'AsmStmt', 'Token', 'ErrorReporter']
+DEBUG: Entering parse_entity CTranspiler
+DEBUG: Entering parse_method
+DEBUG: Parsing method new
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=20)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=28)
+DEBUG: Entering parse_method
+DEBUG: Parsing method mapType
+DEBUG: parse_if started (NEW SYNTAX) at line 29
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 37
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 45
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 53
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=64)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emit
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=65)
+DEBUG: parse_if started (NEW SYNTAX) at line 67
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=84)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitLine
+DEBUG: parse_if started (NEW SYNTAX) at line 87
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=97)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=101)
+DEBUG: Entering parse_method
+DEBUG: Parsing method indent
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=105)
+DEBUG: Entering parse_method
+DEBUG: Parsing method dedent
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=109)
+DEBUG: Entering parse_method
+DEBUG: Parsing method transpile
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=113)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitProgram
+DEBUG: parse_if started (NEW SYNTAX) at line 122
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 131
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=140)
+DEBUG: parse_if started (NEW SYNTAX) at line 151
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 160
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=169)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=177)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitStatement
+DEBUG: parse_if started (NEW SYNTAX) at line 181
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 189
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 197
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 205
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 213
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 221
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 229
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 237
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 245
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 253
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 261
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 269
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 277
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 286
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=298)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitLetStmt
+DEBUG: parse_if started (NEW SYNTAX) at line 300
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=317)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitExprStmt
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=323)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitReturnStmt
+DEBUG: parse_if started (NEW SYNTAX) at line 326
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=337)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitExpression
+DEBUG: parse_if started (NEW SYNTAX) at line 342
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 350
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 358
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 366
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 374
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 382
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 390
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 398
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 406
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 414
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=426)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitLiteral
+DEBUG: parse_if started (NEW SYNTAX) at line 428
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=442)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitVariable
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=447)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitBinary
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=455)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitAssign
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=462)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitUnary
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=468)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitGetExpr
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=474)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitGrouping
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=481)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitArrayAccess
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=492)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitCall
+DEBUG: parse_if started (NEW SYNTAX) at line 499
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 505
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 511
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 518
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 525
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 534
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 543
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 558
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 566
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 597
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 603
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 609
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 618
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 625
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 643
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 648
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 653
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 659
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 666
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 684
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 692
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=703)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 709
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 720
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 729
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 737
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=748)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=758)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitIfStmt
+DEBUG: parse_if started (NEW SYNTAX) at line 772
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=786)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitWhileStmt
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=798)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitLoopStmt
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=807)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitScopedStmt
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=816)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitBlock
+DEBUG: parse_if started (NEW SYNTAX) at line 819
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 826
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=836)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=841)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitBlockAsExpression
+DEBUG: parse_if started (NEW SYNTAX) at line 844
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 855
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 866
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 873
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=889)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=892)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitModuleDecl
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=897)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitEntityDecl
+DEBUG: parse_if started (NEW SYNTAX) at line 908
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 916
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=927)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 937
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 944
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=954)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=961)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitMethodDecl
+DEBUG: parse_if started (NEW SYNTAX) at line 977
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 984
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=995)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1012)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitIncludeDecl
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1017)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitImportDecl
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1022)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitUnabstractedBlock
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1027)
+DEBUG: Entering parse_method
+DEBUG: Parsing method emitAsmStmt
+DEBUG: parse_if started (NEW SYNTAX) at line 1029
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=1039)
+DEBUG: Note: Imported entities: ['Map', 'List', 'Strings', 'ASTList', 'ASTNode', 'Program', 'LetStmt', 'ReturnStmt', 'ExprStmt', 'BinaryExpr', 'UnaryExpr', 'LiteralExpr', 'VariableExpr', 'AssignExpr', 'Block', 'IfStmt', 'WhileStmt', 'GroupingExpr', 'MethodCall', 'GetExpr', 'ArrayAccess', 'FieldDecl', 'MethodDecl', 'StructDecl', 'EntityDecl', 'ModuleDecl', 'ImportDecl', 'IncludeDecl', 'LoopStmt', 'ScopedStmt', 'UnabstractedBlock', 'AsmStmt', 'Token', 'ErrorReporter', 'CTranspiler']
+DEBUG: Checking candidate bunker/std/io.bnk
+DEBUG: Checking candidate src/std/bunker/std/io.bnk
+DEBUG: Found src/std/bunker/std/io.bnk
+DEBUG: Parsing imported tokens: 119 tokens
+DEBUG: Entering parse_entity File
+DEBUG: Entering parse_method
+DEBUG: Parsing method open
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=18)
+DEBUG: Entering parse_method
+DEBUG: Parsing method create
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=30)
+DEBUG: Entering parse_method
+DEBUG: Parsing method readToString
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=46)
+DEBUG: Entering parse_method
+DEBUG: Parsing method writeString
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=56)
+DEBUG: Entering parse_method
+DEBUG: Parsing method close
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=65)
+DEBUG: Note: Imported entities: ['File']
+DEBUG: Checking candidate bunker/std/fs.bnk
+DEBUG: Checking candidate src/std/bunker/std/fs.bnk
+DEBUG: Found src/std/bunker/std/fs.bnk
+DEBUG: Parsing imported tokens: 58 tokens
+DEBUG: Entering parse_entity FileSystem
+DEBUG: Entering parse_method
+DEBUG: Parsing method exists
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=10)
+DEBUG: Entering parse_method
+DEBUG: Parsing method delete
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=15)
+DEBUG: Note: Imported entities: ['FileSystem']
+DEBUG: Checking candidate bunker/std/strings.bnk
+DEBUG: Checking candidate src/std/bunker/std/strings.bnk
+DEBUG: Found src/std/bunker/std/strings.bnk
+DEBUG: Parsing imported tokens: 441 tokens
+DEBUG: Checking candidate bunker/std/collections.bnk
+DEBUG: Checking candidate src/std/bunker/std/collections.bnk
+DEBUG: Found src/std/bunker/std/collections.bnk
+DEBUG: Parsing imported tokens: 603 tokens
+DEBUG: Entering parse_entity Map
+DEBUG: Entering parse_method
+DEBUG: Parsing method create
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=19)
+DEBUG: Entering parse_method
+DEBUG: Parsing method set
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 7 stmts
+DEBUG: parse_if started (NEW SYNTAX) at line 35
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=47)
+DEBUG: Entering parse_method
+DEBUG: Parsing method get
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 7 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=63)
+DEBUG: Entering parse_entity List
+DEBUG: Entering parse_method
+DEBUG: Parsing method create
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=78)
+DEBUG: Entering parse_method
+DEBUG: Parsing method add
+DEBUG: parse_if started (NEW SYNTAX) at line 79
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=91)
+DEBUG: Entering parse_method
+DEBUG: Parsing method get
+DEBUG: parse_if started (NEW SYNTAX) at line 92
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=103)
+DEBUG: Entering parse_method
+DEBUG: Parsing method size
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=107)
+DEBUG: Entering parse_method
+DEBUG: Parsing method _resize
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=118)
+DEBUG: Note: Imported entities: ['Map', 'List']
+DEBUG: Entering parse_entity Strings
+DEBUG: Entering parse_method
+DEBUG: Parsing method concat
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=23)
+DEBUG: Entering parse_method
+DEBUG: Parsing method length
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=29)
+DEBUG: Entering parse_method
+DEBUG: Parsing method substring
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=46)
+DEBUG: Entering parse_method
+DEBUG: Parsing method charAt
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=52)
+DEBUG: Entering parse_method
+DEBUG: Parsing method charToString
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=67)
+DEBUG: Entering parse_method
+DEBUG: Parsing method startsWith
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=77)
+DEBUG: Entering parse_method
+DEBUG: Parsing method trim
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=94)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toUpper
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=107)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toLower
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=120)
+DEBUG: Entering parse_method
+DEBUG: Parsing method contains
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=129)
+DEBUG: Entering parse_method
+DEBUG: Parsing method indexOf
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=139)
+DEBUG: Entering parse_method
+DEBUG: Parsing method replace
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=179)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toInt
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=185)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toFloat
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=191)
+DEBUG: Entering parse_method
+DEBUG: Parsing method split
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=218)
+DEBUG: Entering parse_method
+DEBUG: Parsing method join
+DEBUG PARSER: parse_unabstracted started
+DEBUG PARSER: parse_unabstracted finished with 1 stmts
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=240)
+DEBUG: Note: Imported entities: ['Map', 'List', 'Strings']
+DEBUG: Entering parse_entity Casts
+DEBUG: Entering parse_method
+DEBUG: Parsing method toASTList
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=18)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toASTNode
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=21)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toToken
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=24)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toVariableExpr
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=27)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toIncludeDecl
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=30)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toImportDecl
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=33)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toProgram
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=36)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toBlock
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=39)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toMethodCall
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=42)
+DEBUG: Entering parse_method
+DEBUG: Parsing method toArrayAccess
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=45)
+DEBUG: Entering parse_method
+DEBUG: Parsing method isBlockTerminatedByDot
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=49)
+DEBUG: Entering parse_entity Lexer
+DEBUG: Entering parse_method
+DEBUG: Parsing method new
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=70)
+DEBUG: Entering parse_method
+DEBUG: Parsing method peek
+DEBUG: parse_if started (NEW SYNTAX) at line 71
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=79)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=82)
+DEBUG: Entering parse_method
+DEBUG: Parsing method peekNext
+DEBUG: parse_if started (NEW SYNTAX) at line 83
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=91)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=94)
+DEBUG: Entering parse_method
+DEBUG: Parsing method advance
+DEBUG: parse_if started (NEW SYNTAX) at line 95
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=103)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=109)
+DEBUG: Entering parse_method
+DEBUG: Parsing method isAlpha
+DEBUG: parse_if started (NEW SYNTAX) at line 110
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='c', line=118)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=121)
+DEBUG: Entering parse_method
+DEBUG: Parsing method isDigit
+DEBUG: parse_if started (NEW SYNTAX) at line 122
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='c', line=130)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=133)
+DEBUG: Entering parse_method
+DEBUG: Parsing method isAlphaNumeric
+DEBUG: parse_if started (NEW SYNTAX) at line 134
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 142
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=153)
+DEBUG: Entering parse_method
+DEBUG: Parsing method readIdentifier
+DEBUG: parse_if started (NEW SYNTAX) at line 160
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=170)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='start', line=173)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='endIdx', line=173)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=178)
+DEBUG: Entering parse_method
+DEBUG: Parsing method readNumber
+DEBUG: parse_if started (NEW SYNTAX) at line 187
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=197)
+DEBUG: parse_if started (NEW SYNTAX) at line 201
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 208
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 217
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=227)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='start', line=234)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='endIdx', line=234)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=240)
+DEBUG: Entering parse_method
+DEBUG: Parsing method readString
+DEBUG: parse_if started (NEW SYNTAX) at line 246
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 254
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 264
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 272
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=281)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='start', line=283)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=283)
+DEBUG: parse_if started (NEW SYNTAX) at line 286
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=299)
+DEBUG: Entering parse_method
+DEBUG: Parsing method isKeyword
+DEBUG: parse_if started (NEW SYNTAX) at line 300
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 308
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 316
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 324
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 332
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 340
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 348
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 356
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 364
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 372
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 380
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 388
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 396
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 404
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 412
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 420
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 428
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 436
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 444
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 452
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 460
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 468
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 476
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 484
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 492
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 500
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 508
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 516
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 524
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 532
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 540
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 548
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 556
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 564
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 572
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 580
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 588
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 596
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 604
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 612
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=623)
+DEBUG: Entering parse_method
+DEBUG: Parsing method nextToken
+DEBUG: parse_if started (NEW SYNTAX) at line 637
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 642
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=656)
+DEBUG: parse_if started (NEW SYNTAX) at line 666
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='', line=671)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=671)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=671)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=671)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 677
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 684
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=693)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 699
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='value', line=707)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=707)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=707)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=707)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 714
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='value', line=722)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=722)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=722)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=722)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 729
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 738
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='value', line=743)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=743)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=743)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=743)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='value', line=747)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=747)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=747)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=747)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 755
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 760
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='==', line=769)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=769)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=769)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=769)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 775
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 780
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='!=', line=789)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=789)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=789)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=789)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 795
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 800
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='<-', line=809)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=809)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=809)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=809)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 812
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='<=', line=821)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=821)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=821)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=821)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 827
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 832
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='>=', line=841)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=841)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=841)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=841)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 847
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 852
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='->', line=861)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=861)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=861)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=861)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='current', line=872)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=872)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startCol', line=872)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='startOff', line=872)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=875)
+DEBUG: Entering parse_entity Parser
+DEBUG: Entering parse_method
+DEBUG: Parsing method new
+DEBUG: parse_if started (NEW SYNTAX) at line 891
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 899
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=909)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 915
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=931)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=935)
+DEBUG: Entering parse_method
+DEBUG: Parsing method peek
+DEBUG: parse_if started (NEW SYNTAX) at line 936
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='', line=941)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=941)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=941)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=941)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=951)
+DEBUG: Entering parse_method
+DEBUG: Parsing method peekNext
+DEBUG: parse_if started (NEW SYNTAX) at line 952
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='', line=957)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=957)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=957)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=957)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 961
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='', line=966)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=966)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=966)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=966)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=975)
+DEBUG: Entering parse_method
+DEBUG: Parsing method peekAt
+DEBUG: parse_if started (NEW SYNTAX) at line 979
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=989)
+DEBUG: parse_if started (NEW SYNTAX) at line 991
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='', line=996)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=996)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=996)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=996)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1004)
+DEBUG: Entering parse_method
+DEBUG: Parsing method previous
+DEBUG: Found comma in args. Next: Token(type='STRING', value='', line=1008)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=1008)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=1008)
+DEBUG: Found comma in args. Next: Token(type='INTEGER', value='0', line=1008)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1011)
+DEBUG: Entering parse_method
+DEBUG: Parsing method isAtEnd
+DEBUG: parse_if started (NEW SYNTAX) at line 1013
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1024)
+DEBUG: Entering parse_method
+DEBUG: Parsing method check
+DEBUG: parse_if started (NEW SYNTAX) at line 1025
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1034
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1045)
+DEBUG: Entering parse_method
+DEBUG: Parsing method advance
+DEBUG: parse_if started (NEW SYNTAX) at line 1046
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1063)
+DEBUG: Entering parse_method
+DEBUG: Parsing method consume
+DEBUG: parse_if started (NEW SYNTAX) at line 1064
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1075
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=1089)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=1089)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1097)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseDeclaration
+DEBUG: parse_if started (NEW SYNTAX) at line 1099
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1104
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1112
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1120
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1133)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseEntity
+DEBUG: Found comma in args. Next: Token(type='STRING', value='Expected Entity name.', line=1135)
+DEBUG: parse_if started (NEW SYNTAX) at line 1136
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=1143)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=1143)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1151
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1157)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='Expected type parameter name.', line=1160)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1161)
+DEBUG: parse_if started (NEW SYNTAX) at line 1162
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1178
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1188)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='>', line=1189)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1196
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1202)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1206)
+DEBUG: parse_if started (NEW SYNTAX) at line 1207
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1223
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1233)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='STRING', value=':', line=1238)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1240)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1242)
+DEBUG: parse_if started (NEW SYNTAX) at line 1247
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1252
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1260
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1271
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1283
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1293
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1298
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1303
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1318)
+DEBUG: parse_if started (NEW SYNTAX) at line 1322
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1330
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1335)
+DEBUG: parse_if started (NEW SYNTAX) at line 1336
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1358
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1363)
+DEBUG: parse_if started (NEW SYNTAX) at line 1364
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1396)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='nameTok', line=1398)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='typeParams', line=1398)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='implList', line=1398)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='fields', line=1398)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='methods', line=1398)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1402)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseMethod
+DEBUG: Found comma in args. Next: Token(type='STRING', value='Expected method name.', line=1403)
+DEBUG: parse_if started (NEW SYNTAX) at line 1408
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1414)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='Expected type parameter name.', line=1417)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1418)
+DEBUG: parse_if started (NEW SYNTAX) at line 1419
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1435
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1445)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='>', line=1446)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1450)
+DEBUG: parse_if started (NEW SYNTAX) at line 1456
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1466
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1472
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1484
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1493
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1504
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1509
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1521
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1531
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1541
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='pName', line=1556)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='pType', line=1556)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1557)
+DEBUG: parse_if started (NEW SYNTAX) at line 1559
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1576
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1590)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1596
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1601
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1608
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1628
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1643
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=1650)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 1653
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='end', line=1658)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='method', line=1659)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=1660)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='nameTok', line=1667)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='isStatic', line=1667)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='args', line=1667)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='returnType', line=1667)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='body', line=1667)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='typeParams', line=1667)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1671)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseStruct
+DEBUG: Found comma in args. Next: Token(type='STRING', value='Expected struct name.', line=1673)
+DEBUG: parse_if started (NEW SYNTAX) at line 1678
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1684)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='Expected type parameter name.', line=1687)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1688)
+DEBUG: parse_if started (NEW SYNTAX) at line 1689
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1705
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1715)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='>', line=1716)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1724
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1729
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1737
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1748)
+DEBUG: parse_if started (NEW SYNTAX) at line 1753
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1758
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 1768
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='struct', line=1774)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=1775)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1782
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1793
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=1798)
+DEBUG: parse_if started (NEW SYNTAX) at line 1799
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1815)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='nameTok', line=1817)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='typeParams', line=1817)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='fields', line=1817)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1821)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseField
+DEBUG: parse_if started (NEW SYNTAX) at line 1823
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='STRING', value='Expected field name.', line=1832)
+DEBUG: parse_if started (NEW SYNTAX) at line 1836
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1844
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1859
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='nameTok', line=1868)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='typeName', line=1868)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1872)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parsePath
+DEBUG: parse_if started (NEW SYNTAX) at line 1876
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1890
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1902)
+DEBUG: parse_if started (NEW SYNTAX) at line 1904
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=1909)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=1909)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1916)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseType
+DEBUG: parse_if started (NEW SYNTAX) at line 1919
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=1924)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=1924)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1934
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 1946
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1958)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='>', line=1960)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 1968
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=1980)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=1985)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseModule
+DEBUG: parse_if started (NEW SYNTAX) at line 1991
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='path', line=2000)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2004)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseImport
+DEBUG: parse_if started (NEW SYNTAX) at line 2010
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='path', line=2019)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2023)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseInclude
+DEBUG: parse_if started (NEW SYNTAX) at line 2029
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='path', line=2038)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2042)
+DEBUG: Entering parse_method
+DEBUG: Parsing method isIncluded
+DEBUG: parse_if started (NEW SYNTAX) at line 2046
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2055
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=2064)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2068)
+DEBUG: Entering parse_method
+DEBUG: Parsing method addIncluded
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2070)
+DEBUG: parse_if started (NEW SYNTAX) at line 2071
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2087)
+DEBUG: Entering parse_method
+DEBUG: Parsing method resolvePath
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2088)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='/', line=2088)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2093)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseIncludeFile
+DEBUG: parse_if started (NEW SYNTAX) at line 2096
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2108
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2115
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2131)
+DEBUG: parse_if started (NEW SYNTAX) at line 2135
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2143)
+DEBUG: parse_if started (NEW SYNTAX) at line 2144
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=2158)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='subSource', line=2160)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2166)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseUnabstracted
+DEBUG: parse_if started (NEW SYNTAX) at line 2170
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2184
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2193
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='bodyVoid', line=2207)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2211)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseAsm
+DEBUG: Found comma in args. Next: Token(type='STRING', value='Expected asm target (e.g. c).', line=2213)
+DEBUG: Found comma in args. Next: Token(type='STRING', value=':', line=2214)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='Expected asm code string.', line=2215)
+DEBUG: parse_if started (NEW SYNTAX) at line 2219
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='targetTok', line=2228)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='codeTok', line=2228)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2233)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseProgram
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2234)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2234)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2235)
+DEBUG: parse_if started (NEW SYNTAX) at line 2241
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2246
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2253)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2263
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2272
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2277
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2287
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2295
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2304)
+DEBUG: parse_if started (NEW SYNTAX) at line 2306
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=2322)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=2331)
+DEBUG: parse_if started (NEW SYNTAX) at line 2335
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2344
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2349
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2357)
+DEBUG: parse_if started (NEW SYNTAX) at line 2358
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2374
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2382
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2391)
+DEBUG: parse_if started (NEW SYNTAX) at line 2393
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=2409)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=2419)
+DEBUG: parse_if started (NEW SYNTAX) at line 2423
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2434
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2439)
+DEBUG: parse_if started (NEW SYNTAX) at line 2441
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=2460)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2466)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseBlock
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2468)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='false', line=2468)
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2470)
+DEBUG: parse_if started (NEW SYNTAX) at line 2474
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2486
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2491
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2499
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2511
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2516
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2521
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2537
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2546
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2551)
+DEBUG: parse_if started (NEW SYNTAX) at line 2552
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2571
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2576
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=2586)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2592)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseStatement
+DEBUG: parse_if started (NEW SYNTAX) at line 2595
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2600
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2609
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2618
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2627
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2636
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2645
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2654
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2665
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2676
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value="Expected ';' after let statement.", line=2683)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2688
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2697
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2702
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2716
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2726
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2739)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseScoped
+DEBUG: parse_if started (NEW SYNTAX) at line 2744
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2749
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2765
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='scoped', line=2771)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2772)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 2775
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='end', line=2780)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='scoped', line=2781)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2782)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='body', line=2788)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2792)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseLoop
+DEBUG: parse_if started (NEW SYNTAX) at line 2798
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2803
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2821
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='loop', line=2827)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2828)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 2831
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='end', line=2836)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='loop', line=2837)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2838)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='body', line=2846)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2850)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseWhile
+DEBUG: parse_if started (NEW SYNTAX) at line 2857
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2862
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2878
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='while', line=2884)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2885)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 2888
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='end', line=2893)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='while', line=2894)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2895)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='cond', line=2901)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='body', line=2901)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2905)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseIf
+DEBUG: Found comma in args. Next: Token(type='STRING', value=':', line=2908)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='condition', line=2911)
+DEBUG: Found comma in args. Next: Token(type='STRING', value=':', line=2912)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='end', line=2916)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='condition', line=2917)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2918)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='then', line=2921)
+DEBUG: Found comma in args. Next: Token(type='STRING', value=':', line=2922)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='end', line=2926)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='then', line=2927)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2928)
+DEBUG: parse_if started (NEW SYNTAX) at line 2933
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value=':', line=2939)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='end', line=2943)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='else', line=2944)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2945)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='STRING', value='end', line=2950)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='if', line=2951)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='.', line=2952)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='condBlock', line=2954)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='thenBlock', line=2954)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='elseStmt', line=2954)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=2958)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseReturn
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=2961)
+DEBUG: parse_if started (NEW SYNTAX) at line 2967
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 2972
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2983
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 2997
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3009)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseExpressionStatement
+DEBUG: parse_if started (NEW SYNTAX) at line 3011
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3022
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3031)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3035)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseExpression
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3039)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseAssignment
+DEBUG: parse_if started (NEW SYNTAX) at line 3046
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3056
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3061
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3066
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3074
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3091
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3096
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3105
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3111
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='varExpr', line=3116)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='typeHint', line=3116)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='value', line=3116)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3119)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='value', line=3119)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 3122
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3127
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3135)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='value', line=3135)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3151)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseEquality
+DEBUG: parse_if started (NEW SYNTAX) at line 3158
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3163
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3171
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3182
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3189)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='op', line=3189)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='right', line=3189)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=3195)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3199)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseComparison
+DEBUG: parse_if started (NEW SYNTAX) at line 3206
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3211
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3219
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3229
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3234
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3242
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3253
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3260)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='op', line=3260)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='right', line=3260)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=3266)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3271)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseTerm
+DEBUG: parse_if started (NEW SYNTAX) at line 3278
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3283
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3291
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3302
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3309)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='op', line=3309)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='right', line=3309)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=3315)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3320)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseFactor
+DEBUG: parse_if started (NEW SYNTAX) at line 3327
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3332
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3340
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3351
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3358)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='op', line=3358)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='right', line=3358)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=3364)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3369)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseUnary
+DEBUG: parse_if started (NEW SYNTAX) at line 3373
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3378
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3388
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3393
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3404
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='op', line=3411)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='right', line=3411)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3419)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseCall
+DEBUG: parse_if started (NEW SYNTAX) at line 3426
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3435
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3441
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3447
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3455
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3470
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3481
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 3494
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3500
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3506
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3519
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 3532
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3541
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3558
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='methodName', line=3563)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=3563)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=3563)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=3563)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3569)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='metTok', line=3569)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='args', line=3569)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3578
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3584
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value='Expected property name.', line=3590)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3591)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='pTok', line=3591)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3600
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value="Expected ']' after array index.", line=3607)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3608)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='indexExpr', line=3608)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=3615)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3620)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parseArgumentList
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=3621)
+DEBUG: parse_if started (NEW SYNTAX) at line 3626
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=3637)
+DEBUG: parse_if started (NEW SYNTAX) at line 3639
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3655
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3660
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=3672)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='has', line=3677)
+DEBUG: Entering parse_method
+DEBUG: Parsing method parsePrimary
+DEBUG: parse_if started (NEW SYNTAX) at line 3681
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3686
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=3692)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='bool', line=3692)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3695
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=3701)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='bool', line=3701)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3704
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=3710)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='nil', line=3710)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3716
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='numTok', line=3722)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='int', line=3722)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3726
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='strTok', line=3732)
+DEBUG: Found comma in args. Next: Token(type='STRING', value='string', line=3732)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3736
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3743
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3758
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3768
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3776
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3782
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3790
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=3804)
+DEBUG: parse_if started (NEW SYNTAX) at line 3806
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='fullType', line=3813)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=3813)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=3813)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=3813)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='genTk', line=3814)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='identTok', line=3823)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3827
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 3832
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3840
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: Found comma in args. Next: Token(type='STRING', value="Expected ')' after expression.", line=3847)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='expr', line=3851)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='tk', line=3859)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='self', line=3859)
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=3865)
+DEBUG: Entering parse_entity Main
+DEBUG: Entering parse_method
+DEBUG: Parsing method main
+DEBUG: parse_if started (NEW SYNTAX) at line 3871
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3885
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=3904)
+DEBUG: parse_if started (NEW SYNTAX) at line 3910
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 3919
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: Found comma in args. Next: Token(type='KEYWORD', value='nil', line=3928)
+DEBUG: parse_if started (NEW SYNTAX) at line 3929
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=3943)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='code', line=3948)
+DEBUG: parse_if started (NEW SYNTAX) at line 3951
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if started (NEW SYNTAX) at line 3969
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=3984)
+DEBUG: Found comma in args. Next: Token(type='IDENT', value='code', line=3987)
+DEBUG: parse_if started (NEW SYNTAX) at line 3990
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if started (NEW SYNTAX) at line 4008
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if started (NEW SYNTAX) at line 4017
+DEBUG: parse_if parsing CONDITION block
+DEBUG: parse_if CONDITION block done
+DEBUG: parse_if parsing THEN block
+DEBUG: parse_if THEN block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_loop dot=False. Peek: Token(type='KEYWORD', value='end', line=4029)
+DEBUG: parse_if THEN block done
+DEBUG: parse_if parsing ELSE block
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: parse_if ELSE block done
+DEBUG: parse_if FINISHED
+DEBUG: Parsed method. Next token: Token(type='KEYWORD', value='end', line=4042)
+DEBUG: Instantiating List as List_string with args ['string']
+DEBUG: Template has 8 members/fields
+DEBUG: First member type: <class '__main__.FieldDecl'>
+DEBUG: Loop transpiling Map (EntityDecl)
+DEBUG: Loop transpiling List (EntityDecl)
+DEBUG: Loop transpiling Strings (EntityDecl)
+DEBUG: Transpiling Strings_concat, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_length, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_substring, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_charAt, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_charToString, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_startsWith, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_trim, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_toUpper, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_toLower, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_contains, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_indexOf, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_replace, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_toInt, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_toFloat, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling Strings_split, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Strings_join, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Loop transpiling ErrorReporter (EntityDecl)
+DEBUG: Transpiling ErrorReporter_report, body len: 15
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Loop transpiling SymbolTable (EntityDecl)
+DEBUG: Transpiling SymbolTable_new, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling SymbolTable_enterScope, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling SymbolTable_exitScope, body len: 3
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling SymbolTable_define, body len: 8
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling SymbolTable_resolve, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Loop transpiling TypeChecker (EntityDecl)
+DEBUG: Transpiling TypeChecker_new, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_reportError, body len: 2
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling TypeChecker_checkProgram, body len: 8
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling TypeChecker_checkModule, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling TypeChecker_checkStatement, body len: 15
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling TypeChecker_checkScopedStmt, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkBlock, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkExpression, body len: 12
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling TypeChecker_checkLiteral, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkVariable, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkAssign, body len: 5
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkExprStmt, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkVarDecl, body len: 5
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkMethodDecl, body len: 8
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkReturn, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkIf, body len: 5
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkWhile, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkLoop, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkBinary, body len: 7
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkUnary, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkCall, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkArrayAccess, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkStructDecl, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_checkEntityDecl, body len: 5
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling TypeChecker_check, body len: 7
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Loop transpiling CTranspiler (EntityDecl)
+DEBUG: Transpiling CTranspiler_new, body len: 7
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_mapType, body len: 5
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling CTranspiler_emit, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitLine, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_indent, body len: 1
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_dedent, body len: 1
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_transpile, body len: 1
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling CTranspiler_emitProgram, body len: 17
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitStatement, body len: 18
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitLetStmt, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitExprStmt, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitReturnStmt, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitExpression, body len: 15
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitLiteral, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitVariable, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitBinary, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitAssign, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitUnary, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitGetExpr, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitGrouping, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitArrayAccess, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitCall, body len: 10
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitIfStmt, body len: 12
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitWhileStmt, body len: 9
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitLoopStmt, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitScopedStmt, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitBlock, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitBlockAsExpression, body len: 5
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitModuleDecl, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitEntityDecl, body len: 13
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitMethodDecl, body len: 13
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitIncludeDecl, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitImportDecl, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitUnabstractedBlock, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling CTranspiler_emitAsmStmt, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Loop transpiling File (EntityDecl)
+DEBUG: Transpiling File_open, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling File_create, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling File_readToString, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling File_writeString, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Transpiling File_close, body len: 1
+DEBUG: First stmt type: <class '__main__.UnabstractedBlock'>
+DEBUG: Loop transpiling FileSystem (EntityDecl)
+DEBUG: Loop transpiling Casts (EntityDecl)
+DEBUG: Transpiling Casts_toASTList, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Casts_toASTNode, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Casts_toToken, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Casts_toVariableExpr, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Casts_toIncludeDecl, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Casts_toImportDecl, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Casts_toProgram, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Casts_toBlock, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Casts_toMethodCall, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Casts_toArrayAccess, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Casts_isBlockTerminatedByDot, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Loop transpiling Lexer (EntityDecl)
+DEBUG: Transpiling Lexer_new, body len: 7
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Lexer_peek, body len: 2
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Lexer_peekNext, body len: 2
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Lexer_advance, body len: 5
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Lexer_isAlpha, body len: 2
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Lexer_isDigit, body len: 2
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Lexer_isAlphaNumeric, body len: 3
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Lexer_readIdentifier, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Lexer_readNumber, body len: 10
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Lexer_readString, body len: 7
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Lexer_isKeyword, body len: 41
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Lexer_nextToken, body len: 32
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Loop transpiling Parser (EntityDecl)
+DEBUG: Transpiling Parser_new, body len: 11
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_peek, body len: 4
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Parser_peekNext, body len: 6
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Parser_peekAt, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_previous, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Parser_isAtEnd, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_check, body len: 4
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Parser_advance, body len: 5
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Parser_consume, body len: 7
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling Parser_parseDeclaration, body len: 2
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseEntity, body len: 17
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseMethod, body len: 20
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseStruct, body len: 13
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseField, body len: 12
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parsePath, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseType, body len: 9
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseModule, body len: 6
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseImport, body len: 6
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseInclude, body len: 6
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_isIncluded, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_addIncluded, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_resolvePath, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseIncludeFile, body len: 17
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseUnabstracted, body len: 10
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseAsm, body len: 8
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseProgram, body len: 10
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseBlock, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseStatement, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseScoped, body len: 9
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseLoop, body len: 9
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseWhile, body len: 10
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseIf, body len: 22
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseReturn, body len: 9
+DEBUG: First stmt type: <class '__main__.MethodCall'>
+DEBUG: Transpiling Parser_parseExpressionStatement, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseExpression, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling Parser_parseAssignment, body len: 8
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseEquality, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseComparison, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseTerm, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseFactor, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseUnary, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseCall, body len: 3
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parseArgumentList, body len: 4
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling Parser_parsePrimary, body len: 11
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Loop transpiling Main (EntityDecl)
+DEBUG: Loop transpiling List_string (EntityDecl)
+DEBUG: Transpiling List_string_create, body len: 5
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Transpiling List_string_add, body len: 3
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling List_string_get, body len: 2
+DEBUG: First stmt type: <class '__main__.IfStmt'>
+DEBUG: Transpiling List_string_size, body len: 1
+DEBUG: First stmt type: <class '__main__.ReturnStmt'>
+DEBUG: Transpiling List_string__resize, body len: 6
+DEBUG: First stmt type: <class '__main__.AssignStmt'>
+DEBUG: Program transpilation FINISHED

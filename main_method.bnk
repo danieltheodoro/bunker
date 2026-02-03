@@ -1,0 +1,181 @@
+Entity Main:
+    has static method main: argc: int, argv: void** -> int:
+        print: "--- Bunker Self-Hosted Lexer & Parser v0.3 ---";
+        
+        if:
+        condition:
+            return argc < 2;
+        end condition.
+        then:
+             print: "Usage: bunker <source.bnk>";
+             return 1;
+        end then.
+        end if.
+
+        let filename: string <- argv[1];
+        print: "Reading file: " + filename;
+
+        f <- File: open: filename;
+        if:
+        condition:
+            return f == nil;
+        end condition.
+        then:
+             print: "Error: Could not open file " + filename;
+             return 1;
+        end then.
+        end if.
+
+        code <- f: readToString;
+        f: close;
+        print: "File read, length: " + Strings: length: code;
+        
+        print: "Initializing Lexer...";
+        lexer <- Lexer: new: code;
+        print: "Lexer initialized.";
+        
+        print: "Collecting tokens...";
+        tokens <- ASTList: new: nil, nil;
+        let tail: ASTNode <- nil;
+        let tokCount: int <- 0;
+        loop:
+            tok <- lexer: nextToken;
+            tokCount <- tokCount + 1;
+            if:
+            condition:
+                return tok.type == "EOF";
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return tokCount % 1000 == 0;
+            end condition.
+            then:
+                 print: "Collected " + tokCount + " tokens...";
+            end then.
+            end if.
+            
+            node <- ASTNode: new: tok, nil;
+            if:
+            condition:
+                return tokens.head == nil;
+            end condition.
+            then:
+                tokens.head <- node;
+                tail <- node;
+            end then.
+            else:
+                let tailNode: ASTNode <- Casts: toASTNode: tail;
+                tailNode.next <- node;
+                tail <- node;
+            end else.
+            end if.
+        end loop.
+        print: "Tokens collected: " + tokCount;
+        
+        print: "Tokens collected";
+        
+        parser <- Parser: new: tokens, code;
+        prog <- parser: parseProgram;
+        
+        if:
+        condition:
+            return parser.hadError;
+        end condition.
+        then:
+             print: "Parsing failed.";
+             return 1;
+        end then.
+        else:
+             print: "Parsing successful!";
+             
+             # Verify AST
+             let progRec: Program <- prog;
+             let list: ASTList <- progRec.stmts;
+             let curr: ASTNode <- list.head;
+             
+             print: "AST Structure:";
+             loop:
+                 if:
+                 condition:
+                     return curr == nil;
+                 end condition.
+                 then:
+                     break;
+                 end then.
+                 end if.
+                 
+                 # Cast to Program to access 'type' field which is first
+                 let stmt: Program <- curr.value;
+                 print: " - Stmt Type: " + stmt.type;
+                 
+                 # Move next
+                 curr <- curr.next;
+             end loop.
+              print: "";
+              print: "Running Type Checker...";
+              checker <- TypeChecker: new: parser, code;
+              checker: checkProgram: prog;
+              
+              if:
+              condition:
+                  return checker.hadError;
+              end condition.
+              then:
+                   print: "Type checking failed.";
+                   return 1;
+              end then.
+              end if.
+
+              print: "Generating C Code...";
+              transpiler <- CTranspiler: new;
+              transpiler.symbols <- checker.symbols;
+              transpiler: transpile: prog;
+
+              # Output filename
+              out_path <- filename + ".c";
+              outFile <- File: create: out_path;
+              if:
+              condition:
+                  return outFile != nil;
+              end condition.
+              then:
+                  print: "Saving to: " + out_path;
+                  let outList: ASTList <- transpiler.output;
+                  let currNode: ASTNode <- outList.head;
+                  loop:
+                      if:
+                      condition:
+                          return currNode == nil;
+                      end condition.
+                      then:
+                          break;
+                      end then.
+                      end if.
+                      
+                      let s: string <- currNode.value;
+                      outFile: writeString: s;
+                      currNode <- currNode.next;
+                  end loop.
+                  outFile: close;
+                  print: "Saved successfully.";
+              end then.
+              else:
+                  print: "Error: Could not create output file: " + out_path;
+              end else.
+              end if.
+             end else.
+             end if.
+             end else.
+             end if.
+             end else.
+             end if.
+        return 0.
+    end method.
+
+    end Entity.
+

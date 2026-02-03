@@ -1,0 +1,33 @@
+module test_map;
+
+import bunker.std.collections;
+
+Entity App:
+    has public static method main:
+        print: "Testing Map module...";
+        
+        let m: Map<string, int> <- Map<string, int> : create;
+        
+        print: "Setting keys...";
+        m : set: "apple", 100;
+        m : set: "banana", 200;
+        m : set: "cherry", 300;
+        
+        print: "Getting keys...";
+        print: "apple: ";
+        print: m : get: "apple";
+        print: "banana: ";
+        print: m : get: "banana";
+        print: "cherry: ";
+        print: m : get: "cherry";
+        print: "date (nil): ";
+        print: m : get: "date";
+        
+        print: "Updating apple...";
+        m : set: "apple", 150;
+        print: "apple (new): ";
+        print: m : get: "apple";
+
+        print: "Map test complete.";
+    .
+end Entity.

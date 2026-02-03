@@ -1,0 +1,6 @@
+
+Entity Foo:
+    has method bar -> void:
+        print: "Bar";
+    end method.
+end Entity.

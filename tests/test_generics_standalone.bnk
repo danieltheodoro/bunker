@@ -1,0 +1,90 @@
+module TestGenerics;
+
+# Inline List implementation
+Entity List<T>:
+    has data: Array<T>;
+    has count: int;
+    has cap: int;
+
+    has public static method create -> List<T>:
+        let l: List<T> <- List<T> : alloc;
+        l.count <- 0;
+        l.cap <- 8;
+        l.data <- Array<T> : create: 8;
+        return l;
+    .
+
+    has public method append: item: T:
+        if:
+        condition:
+            return self.count == self.cap;
+        end condition.
+        then:
+            self._resize;
+        end then.
+        end if.
+        self.data[self.count] <- item;
+        self.count <- self.count + 1;
+    .
+
+    has public method get: index: int -> T:
+        if:
+        condition:
+            return index < 0 or index >= self.count;
+        end condition.
+        then:
+            return nil;
+        end then.
+        end if.
+        return self.data[index];
+    .
+
+    has public method size -> int:
+        return self.count;
+    .
+
+    has method _resize:
+        let newCap: int <- self.cap * 2;
+        let newData: Array<T> <- Array<T> : create: newCap;
+        let i: int <- 0;
+        while i < self.count:
+            newData[i] <- self.data[i];
+            i <- i + 1;
+        .
+        self.data <- newData;
+        self.cap <- newCap;
+    .
+end Entity.
+
+Entity App:
+    has public method main:
+        print: "=== Generics Test ===";
+        
+        # Test List<int>
+        list: List<int> <- List : create;
+        list : append: 10;
+        list : append: 20;
+        
+        val: int <- list : get: 0;
+        print: val; # Expect 10
+        
+        val2: int <- list : get: 1;
+        print: val2; # Expect 20
+        
+        size: int <- list : size;
+        print: size; # Expect 2
+        
+        # Test List<str>
+        slist: List<str> <- List : create;
+        slist : append: "Hello";
+        slist : append: "World";
+        
+        s1: str <- slist : get: 0;
+        print: s1; # Expect Hello
+        
+        s2: str <- slist : get: 1;
+        print: s2; # Expect World
+        
+        print: "=== Done ===";
+    end method.
+end Entity.

@@ -1,0 +1,23 @@
+module test;
+
+Entity App:
+    has static method main -> int:
+        print: "Testing GC Optimizations...";
+        
+        # Test 1: Memory:free
+        p: string <- "Manual memory check";
+        Memory: free: p;
+        print: "Memory:free call successful (avoiding use-after-free in test)";
+        
+        # Test 2: Scoped block
+        scoped:
+            x: int <- 42;
+            print: "Inside scoped block";
+            print: x;
+        end scoped.
+        
+        print: "Outside scoped block";
+        
+        return 0.
+    end method.
+end Entity.

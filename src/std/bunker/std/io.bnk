@@ -1,0 +1,65 @@
+module bunker.std.io;
+
+Entity File:
+    has state handle: void*
+
+    has public static method open: path: str -> File:
+        unabstracted:
+            asm c: "
+                FILE* f = fopen(path, \"r\");
+                if (!f) return NULL;
+                struct File* obj = gc_alloc(sizeof(struct File));
+                obj->handle = f;
+                return obj;
+            "
+        .
+    end method.
+
+    has public static method create: path: str -> File:
+        unabstracted:
+            asm c: "
+                FILE* f = fopen(path, \"w\");
+                if (!f) return NULL;
+                struct File* obj = gc_alloc(sizeof(struct File));
+                obj->handle = f;
+                return obj;
+            "
+        .
+    end method.
+
+    has public method readToString -> str:
+        unabstracted:
+            asm c: "
+                FILE* f = self->handle;
+                if (!f) return \"\";
+                fseek(f, 0, SEEK_END);
+                long size = ftell(f);
+                rewind(f);
+                char* buffer = gc_alloc(size + 1);
+                fread(buffer, 1, size, f);
+                buffer[size] = 0;
+                return buffer;
+            "
+        .
+    end method.
+
+    has public method writeString: text: str -> void:
+        unabstracted:
+            asm c: "
+                FILE* f = self->handle;
+                if (!f) return;
+                fputs(text, f);
+            "
+        .
+    end method.
+
+    has public method close -> void:
+        unabstracted:
+            asm c: "
+                FILE* f = self->handle;
+                if (f) fclose(f);
+                self->handle = NULL;
+            "
+        .
+    end method.
+end Entity.

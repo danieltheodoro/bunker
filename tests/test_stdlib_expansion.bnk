@@ -1,0 +1,48 @@
+module test_stdlib_expansion;
+
+import bunker.std.io;
+import bunker.std.math;
+import bunker.std.collections;
+
+Entity App:
+    has public static method main:
+        print: "=== Bunker Standard Library Expansion Verification ===";
+
+        # 1. IO Module
+        print: "1. Testing IO...";
+        print: "System OS: ";
+        print: System : os;
+        print: "System Arch: ";
+        print: System : arch;
+
+        # 2. Math Module
+        print: "2. Testing Math...";
+        print: "sqrt(16): ";
+        print: Math : sqrt: 16.0;
+        print: "abs(-42): ";
+        print: Math : abs: -42.0;
+
+        # 3. Collections - List
+        print: "3. Testing List<string>...";
+        let names: List<string> <- List<string> : create;
+        names : add: "Alice";
+        names : add: "Bob";
+        names : add: "Charlie";
+        print: "Size: ";
+        print: names : size;
+        print: "First: ";
+        print: names : get: 0;
+
+        # 4. Collections - Map
+        print: "4. Testing Map<int, string>...";
+        let scores: Map<int, string> <- Map<int, string> : create;
+        scores : set: 10, "Ten";
+        scores : set: 20, "Twenty";
+        print: "Key 10: ";
+        print: scores : get: 10;
+        print: "Key 30 (nil): ";
+        print: scores : get: 30;
+
+        print: "=== All tests passed! ===";
+    .
+end Entity.

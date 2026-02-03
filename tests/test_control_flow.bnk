@@ -1,0 +1,41 @@
+module Test;
+
+Entity App:
+    has method main:
+        print: "=== Control Flow Test ===";
+        
+        counter <- 0;
+        
+        loop:
+            print: "Loop iteration";
+            counter <- counter + 1;
+            
+            if:
+            condition:
+                return counter > 3;
+            end condition.
+            then:
+                print: "Breaking loop...";
+                break;
+            end then.
+            end if.
+        end loop.
+        
+        defer: print: "Defer 1 (Last)";
+        defer: print: "Defer 2 (First)";
+        
+        print: "Loop finished.";
+        
+        if:
+        condition:
+            return counter > 3;
+        end condition.
+        then:
+             defer: print: "Defer inside block (Block Exit)";
+             print: "Inside if block";
+        end then.
+        end if.
+        
+        print: "=== Done ===";
+    end method.
+end Entity.

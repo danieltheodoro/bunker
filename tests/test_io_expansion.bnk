@@ -1,0 +1,63 @@
+module test_io_expansion;
+
+import bunker.std.io;
+
+Entity test_io_expansion:
+    has public static method main:
+        print: "=== Bunker IO Expansion Verification ===";
+
+        let test_file : str <- "test_io_output.txt";
+        let content : str <- "Bunker IO System Test Content";
+
+        # 1. Create and Write
+        print: "Writing to file: ";
+        print: test_file;
+        let f_write : File <- File : create: test_file;
+        if:
+        condition:
+            return f_write == nil;
+        end condition.
+        then:
+            print: "Error: Could not create file";
+            return;
+        end then.
+        end if.
+        
+        f_write : writeString: content;
+        f_write : close;
+        print: "Write successful.";
+
+        # 2. Open and Read
+        print: "Reading from file: ";
+        let f_read : File <- File : open: test_file;
+        if:
+        condition:
+            return f_read == nil;
+        end condition.
+        then:
+            print: "Error: Could not open file";
+            return;
+        end then.
+        end if.
+
+        let read_content : str <- f_read : readToString;
+        f_read : close;
+
+        print: "Read content: '";
+        print: read_content;
+        print: "'";
+
+        if:
+        condition:
+            return read_content == content;
+        end condition.
+        then:
+            print: "Verification: SUCCESS";
+        end then.
+        else:
+            print: "Verification: FAILURE (content mismatch)";
+        end if.
+
+        print: "=== IO Expansion tests completed! ===";
+    end method.
+end Entity.

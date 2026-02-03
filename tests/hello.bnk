@@ -1,0 +1,8 @@
+module hello:
+
+Entity Main:
+    has method main: argc: int, argv: void** -> int:
+        print: "Hello from self-hosted Bunker!";
+        return 0;
+    end method.
+end Entity.

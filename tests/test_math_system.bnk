@@ -1,0 +1,40 @@
+module test_math_system;
+
+import bunker.std.math;
+import bunker.std.system;
+
+Entity test_math_system:
+    has public static method main:
+        print: "=== Bunker Math & System Verification ===";
+
+        # 1. Math Verification
+        print: "Testing Math...";
+        let s : float <- Math : sqrt: 16.0;
+        print: "sqrt(16.0): ";
+        print: s;
+
+        let a : float <- Math : abs: -5.5;
+        print: "abs(-5.5): ";
+        print: a;
+
+        let p : float <- Math : pow: 2.0, 3.0;
+        print: "pow(2.0, 3.0): ";
+        print: p;
+
+        let f : float <- Math : floor: 3.9;
+        print: "floor(3.9): ";
+        print: f;
+
+        # 2. System Verification
+        print: "Testing System...";
+        let t : int <- System : time;
+        print: "Current timestamp: ";
+        print: t;
+
+        let home : string <- System : getenv: "HOME";
+        print: "HOME env var: ";
+        print: home;
+
+        print: "=== Math & System tests completed! ===";
+    end method.
+end Entity.

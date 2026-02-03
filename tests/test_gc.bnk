@@ -1,0 +1,27 @@
+module test_gc;
+
+Entity App:
+    has static method main:
+        print: "Starting GC Test";
+        
+        # Trigger many allocations to force GC
+        i <- 0;
+        while i < 1500:
+            # Create array
+            arr <- [i, i+1, i+2];
+            
+            # String concat
+            s <- "Iteration: " + i;
+            
+            # Map
+            doubled <- arr : map: \x: int. x * 2.;
+            
+            # Reduce
+            sum <- doubled : reduce: 0, \acc: int, x: int. acc + x.;
+            
+            i <- i + 1;
+        end while.
+        
+        print: "GC Test Completed, i=" + i;
+    end method.
+end Entity.

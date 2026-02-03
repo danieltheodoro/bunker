@@ -1,0 +1,637 @@
+# ============================================
+# BUNKER LANGUAGE - PEG GRAMMAR
+# Version 2.3.0
+# ============================================
+
+# ===== ENTRY POINT =====
+
+Program <- _ ModuleDecl ImportStmt* TopLevelDecl* EOF
+
+# ===== MODULE & IMPORTS =====
+
+ModuleDecl <- 'module' __ QualifiedIdent EOL
+
+ImportStmt <- ('include' / 'import') __ QualifiedIdent (':' _ IdentList)? EOL
+
+# ===== TOP LEVEL =====
+
+TopLevelDecl <- EntityDecl
+              / InterfaceDecl
+              / ExportDecl
+              / ForeignDecl
+
+ExportDecl <- 'export' __ Ident EOL
+
+# ===== ENTITY =====
+
+EntityDecl <- Visibility? 'Entity' __ Ident GenericParams? Inheritance? Traits? EntityMods? AtClause? _ ':' EOL
+              EntityMember*
+              '.'
+
+Visibility <- ('private' / 'protected' / 'shared' / 'public') __
+
+GenericParams <- 'generic' __ TypeParamList WhereClause?
+
+TypeParamList <- TypeParam (_ ',' _ TypeParam)*
+
+TypeParam <- Ident
+
+WhereClause <- 'where' __ ConstraintList
+
+ConstraintList <- Constraint (_ ',' _ Constraint)*
+
+Constraint <- TypeParam __ ('is' __ TraitName
+                           / 'has' __ 'method' __ MethodSig
+                           / 'act' __ 'as' __ ('a' / 'an') __ TraitName)
+
+Inheritance <- 'is' __ ('a' / 'an') __ TypeName
+
+Traits <- 'act' __ 'as' __ ('a' / 'an') __ TraitList
+
+TraitList <- TraitName (_ ',' _ TraitName)*
+
+TraitName <- Ident
+
+EntityMods <- ('packed' / 'align' __ Integer / 'cstruct') __
+
+AtClause <- 'at' __ 'offset' __ HexLiteral
+
+# ===== ENTITY MEMBERS =====
+
+EntityMember <- StateDecl
+              / MethodDecl
+              / SubEntityDecl
+              / UsesDecl
+              / DelegatesDecl
+              / TypeAliasDecl
+
+# ----- STATE -----
+
+StateDecl <- 'has' __ ('a' / 'an') __ Visibility? StateMods? 'state' __ Ident StateTypeSpec InitValue? InClause? EOL
+
+StateMods <- ('necessary' / 'optional' / 'intrinsic' / 'external' / 'replaceable' / 'fixed' / 'atomic' / 'volatile') __
+
+StateTypeSpec <- ':' _ TypeExpr
+               / 'set' _ ':' _ SetBody
+               / 'union' _ ':' _ UnionBody
+
+SetBody <- SetMember (_ ';' _ SetMember)* (_ ';')?
+
+SetMember <- '.' Ident (_ ':' _ Expr)?
+
+UnionBody <- UnionVariant (_ ';' _ UnionVariant)* (_ ';')?
+
+UnionVariant <- Ident _ ':' _ TypeExpr
+
+InClause <- 'in' __ 'offset' __ HexLiteral
+
+InitValue <- ':' _ Expr
+
+# ----- METHOD -----
+
+MethodDecl <- 'has' __ ('a' / 'an') __ Visibility? 'async'? __ 'method' __ Ident GenericParams? ParamList? ReturnType? _ ':' EOL
+              BlockBody
+              '.'
+
+ParamList <- ':' _ Param (_ ',' _ Param)*
+
+Param <- (ParamLabel _ ':' _)? Ident (_ ':' _ TypeExpr)?
+
+ParamLabel <- Ident
+
+ReturnType <- '->' _ (TypeExpr / NamedReturnList)
+
+NamedReturnList <- Ident _ ':' _ TypeExpr (_ ',' _ Ident _ ':' _ TypeExpr)*
+
+# ----- SUB-ENTITY -----
+
+SubEntityDecl <- 'has' __ ('a' / 'an') __ Visibility? Ident ('necessary' / 'optional')? ('intrinsic' / 'external')? ('replaceable' / 'fixed')? EOL
+
+# ----- USES -----
+
+UsesDecl <- 'uses' __ ('a' / 'an') __ TypeName ('from' __ 'Core')? 'as' __ Ident UsingClause? EOL
+
+UsingClause <- 'using' __ HexLiteral
+
+# ----- DELEGATES -----
+
+DelegatesDecl <- 'delegates' __ Ident 'to' __ Ident EOL
+
+# ----- TYPE ALIAS -----
+
+TypeAliasDecl <- 'type' __ Ident _ ':' _ TypeExpr EOL
+
+# ===== INTERFACE =====
+
+InterfaceDecl <- 'Interface' __ Ident GenericParams? _ ':' EOL
+                 InterfaceMember*
+                 '.'
+
+InterfaceMember <- MethodSig
+                 / TypeAliasDecl
+
+MethodSig <- 'has' __ ('a' / 'an') __ 'method' __ Ident ParamList? ReturnType? EOL
+
+# ===== TYPE EXPRESSIONS =====
+
+TypeExpr <- PrimitiveType
+          / WrapperType
+          / CompositeType
+          / GenericInst
+          / FunctionType
+          / ArrayType
+          / DynamicArrayType
+          / SliceType
+          / OptionalType
+          / ResultType
+          / RangeType
+          / TypeName
+
+PrimitiveType <- ('word_8' / 'word_16' / 'word_32' / 'word_64' / 'word_128') !IdentCont
+
+WrapperType <- ('int' / 'float' / 'bool' / 'str' / 'pointer' / 'void') !IdentCont
+
+CompositeType <- TypeExpr _ ',' _ WrapperType
+
+TypeName <- QualifiedIdent
+
+GenericInst <- TypeName __ 'of' __ TypeArgList
+
+TypeArgList <- TypeExpr (_ ',' _ TypeExpr)*
+
+FunctionType <- 'function' (__ CallingConv)? _ ':' _ FuncParamTypes? (_ '->' _ TypeExpr)?
+
+CallingConv <- 'cdecl' / 'stdcall' / 'fastcall' / 'sysv' / 'win64'
+
+FuncParamTypes <- TypeExpr (_ ',' _ TypeExpr)*
+
+ArrayType <- 'array' _ '[' _ DimList _ ']' __ 'of' __ TypeExpr
+
+DimList <- Expr (_ ',' _ Expr)*
+
+DynamicArrayType <- 'dynamic' __ 'array' __ 'of' __ TypeExpr
+
+SliceType <- 'slice' __ 'of' __ TypeExpr
+
+OptionalType <- 'optional' __ TypeExpr
+
+ResultType <- 'result' __ 'of' __ TypeExpr __ 'or' __ TypeExpr
+
+RangeType <- 'range' __ 'from' __ Expr __ ('to' / 'until') __ Expr
+
+# ===== STATEMENTS =====
+
+Stmt <- AssignStmt
+      / MethodCallStmt
+      / ReturnStmt
+      / BreakStmt
+      / ContinueStmt
+      / YieldStmt
+      / ThrowStmt
+      / IfStmt
+      / WhileStmt
+      / DoWhileStmt
+      / LoopStmt
+      / ForStmt
+      / MatchStmt
+      / SwitchStmt
+      / GuardStmt
+      / DeferStmt
+      / TryStmt
+      / ExprStmt
+
+# ----- ASSIGNMENT -----
+
+AssignStmt <- Ident _ AssignOp _ Expr EOL
+
+AssignOp <- '<-' / '+=' / '-=' / '*=' / '/=' / '%='
+
+# ----- METHOD CALL -----
+
+MethodCallStmt <- Expr _ ':' _ Ident (_ ':' _ ArgList)? EOL
+
+ArgList <- Expr (_ ',' _ Expr)*
+
+# ----- RETURN -----
+
+ReturnStmt <- 'return' (__ Expr)? EOL
+
+# ----- BREAK / CONTINUE -----
+
+BreakStmt <- 'break' (__ Label)? (__ Expr)? EOL
+
+ContinueStmt <- 'continue' (__ Label)? EOL
+
+# ----- YIELD -----
+
+YieldStmt <- 'yield' __ Expr EOL
+
+# ----- THROW -----
+
+ThrowStmt <- 'throw' __ Expr EOL
+
+# ----- IF -----
+
+IfStmt <- 'if' __ Expr _ ':' EOL BlockBody ElseIfClause* ElseClause? '.'
+
+ElseIfClause <- 'else' __ 'if' __ Expr _ ':' EOL BlockBody
+
+ElseClause <- 'else' _ ':' EOL BlockBody
+
+# ----- WHILE -----
+
+WhileStmt <- (Label _ ':' _)? 'while' __ Expr _ ':' EOL BlockBody ElseClause? '.'
+
+# ----- DO-WHILE -----
+
+DoWhileStmt <- (Label _ ':' _)? 'do' _ ':' EOL BlockBody 'while' __ Expr '.'
+
+# ----- LOOP -----
+
+LoopStmt <- (Label _ ':' _)? 'loop' _ ':' EOL BlockBody '.'
+
+# ----- FOR -----
+
+ForStmt <- (Label _ ':' _)? 'for' __ ForPattern __ 'in' __ Expr _ ':' EOL BlockBody ElseClause? '.'
+
+ForPattern <- Ident (_ ',' _ Ident)?
+
+# ----- MATCH -----
+
+MatchStmt <- 'match' __ ExprList _ ':' EOL MatchArm+ '.'
+
+ExprList <- Expr (_ ',' _ Expr)*
+
+MatchArm <- Pattern GuardCond? _ ':' EOL BlockBody
+
+Pattern <- LiteralPattern
+         / UnionPattern
+         / SetPattern
+         / RangePattern
+         / TuplePattern
+         / IdentPattern
+         / WildcardPattern
+
+LiteralPattern <- Literal
+
+UnionPattern <- 'is' __ Ident (__ 'as' __ Ident)?
+
+SetPattern <- '.' Ident
+
+RangePattern <- Expr __ ('to' / 'until') __ Expr
+
+TuplePattern <- '[' _ Pattern (_ ',' _ Pattern)* _ ']'
+
+IdentPattern <- Ident
+
+WildcardPattern <- '_'
+
+GuardCond <- __ 'if' __ Expr
+
+# ----- SWITCH -----
+
+SwitchStmt <- 'switch' __ Expr _ ':' EOL SwitchCase* DefaultCase? '.'
+
+SwitchCase <- 'case' __ CaseValueList _ ':' EOL BlockBody Fallthrough?
+
+CaseValueList <- CaseValue (_ ',' _ CaseValue)*
+
+CaseValue <- Expr / RangePattern
+
+Fallthrough <- 'fallthrough' EOL
+
+DefaultCase <- 'default' _ ':' EOL BlockBody
+
+# ----- GUARD -----
+
+GuardStmt <- 'guard' __ Expr __ 'else' _ ':' EOL BlockBody '.'
+
+# ----- DEFER -----
+
+DeferStmt <- 'defer' _ ':' EOL BlockBody '.'
+
+# ----- TRY -----
+
+TryStmt <- 'try' _ ':' EOL BlockBody CatchClause* FinallyClause? '.'
+
+CatchClause <- 'catch' (__ 'error' (__ 'as' __ TypeName)?)? _ ':' EOL BlockBody
+
+FinallyClause <- 'finally' _ ':' EOL BlockBody
+
+# ----- EXPRESSION STATEMENT -----
+
+ExprStmt <- Expr EOL
+
+# ----- BLOCK -----
+
+BlockBody <- Stmt*
+
+# ===== EXPRESSIONS =====
+
+Expr <- TernaryExpr
+
+TernaryExpr <- LogicalOrExpr (__ 'if' __ Expr __ 'else' _ ':' _ Expr)?
+
+LogicalOrExpr <- LogicalAndExpr (__ 'or' __ LogicalAndExpr)*
+
+LogicalAndExpr <- BitwiseOrExpr (__ 'and' __ BitwiseOrExpr)*
+
+BitwiseOrExpr <- BitwiseXorExpr (__ 'bor' __ BitwiseXorExpr)*
+
+BitwiseXorExpr <- BitwiseAndExpr (__ 'bxor' __ BitwiseAndExpr)*
+
+BitwiseAndExpr <- EqualityExpr (__ 'band' __ EqualityExpr)*
+
+EqualityExpr <- RelationalExpr (_ ('==' / '!=') _ RelationalExpr)*
+
+RelationalExpr <- ShiftExpr (_ ('<=' / '>=' / '<' / '>') _ ShiftExpr)*
+
+ShiftExpr <- AdditiveExpr (__ ('shl' / 'shr') __ AdditiveExpr)*
+
+AdditiveExpr <- MultiplicativeExpr (_ ('+' / '-') _ MultiplicativeExpr)*
+
+MultiplicativeExpr <- UnaryExpr (_ ('*' / '/' / '%') _ UnaryExpr)*
+
+UnaryExpr <- UnaryOp? _ PostfixExpr
+
+UnaryOp <- '-' / 'not' / 'bnot' / 'move' / ('borrow' (__ 'mut')?)
+
+PostfixExpr <- PrimaryExpr PostfixOp*
+
+PostfixOp <- MemberAccess
+           / MethodCall
+           / ArraySubscript
+           / TryOp
+           / PropagateOp
+           / CompositionOp
+
+MemberAccess <- _ ':' _ Ident
+
+MethodCall <- _ ':' _ Ident (_ ':' _ ArgList)?
+
+ArraySubscript <- _ '[' _ Expr (_ ',' _ Expr)* _ ']'
+
+TryOp <- __ 'try'
+
+PropagateOp <- _ '?'
+
+CompositionOp <- _ ('<<' / '>>') _ Expr
+
+PrimaryExpr <- Literal
+             / LambdaExpr
+             / IfExpr
+             / MatchExpr
+             / AwaitExpr
+             / ComptimeExpr
+             / ArrayLiteral
+             / ParenExpr
+             / UnabstractedBlock
+             / 'this' !IdentCont
+             / 'nil' !IdentCont
+             / SetMemberRef
+             / Ident
+
+# ----- LAMBDA -----
+
+LambdaExpr <- '/' CaptureList? LambdaParams? _ '.' _ LambdaBody
+
+CaptureList <- '[' _ Capture (_ ',' _ Capture)* _ ']'
+
+Capture <- ('ref' __)? Ident
+
+LambdaParams <- Ident (_ ',' _ Ident)*
+
+LambdaBody <- Expr / (':' EOL BlockBody)
+
+# ----- LITERALS -----
+
+Literal <- FloatLit
+         / IntegerLit
+         / StringLit
+         / BooleanLit
+         / CharLit
+
+IntegerLit <- HexLit / OctalLit / BinaryLit / DecimalLit
+
+DecimalLit <- [0-9] [0-9_]*
+
+HexLit <- '0x' [0-9a-fA-F] [0-9a-fA-F_]*
+
+OctalLit <- '0o' [0-7] [0-7_]*
+
+BinaryLit <- '0b' [01] [01_]*
+
+FloatLit <- DecimalLit ('.' DecimalLit)? Exponent?
+
+Exponent <- [eE] [+\-]? DecimalLit
+
+StringLit <- '"' (!'"' .)* '"'
+           / 'r"' (!'"`' .)* '"'
+           / '"""' (!'"""' .)* '"""'
+
+BooleanLit <- ('true' / 'false') !IdentCont
+
+CharLit <- "'" (!'\\' . / EscapeSeq) "'"
+
+EscapeSeq <- '\\' [ntr"'\\] / '\\u{' [0-9a-fA-F]+ '}'
+
+# ----- ARRAY LITERAL -----
+
+ArrayLiteral <- '[' _ (ExprList _)? ']'
+
+# ----- IF EXPRESSION -----
+
+IfExpr <- 'if' __ Expr _ ':' _ Expr __ 'else' _ ':' _ Expr
+
+# ----- MATCH EXPRESSION -----
+
+MatchExpr <- 'match' __ Expr _ ':' EOL MatchArm+ '.'
+
+# ----- AWAIT -----
+
+AwaitExpr <- 'await' __ Expr
+
+# ----- COMPTIME -----
+
+ComptimeExpr <- 'comptime' _ ':' EOL BlockBody '.'
+
+# ----- PARENTHESIZED -----
+
+ParenExpr <- '(' _ Expr _ ')'
+
+# ----- SET MEMBER REF -----
+
+SetMemberRef <- '.' Ident
+
+# ===== FOREIGN =====
+
+ForeignDecl <- 'foreign' __ ForeignSpec _ ':' EOL ForeignItem+ '.'
+
+ForeignSpec <- CVersion (__ 'convention' __ CallingConv)? (__ 'acts' __ 'as' __ ('a' / 'an') __ TraitName)? (__ 'from' __ StringLit)? (__ 'inline')?
+
+CVersion <- 'c17' / 'c23' / 'c26'
+
+ForeignItem <- ForeignFunc
+             / ForeignType
+             / ForeignVar
+
+ForeignFunc <- 'func' __ StringLit _ '(' _ ForeignParamList? _ ')' (_ '->' _ TypeExpr)? EOL
+
+ForeignParamList <- ForeignParam (_ ',' _ ForeignParam)*
+
+ForeignParam <- Ident _ ':' _ TypeExpr
+
+ForeignType <- 'type' __ Ident _ ':' _ TypeExpr EOL
+
+ForeignVar <- 'var' __ StringLit _ ':' _ TypeExpr EOL
+
+# ===== UNABSTRACTED =====
+
+UnabstractedBlock <- 'unabstracted' _ ':' EOL AsmBlock '.'
+
+AsmBlock <- 'asm' __ Arch _ ':' EOL AsmInstr+ '.'
+
+Arch <- 'x86_64' / 'arm64' / 'armv7' / 'riscv64' / 'riscv32'
+
+AsmInstr <- StringLit _ ';' EOL
+
+# ===== IDENTIFIERS =====
+
+Ident <- !Keyword [a-zA-Z_] [a-zA-Z0-9_]* _
+
+QualifiedIdent <- Ident ('.' Ident)*
+
+IdentList <- Ident (_ ',' _ Ident)*
+
+Label <- "'" Ident
+
+# ===== KEYWORDS =====
+
+Keyword <- ('module' / 'include' / 'import' / 'export' / 'Entity' / 'Interface' / 'Task' / 'Object'
+          / 'has' / 'is' / 'a' / 'an' / 'act' / 'acts' / 'as' / 'uses' / 'from' / 'delegates' / 'to'
+          / 'generic' / 'where' / 'type' / 'state' / 'method' / 'set' / 'union'
+          / 'private' / 'protected' / 'shared' / 'public'
+          / 'necessary' / 'optional' / 'intrinsic' / 'external' / 'replaceable' / 'fixed'
+          / 'atomic' / 'volatile' / 'packed' / 'align' / 'cstruct'
+          / 'if' / 'else' / 'while' / 'do' / 'loop' / 'for' / 'in' / 'match' / 'switch' / 'case' / 'default' / 'fallthrough'
+          / 'break' / 'continue' / 'return' / 'yield' / 'await' / 'async'
+          / 'guard' / 'defer' / 'try' / 'catch' / 'finally' / 'throw'
+          / 'foreign' / 'convention' / 'inline' / 'unabstracted' / 'asm'
+          / 'word_8' / 'word_16' / 'word_32' / 'word_64' / 'word_128'
+          / 'int' / 'float' / 'bool' / 'str' / 'pointer' / 'void'
+          / 'array' / 'dynamic' / 'slice' / 'optional' / 'result' / 'range' / 'function'
+          / 'and' / 'or' / 'not' / 'band' / 'bor' / 'bxor' / 'bnot' / 'shl' / 'shr'
+          / 'of' / 'with' / 'ok' / 'error' / 'until' / 'down' / 'step'
+          / 'borrow' / 'mut' / 'move' / 'comptime' / 'sizeof' / 'alignof' / 'offsetof'
+          / 'this' / 'nil' / 'true' / 'false'
+          / 'at' / 'offset' / 'using') !IdentCont
+
+IdentCont <- [a-zA-Z0-9_]
+
+# ===== WHITESPACE & COMMENTS =====
+
+_ <- ([ \t\r\n] / Comment)*
+
+__ <- ([ \t\r\n] / Comment)+
+
+EOL <- _ ([\r\n] / Comment) _
+
+Comment <- '#' (![\r\n] .)* / '/*' (!'*/' .)* '*/'
+
+EOF <- !.
+
+# ===== UNSAFE =====
+
+UnsafeBlock <- 'unsafe' _ ':' EOL BlockBody '.'
+
+UnsafeFunction <- 'unsafe' __ 'has' __ ('a' / 'an') __ 'method' __ Ident
+                  ParamList? ReturnType? _ ':' EOL
+                  BlockBody
+                  '.'
+
+UnsafeTrait <- 'unsafe' __ 'Interface' __ Ident GenericParams? _ ':' EOL
+               InterfaceMember*
+               '.'
+
+# ===== VARIANCE =====
+
+VarianceMod <- ('covariant' / 'contravariant' / 'invariant') __
+
+GenericWithVariance <- 'generic' __ TypeParam __ VarianceMod
+                       (_ ',' _ TypeParam __ VarianceMod)*
+
+# ===== PIN =====
+
+PinType <- 'Pin' __ 'of' __ TypeExpr
+
+# ===== ATTRIBUTES (EXPANDED) =====
+
+AttrList <- Attr+
+
+Attr <- '#[' _ AttrInner _ ']' _
+
+AttrInner <- InlineAttr
+           / 'cold' !IdentCont
+           / 'hot' !IdentCont
+           / TargetFeatureAttr
+           / DeprecatedAttr
+           / MustUseAttr
+           / LinkAttr
+           / ExportNameAttr
+           / 'no_mangle' !IdentCont
+           / ReprAttr
+           / AbiAttr
+           / 'non_exhaustive' !IdentCont
+           / DropOrderAttr
+           / 'global_allocator' !IdentCont
+           / DeriveAttr
+
+InlineAttr <- 'inline' _ '(' _ ('always' / 'never') _ ')'
+
+TargetFeatureAttr <- 'target_feature' _ '(' _ 'enable' _ '=' _ StringLit _ ')'
+
+DeprecatedAttr <- 'deprecated' (_ '(' _ DeprecatedArgs _ ')')?
+
+MustUseAttr <- 'must_use' (_ '=' _ StringLit)?
+
+LinkAttr <- 'link' _ '(' _ 'name' _ '=' _ StringLit (_ ',' _ 'kind' _ '=' _ LinkKind)? _ ')'
+
+LinkKind <- 'static' / 'dylib' / 'framework'
+
+ExportNameAttr <- 'export_name' _ '=' _ StringLit
+
+ReprAttr <- 'repr' _ '(' _ ReprArgs _ ')'
+
+ReprArgs <- 'C' / 'packed' / 'transparent' / ('align' _ '(' _ Integer _ ')')
+
+AbiAttr <- 'abi' _ '(' _ StringLit _ ')'
+
+DropOrderAttr <- 'drop_order' _ '(' _ IdentList _ ')'
+
+DeriveAttr <- 'derive' _ '(' _ TraitList _ ')'
+
+# ===== ASM (EXPANDED) =====
+
+AsmStmt <- 'asm' __ Arch _ ':' EOL
+           StringLit
+           (_ ':' _ 'output' _ ':' _ OutputOps)?
+           (_ ':' _ 'input' _ ':' _ InputOps)?
+           (_ ':' _ 'clobbers' _ ':' _ ClobberList)?
+           (_ ':' _ 'options' _ ':' _ OptionList)?
+           '.'
+
+OutputOps <- OutputOp (_ ',' _ OutputOp)*
+
+OutputOp <- Ident _ '=' _ StringLit
+
+InputOps <- InputOp (_ ',' _ InputOp)*
+
+InputOp <- Ident _ '=' _ StringLit (_ '(' _ Expr _ ')')?
+
+ClobberList <- StringLit (_ ',' _ StringLit)*
+
+OptionList <- StringLit (_ ',' _ StringLit)*
+
+# ============================================
+# END OF BUNKER PEG GRAMMAR v2.6.0
+# ============================================

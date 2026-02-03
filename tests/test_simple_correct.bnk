@@ -1,0 +1,8 @@
+module test;
+
+Entity App:
+    has static method main -> int:
+        print: "Hello from Self-Hosted Bunker!";
+        return 0;
+    end method.
+end Entity.

@@ -1,0 +1,4052 @@
+module bunker;
+
+# Data Structures
+# --- AST Definitions ---
+
+include src.selfhost.ast;
+include src.selfhost.typechecker;
+include src.selfhost.transpiler;
+include bunker.std.io;
+include bunker.std.fs;
+include bunker.std.strings;
+
+# Simple Linked List for AST Nodes
+Entity Casts:
+    has static method toASTList: ptr: void* -> ASTList:
+        return ptr.
+    end method.
+    has static method toASTNode: ptr: void* -> ASTNode:
+        return ptr.
+    end method.
+    has static method toToken: ptr: void* -> Token:
+        return ptr.
+    end method.
+    has static method toVariableExpr: ptr: void* -> VariableExpr:
+        return ptr.
+    end method.
+    has static method toIncludeDecl: ptr: void* -> IncludeDecl:
+        return ptr.
+    end method.
+    has static method toImportDecl: ptr: void* -> ImportDecl:
+        return ptr.
+    end method.
+    has static method toProgram: ptr: void* -> Program:
+        return ptr.
+    end method.
+    has static method toBlock: ptr: void* -> Block:
+        return ptr.
+    end method.
+    has static method toMethodCall: ptr: void* -> MethodCall:
+        return ptr.
+    end method.
+    has static method toArrayAccess: ptr: void* -> ArrayAccess:
+        return ptr.
+    end method.
+    has static method isBlockTerminatedByDot: bVoid: void* -> bool:
+        let b: Block <- bVoid;
+        return b.terminatedByDot.
+    end method.
+end Entity.
+
+Entity Lexer:
+    has source: string
+    has pos: int
+    has length: int
+    has line: int
+    has column: int
+
+    has static method new: source: string -> Lexer:
+        l <- Lexer: alloc;
+        l.source <- source;
+        l.length <- Strings: length: source;
+        # print: "DEBUG: Lexer source length: " + l.length;
+        # print: "DEBUG: Source: '" + source + "'";
+        l.pos <- 0;
+        l.line <- 1;
+        l.column <- 1;
+        return l.
+    end method.
+
+    has method peek -> string:
+        if:
+        condition:
+            return self.pos >= self.length;
+        end condition.
+        then:
+            return "".
+        end then.
+        end if.
+        return Strings: charToString: (Strings: charAt: self.source, self.pos).
+    end method.
+    
+    has method peekNext -> string:
+        if:
+        condition:
+            return self.pos + 1 >= self.length;
+        end condition.
+        then:
+             return "".
+        end then.
+        end if.
+        return Strings: charToString: (Strings: charAt: self.source, self.pos + 1).
+    end method.
+    
+    has method advance -> string:
+        if:
+        condition:
+            return self.pos >= self.length;
+        end condition.
+        then:
+             return "".
+        end then.
+        end if.
+        let c: string <- Strings: charToString: (Strings: charAt: self.source, self.pos);
+        self.pos <- self.pos + 1;
+        self.column <- self.column + 1;
+        return c.
+    end method.
+
+    has method isAlpha: c: string -> bool:
+        if:
+        condition:
+            return c == "";
+        end condition.
+        then:
+            return false.
+        end then.
+        end if.
+        return Strings: contains: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_", c.
+    end method.
+
+    has method isDigit: c: string -> bool:
+        if:
+        condition:
+            return c == "";
+        end condition.
+        then:
+            return false.
+        end then.
+        end if.
+        return Strings: contains: "0123456789", c.
+    end method.
+
+    has method isAlphaNumeric: c: string -> bool:
+        if:
+        condition:
+            return (self: isAlpha: c);
+        end condition.
+        then:
+             return true.
+        end then.
+        end if.
+        if:
+        condition:
+            return (self: isDigit: c);
+        end condition.
+        then:
+             return true.
+        end then.
+        end if.
+        return false.
+    end method.
+
+    has method readIdentifier -> string:
+        start <- self.pos;
+        self: advance;
+        
+        loop:
+            c <- self: peek;
+            isAN <- self: isAlphaNumeric: c;
+            if:
+            condition:
+                return isAN;
+            end condition.
+            then:
+                self: advance;
+                continue;
+            end then.
+            end if.
+            break;
+        end loop.
+        
+        endIdx <- self.pos;
+        res <- Strings: substring: self.source, start, endIdx;
+        # print: "DEBUG: readIdentifier start=" + start + " pos=" + self.pos + " res='" + res + "'";
+        return res.
+    end method.
+
+    has method readNumber -> string:
+        c <- "";
+        isD <- false;
+        next <- "";
+        start <- self.pos;
+        
+        loop:
+            c <- self: peek;
+            isD <- self: isDigit: c;
+            if:
+            condition:
+                return isD;
+            end condition.
+            then:
+                self: advance;
+                continue;
+            end then.
+            end if.
+            break;
+        end loop.
+        
+        # Check for decimal point
+        c <- self: peek;
+        if:
+        condition:
+            return c == ".";
+        end condition.
+        then:
+            next <- self: peekNext;
+            isD <- self: isDigit: next;
+            if:
+            condition:
+                return isD;
+            end condition.
+            then:
+                self: advance;
+                loop:
+                    c <- self: peek;
+                    isD <- self: isDigit: c;
+                    if:
+                    condition:
+                        return isD;
+                    end condition.
+                    then:
+                        self: advance;
+                        continue;
+                    end then.
+                    end if.
+                    break;
+                end loop.
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        endIdx <- self.pos;
+        res <- Strings: substring: self.source, start, endIdx;
+        # print: "DEBUG: readNumber start=" + start + " pos=" + self.pos + " res='" + res + "'";
+        return res.
+    end method.
+
+    # Read string literal
+    has method readString -> string:
+        self: advance;
+        start <- self.pos;
+        
+        loop:
+            c <- self: peek;
+            if:
+            condition:
+                return c == "";
+            end condition.
+            then:
+                 break;
+            end then.
+            end if.
+             if:
+             condition:
+                 return c == "\\";
+             end condition.
+             then:
+                  self: advance; # skip \
+                  self: advance; # skip next char
+                  continue;
+             end then.
+             end if.
+             if:
+             condition:
+                 return c == "\"";
+             end condition.
+             then:
+                 break;
+             end then.
+             end if.
+            if:
+            condition:
+                return c == "\n";
+            end condition.
+            then:
+                self.line <- self.line + 1;
+            end then.
+            end if.
+            self: advance;
+        end loop.
+        
+        value <- Strings: substring: self.source, start, self.pos;
+        
+        endC <- self: peek;
+        if:
+        condition:
+            return endC == "\"";
+        end condition.
+        then:
+            self: advance;
+        end then.
+        end if.
+        
+        return value.
+    end method.
+
+    # Check if word is a keyword
+    has static method isKeyword: word: string -> bool:
+        if:
+        condition:
+            return word == "module";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "include";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "import";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "from";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "Entity";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "Trait";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "struct" or word == "Struct";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "has";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "method";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "static";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "return";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "if";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "then";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "condition";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "else";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "while";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "loop";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "break";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "continue";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "try";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "catch";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "finally";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "throw";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "defer";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "scoped";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "unabstracted";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "asm";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "foreign";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "func";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "public";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "private";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "panic";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "true";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "false";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "nil";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "and";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "or";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "not";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "end";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        if:
+        condition:
+            return word == "let";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        return false.
+    end method.
+
+    has method nextToken -> Token:
+        let startCol: int <- 0;
+        let startOff: int <- 0;
+        let isD: bool <- false;
+        let isA: bool <- false;
+        let isKW: bool <- false;
+        let value: string <- "";
+        let current: string <- "";
+        let next: string <- "";
+        
+        let c: string <- "";
+        # Skip whitespace
+        loop:
+            c <- self: peek;
+            if:
+            condition:
+                return c == " " or c == "\t" or c == "\n" or c == "\r";
+            end condition.
+            then:
+                if:
+                condition:
+                    return c == "\n";
+                end condition.
+                then:
+                    self.line <- self.line + 1; 
+                    self.column <- 1;
+                end then.
+                end if.
+                self: advance;
+                continue;
+            end then.
+            end if.
+            break;
+        end loop.
+        
+        # Init vars to avoid scope issues
+        value <- "";
+        isD <- false;
+        isA <- false;
+        
+        current <- self: peek;
+        
+        # EOF
+        if:
+        condition:
+            return current == "";
+        end condition.
+        then:
+            let tokE: Token <- Token: new: "EOF", "", self.line, self.column, self.pos;
+            return tokE.
+        end then.
+        end if.
+        
+        # Comments
+        if:
+        condition:
+            return current == "#";
+        end condition.
+        then:
+            loop:
+                c <- self: peek;
+                if:
+                condition:
+                    return c == "" or c == "\n";
+                end condition.
+                then:
+                    break;
+                end then.
+                end if.
+                self: advance;
+            end loop.
+            return self: nextToken.
+        end then.
+        end if.
+        
+        # String literals
+        if:
+        condition:
+            return current == "\"";
+        end condition.
+        then:
+            startCol <- self.column;
+            startOff <- self.pos;
+            value <- self: readString;
+            let tokStr: Token <- Token: new: "STRING", value, self.line, startCol, startOff;
+            return tokStr.
+        end then.
+        end if.
+        
+        # Numbers
+        isD <- self: isDigit: current;
+        if:
+        condition:
+            return isD;
+        end condition.
+        then:
+            startCol <- self.column;
+            startOff <- self.pos;
+            value <- self: readNumber;
+            let tokNum: Token <- Token: new: "NUMBER", value, self.line, startCol, startOff;
+            return tokNum.
+        end then.
+        end if.
+        
+        # Identifiers and keywords
+        isA <- self: isAlpha: current;
+        if:
+        condition:
+            return isA;
+        end condition.
+        then:
+            startCol <- self.column;
+            startOff <- self.pos;
+            value <- self: readIdentifier;
+            isKW <- Lexer: isKeyword: value;
+            if:
+            condition:
+                return isKW;
+            end condition.
+            then:
+                let tokK: Token <- Token: new: "KEYWORD", value, self.line, startCol, startOff;
+                return tokK.
+            end then.
+            end if.
+            let tokI: Token <- Token: new: "IDENT", value, self.line, startCol, startOff;
+            return tokI.
+        end then.
+        end if.
+
+        # Multi-character operators
+        next <- self: peekNext;
+        
+        if:
+        condition:
+            return current == "=";
+        end condition.
+        then:
+            if:
+            condition:
+                return next == "=";
+            end condition.
+            then:
+                let startCol: int <- self.column;
+                let startOff: int <- self.pos;
+                self: advance;
+                self: advance;
+                return Token: new: "OPERATOR", "==", self.line, startCol, startOff.
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return current == "!";
+        end condition.
+        then:
+            if:
+            condition:
+                return next == "=";
+            end condition.
+            then:
+                let startCol: int <- self.column;
+                let startOff: int <- self.pos;
+                self: advance;
+                self: advance;
+                return Token: new: "OPERATOR", "!=", self.line, startCol, startOff.
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return current == "<";
+        end condition.
+        then:
+            if:
+            condition:
+                return next == "-";
+            end condition.
+            then:
+                let startCol: int <- self.column;
+                let startOff: int <- self.pos;
+                self: advance;
+                self: advance;
+                return Token: new: "OPERATOR", "<-", self.line, startCol, startOff.
+            end then.
+            end if.
+            if:
+            condition:
+                return next == "=";
+            end condition.
+            then:
+                let startCol: int <- self.column;
+                let startOff: int <- self.pos;
+                self: advance;
+                self: advance;
+                return Token: new: "OPERATOR", "<=", self.line, startCol, startOff.
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return current == ">";
+        end condition.
+        then:
+            if:
+            condition:
+                return next == "=";
+            end condition.
+            then:
+                let startCol: int <- self.column;
+                let startOff: int <- self.pos;
+                self: advance;
+                self: advance;
+                return Token: new: "OPERATOR", ">=", self.line, startCol, startOff.
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return current == "-";
+        end condition.
+        then:
+            if:
+            condition:
+                return next == ">";
+            end condition.
+            then:
+                let startCol: int <- self.column;
+                let startOff: int <- self.pos;
+                self: advance;
+                self: advance;
+                let tokO: Token <- Token: new: "OPERATOR", "->", self.line, startCol, startOff;
+                return tokO.
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        # Single-character operators and symbols
+        startCol <- self.column;
+        startOff <- self.pos;
+        self: advance;
+        let tokS: Token <- Token: new: "SYMBOL", current, self.line, startCol, startOff;
+        return tokS.
+    end method.
+end Entity.
+
+Entity Parser:
+    has tokens: void* # ASTList*
+    has current: void* # ASTNode* (pointer to current node in list)
+    has source: string
+    has hadError: bool
+    has panicMode: bool
+    has includedFiles: void* # ASTList* of strings
+
+    has static method new: tokens: void*, source: string -> Parser:
+        p <- Parser: alloc;
+        p.tokens <- tokens;
+        p.source <- source;
+        
+        let count: int <- 0;
+        if:
+        condition:
+            return tokens != nil;
+        end condition.
+        then:
+            let l: ASTList <- tokens;
+            let c: ASTNode <- l.head;
+            loop:
+                if:
+                condition:
+                    return c == nil;
+                end condition.
+                then:
+                    break;
+                end then.
+                end if.
+                count <- count + 1;
+                c <- c.next;
+            end loop.
+        end then.
+        end if.
+        print: "DEBUG: Parser initialized with " + count + " tokens";
+        
+        # Initialize current to head of list if list exists
+        if:
+        condition:
+            return tokens != nil;
+        end condition.
+        then:
+            let list: ASTList <- tokens;
+            p.current <- list.head;
+        end then.
+        else:
+            p.current <- nil;
+        end else.
+        end if.
+        
+
+        p.hadError <- false;
+        p.panicMode <- false;
+        p.includedFiles <- ASTList: new: nil, nil;
+        return p;
+    end method.
+
+    has method peek -> Token:
+        if:
+        condition:
+            return self.current == nil;
+        end condition.
+        then:
+            return Token: new: "EOF", "", 0, 0, 0.
+        end then.
+        end if.
+        
+        let node: ASTNode <- self.current;
+        # print: "DEBUG: accessing node value";
+        let tok: Token <- node.value;
+        return tok.
+    end method.
+
+    has method peekNext -> Token:
+        if:
+        condition:
+            return self.current == nil;
+        end condition.
+        then:
+            return Token: new: "EOF", "", 0, 0, 0;
+        end then.
+        end if.
+        let node: ASTNode <- self.current;
+        if:
+        condition:
+            return node.next == nil;
+        end condition.
+        then:
+            return Token: new: "EOF", "", 0, 0, 0;
+        end then.
+        end if.
+        
+        let nextVal: ASTNode <- node.next;
+        let tok: Token <- nextVal.value;
+        return tok.
+    end method.
+
+    has method peekAt: offset: int -> Token:
+        let node: ASTNode <- self.current;
+        let i: int <- 0;
+        loop:
+            if:
+            condition:
+                return i >= offset or node == nil;
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            node <- node.next;
+            i <- i + 1;
+        end loop.
+        
+        if:
+        condition:
+            return node == nil;
+        end condition.
+        then:
+            return Token: new: "EOF", "", 0, 0, 0.
+        end then.
+        end if.
+        
+        let tok: Token <- node.value;
+        return tok.
+    end method.
+
+    has method previous -> Token:
+        # TODO: This requires a doubly linked list or keeping track of prev.
+        # For now, let's see if we can do without it or carry 'prev' in parsing loop.
+        # Actually, recursive descent often relies on peek() and consume() returning the token.
+        return Token: new: "EOF", "", 0, 0, 0.
+    end method.
+
+    has method isAtEnd -> bool:
+        tk <- self: peek;
+        if:
+        condition:
+            return tk.type == "EOF";
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        return false.
+    end method.
+
+    has method check: type: string -> bool:
+        if:
+        condition:
+            return self: isAtEnd;
+        end condition.
+        then:
+            return false;
+        end then.
+        end if.
+        tk <- self: peek;
+        if:
+        condition:
+            return tk.type == type;
+        end condition.
+        then:
+            return true;
+        end then.
+        end if.
+        return false.
+    end method.
+
+    has method advance -> Token:
+        if:
+        condition:
+            return (self: isAtEnd);
+        end condition.
+        then:
+            return self: peek.
+        end then.
+        end if.
+        tk <- self: peek;
+        
+        # Move current forward
+        let curr: ASTNode <- self.current;
+        self.current <- curr.next;
+        
+        return tk.
+    end method.
+
+    has method consume: type: string, message: string -> Token:
+        if:
+        condition:
+            return (self: check: type);
+        end condition.
+        then:
+            return self: advance;
+        end then.
+        end if.
+        
+        tk <- self: peek;
+        let msg: string <- message;
+        if:
+        condition:
+            return msg == nil;
+        end condition.
+        then:
+            msg <- "Expected " + type;
+        end then.
+        end if.
+        
+        # Use our new ErrorReporter if possible
+        # We need the source string, which we can get if we pass it to Parser
+        # For now, let's assume we'll pass it or find another way.
+        # Actually, let's add 'source' to Parser.
+        
+        ErrorReporter: report: msg, tk, self.source;
+        self.hadError <- true;
+        return tk.
+    end method.
+    
+    
+    # --- Parsing Methods ---
+    
+    has method parseDeclaration -> void*:
+        tk <- self: peek;
+        if:
+        condition:
+            return tk.type == "KEYWORD";
+        end condition.
+        then:
+             if:
+             condition:
+                 return tk.value == "struct";
+             end condition.
+             then:
+                 return self: parseStruct;
+             end then.
+             end if.
+             if:
+             condition:
+                 return tk.value == "Entity";
+             end condition.
+             then:
+                 return self: parseEntity;
+             end then.
+             end if.
+              if:
+              condition:
+                  return tk.value == "unabstracted";
+              end condition.
+              then:
+                  return self: parseUnabstracted;
+              end then.
+              end if.
+        return self: parseStatement;
+        end then.
+        end if.
+    end method.
+
+    has method parseEntity -> void*:
+        self: advance; # Entity
+        let nameTok: Token <- self: consume: "IDENT", "Expected Entity name.";
+        if:
+        condition:
+            return nameTok == nil;
+        end condition.
+        then:
+             # Should already have reported if consume failed? 
+             # But consume in selfhost just returns nil if it fails
+             ErrorReporter: report: "Expected Entity name.", self: peek, self.source;
+             return nil.
+        end then.
+        end if.
+        
+        # Parse Type Params <T, U>
+        let typeParams: ASTList <- nil;
+        let tkP: Token <- self: peek;
+        if:
+        condition:
+            return tkP.type == "SYMBOL" and tkP.value == "<";
+        end condition.
+        then:
+             self: advance; # <
+             typeParams <- ASTList: new: nil, nil;
+             let tpTail: ASTNode <- nil;
+             loop:
+                 let tp: Token <- self: consume: "IDENT", "Expected type parameter name.";
+                 let tpNode: ASTNode <- ASTNode: new: tp, nil;
+                 if:
+                 condition:
+                     return typeParams.head == nil;
+                 end condition.
+                 then:
+                     typeParams.head <- tpNode;
+                     tpTail <- tpNode;
+                 end then.
+                 else:
+                     let tpTailNode: ASTNode <- Casts: toASTNode: tpTail;
+                     tpTailNode.next <- tpNode;
+                     tpTail <- tpNode;
+                 end else.
+                 end if.
+                 
+                 let tkNext: Token <- self: peek;
+                 if:
+                 condition:
+                     return tkNext.value == ",";
+                 end condition.
+                 then:
+                      self: advance;
+                      continue;
+                 end then.
+                 end if.
+                 break;
+             end loop.
+             self: consume: "SYMBOL", ">";
+        end then.
+        end if.
+
+        # Parse implements A, B
+        let implList: ASTList <- nil;
+        let tkI: Token <- self: peek;
+        if:
+        condition:
+            return tkI.type == "KEYWORD" and tkI.value == "implements";
+        end condition.
+        then:
+             self: advance; # implements
+             implList <- ASTList: new: nil, nil;
+             let iTail: ASTNode <- nil;
+             loop:
+                 let iType: string <- self: parseType: "Expected implemented trait name.";
+                 let nodeI: ASTNode <- ASTNode: new: iType, nil;
+                 if:
+                 condition:
+                     return implList.head == nil;
+                 end condition.
+                 then:
+                     implList.head <- nodeI;
+                     iTail <- nodeI;
+                 end then.
+                 else:
+                     let iTailNode: ASTNode <- Casts: toASTNode: iTail;
+                     iTailNode.next <- nodeI;
+                     iTail <- nodeI;
+                 end else.
+                 end if.
+                 
+                 let tkNextI: Token <- self: peek;
+                 if:
+                 condition:
+                     return tkNextI.value == ",";
+                 end condition.
+                 then:
+                      self: advance;
+                      continue;
+                 end then.
+                 end if.
+                 break;
+             end loop.
+        end then.
+        end if.
+
+        # Consume : (required for block start)
+        self: consume: "SYMBOL", ":";
+        
+        fields <- ASTList: new: nil, nil;
+        let fieldTail: ASTNode <- nil;
+        methods <- ASTList: new: nil, nil;
+        let methodTail: ASTNode <- nil;
+        
+        loop:
+             tk <- self: peek;
+             if:
+             condition:
+                 return tk.type == "KEYWORD";
+             end condition.
+             then:
+                 if:
+                 condition:
+                     return tk.value == "end";
+                 end condition.
+                 then:
+                      self: advance; # consumes 'end'
+                      # Optional: consume 'Entity' if it follows
+                      let tkEnd: Token <- self: peek;
+                      if:
+                      condition:
+                          return tkEnd.value == "Entity";
+                      end condition.
+                      then:
+                           self: advance;
+                      end then.
+                      end if.
+                      
+                      # Optional: consume '.'
+                      tkDot: Token <- self: peek;
+                      if:
+                      condition:
+                          return tkDot.value == ".";
+                      end condition.
+                      then:
+                           self: advance;
+                      end then.
+                      end if.
+                      break; 
+                 end then.
+                 end if.
+                 
+                 if:
+                 condition:
+                     return tk.value == "has";
+                 end condition.
+                 then:
+                      self: advance; # has
+                      # Skip modifiers
+                       isStatic <- false;
+                       loop:
+                            tkm: Token <- self: peek;
+                            if:
+                            condition:
+                                return tkm.type == "KEYWORD";
+                            end condition.
+                            then:
+                                 if:
+                                 condition:
+                                     return tkm.value == "public" or tkm.value == "private" or tkm.value == "static" or tkm.value == "a" or tkm.value == "an" or tkm.value == "state";
+                                 end condition.
+                                 then:
+                                      if:
+                                      condition:
+                                          return tkm.value == "static";
+                                      end condition.
+                                      then:
+                                          isStatic <- true;
+                                      end then.
+                                      end if.
+                                      self: advance;
+                                      continue;
+                                 end then.
+                                 end if.
+                            end then.
+                            end if.
+                            break;
+                       end loop.
+                      
+                      tk3: Token <- self: peek;
+                      # print: "DEBUG: parseEntity has, tk3=" + tk3.value;
+                      if:
+                      condition:
+                          return tk3.value == "method";
+                      end condition.
+                      then:
+                          self: advance; # method
+                          # print: "DEBUG: calling parseMethod";
+                          m <- self: parseMethod: isStatic;
+                          if:
+                          condition:
+                              return m != nil;
+                          end condition.
+                          then:
+                              mNode <- ASTNode: new: m, nil;
+                              if:
+                              condition:
+                                  return methods.head == nil;
+                              end condition.
+                              then:
+                                  methods.head <- mNode;
+                                  methodTail <- mNode;
+                              end then.
+                              else:
+                                  mTailNode: ASTNode <- methodTail;
+                                  mTailNode.next <- mNode;
+                                  methodTail <- mNode;
+                              end else.
+                              end if.
+                          end then.
+                          end if.
+                          continue;
+                      end then.
+                      end if.
+                      
+                      # Not a method, must be a field
+                      f <- self: parseField;
+                      if:
+                      condition:
+                          return f != nil;
+                      end condition.
+                      then:
+                          fNode <- ASTNode: new: f, nil;
+                          if:
+                          condition:
+                              return fields.head == nil;
+                          end condition.
+                          then:
+                               fields.head <- fNode;
+                               fieldTail <- fNode;
+                          end then.
+                          else:
+                               fTailNode: ASTNode <- fieldTail;
+                               fTailNode.next <- fNode;
+                               fieldTail <- fNode;
+                          end else.
+                          end if.
+                      end then.
+                      end if.
+                       continue; 
+                 end then.
+                 end if.
+                 
+                 # Safety advance if nothing matched
+                 let tkSafety: Token <- self: peek;
+                 # print: "DEBUG: parseEntity skipping unexpected token: " + tkSafety.value;
+                 self: advance;
+             end then.
+             else:
+                  # Not a keyword ('has' or 'end'), just skip it
+                  tkSafety2: Token <- self: peek;
+                  # print: "DEBUG: parseEntity skipping non-keyword: " + tkSafety2.value;
+                  self: advance;
+             end else.
+             end if.
+        end loop.
+        
+        let ent: EntityDecl <- EntityDecl: new: "EntityDecl", nameTok.value, typeParams, implList, fields, methods;
+        return ent.
+    end method.
+
+    has method parseMethod: isStatic: bool -> void*:
+        let nameTok: Token <- self: consume: "IDENT", "Expected method name.";
+
+        # Parse Type Params <T, U>
+        let typeParams: ASTList <- nil;
+        let tkP: Token <- self: peek;
+        if:
+        condition:
+            return tkP.type == "SYMBOL" and tkP.value == "<";
+        end condition.
+        then:
+             self: advance; # <
+             typeParams <- ASTList: new: nil, nil;
+             let tpTail: ASTNode <- nil;
+             loop:
+                 let tp: Token <- self: consume: "IDENT", "Expected type parameter name.";
+                 let tpNode: ASTNode <- ASTNode: new: tp, nil;
+                 if:
+                 condition:
+                     return typeParams.head == nil;
+                 end condition.
+                 then:
+                     typeParams.head <- tpNode;
+                     tpTail <- tpNode;
+                 end then.
+                 else:
+                     let tpTailNode: ASTNode <- Casts: toASTNode: tpTail;
+                     tpTailNode.next <- tpNode;
+                     tpTail <- tpNode;
+                 end else.
+                 end if.
+                 
+                 let tkNext: Token <- self: peek;
+                 if:
+                 condition:
+                     return tkNext.value == ",";
+                 end condition.
+                 then:
+                      self: advance;
+                      continue;
+                 end then.
+                 end if.
+                 break;
+             end loop.
+             self: consume: "SYMBOL", ">";
+        end then.
+        end if.
+        
+        let args: ASTList <- ASTList: new: nil, nil;
+        let argTail: ASTNode <- nil;
+        let returnType: string <- "void";
+
+        # Optional : after name required for arguments 
+        let tk: Token <- self: peek;
+        if:
+        condition:
+            return tk.type == "SYMBOL" and tk.value == ":";
+        end condition.
+        then:
+             # Look ahead to see if it's REALLY a parameter list
+             let isArgs: bool <- false;
+             let tkN1: Token <- self: peekAt: 1;
+             let tkN2: Token <- self: peekAt: 2;
+             
+             if:
+             condition:
+                 return tkN1.type == "IDENT" and tkN2.value == ":";
+             end condition.
+             then:
+                  let tkN3: Token <- self: peekAt: 3;
+                  if:
+                  condition:
+                      return tkN3.type == "IDENT";
+                  end condition.
+                  then:
+                       isArgs <- true;
+                  end then.
+                  end if.
+             end then.
+             end if.
+             
+             # Also check for return type arrow immediately after :
+             if:
+             condition:
+                 return tkN1.value == "->" or tkN1.value == "-";
+             end condition.
+             then:
+                  isArgs <- true;
+             end then.
+             end if.
+
+             if:
+             condition:
+                 return isArgs;
+             end condition.
+             then:
+                  self: advance;
+                  # Parse arguments loop
+                  loop:
+                     let tkParam: Token <- self: peek;
+                     
+                     # Check for return type arrow 
+                     if:
+                     condition:
+                         return tkParam.type == "OPERATOR" or tkParam.type == "SYMBOL";
+                     end condition.
+                     then:
+                         if:
+                         condition:
+                             return tkParam.value == "-" or tkParam.value == "->";
+                         end condition.
+                         then:
+                              break;
+                         end then.
+                         end if.
+                     end then.
+                     end if.
+                     
+                     # Check for next section colon (body start or after ret type)
+                     if:
+                     condition:
+                         return tkParam.type == "SYMBOL" and tkParam.value == ":";
+                     end condition.
+                     then:
+                          break;
+                     end then.
+                     end if.
+                     
+                     # Assume identifier is arg name
+                     if:
+                     condition:
+                         return tkParam.type == "IDENT";
+                     end condition.
+                     then:
+                          let pName: string <- tkParam.value;
+                          self: advance;
+                          
+                          # Check and consume ':'
+                          let tkCol: Token <- self: peek;
+                          if:
+                          condition:
+                              return tkCol.type == "SYMBOL" and tkCol.value == ":";
+                          end condition.
+                          then:
+                               self: advance;
+                          end then.
+                          else:
+                               print: "Error: Expected ':' after param name " + pName;
+                          end else.
+                          end if.
+                          
+                          let pType: string <- self: parseType: "Expected param type.";
+                          
+                          # Add to list
+                          let f: FieldDecl <- FieldDecl: new: "Arg", pName, pType;
+                          let node: ASTNode <- ASTNode: new: f, nil;
+                          
+                          if:
+                          condition:
+                              return args.head == nil;
+                          end condition.
+                          then:
+                              args.head <- node;
+                              argTail <- node;
+                          end then.
+                          else:
+                              let tailNode: ASTNode <- argTail;
+                               tailNode.next <- node;
+                               argTail <- node;
+                          end else.
+                          end if.
+                          
+                          # Optional comma
+                          let tkComma: Token <- self: peek;
+                          if:
+                          condition:
+                              return tkComma.value == ",";
+                          end condition.
+                          then:
+                              self: advance;
+                          end then.
+                          end if.
+                          
+                          continue;
+                     end then.
+                     end if.
+                     
+                     break; 
+                  end loop.
+             end then.
+             end if.
+        end then.
+        end if.
+        let tkRet: Token <- self: peek;
+        if:
+        condition:
+            return tkRet.value == "->" or tkRet.value == "-";
+        end condition.
+        then:
+             if:
+             condition:
+                 return tkRet.value == "-";
+             end condition.
+             then:
+                  self: advance;
+                  let tkGt: Token <- self: peek;
+                  if:
+                  condition:
+                      return tkGt.value == ">";
+                  end condition.
+                  then:
+                      self: advance;
+                  end then.
+                  end if.
+             end then.
+             else:
+                  self: advance;
+             end else.
+             end if.
+             
+             returnType <- self: parseType: "Expected return type";
+        end then.
+        end if.
+        
+        # Consume final : for body start
+        let tkBodyStart: Token <- self: peek;
+        if:
+        condition:
+            return tkBodyStart.type == "SYMBOL" and tkBodyStart.value == ":";
+        end condition.
+        then:
+            self: advance;
+        end then.
+        end if.
+        
+        let body: Block <- self: parseBlock;
+        
+        # Check for 'end method.'
+        let tkEnd: Token <- self: peek;
+        let tkMethodNext: Token <- self: peekNext;
+        
+        if:
+        condition:
+            return tkEnd.value == "end" and tkMethodNext.value == "method";
+        end condition.
+        then:
+             self: advance; # end
+             self: advance; # method
+             self: consume: "SYMBOL", ".";
+        end then.
+        else:
+             if:
+             condition:
+                 return body.terminatedByDot == false;
+             end condition.
+             then:
+                  self: consume: "KEYWORD", "end";
+                  self: consume: "KEYWORD", "method";
+                  self: consume: "SYMBOL", ".";
+             end then.
+             end if.
+        end else.
+        end if.
+        
+        print: "DEBUG: Creating method " + nameTok.value;
+        let m: MethodDecl <- MethodDecl: new: "MethodDecl", nameTok.value, isStatic, args, returnType, body, typeParams;
+        return m.
+    end method.
+
+    has method parseStruct -> void*:
+        self: advance; # struct
+        let nameTok: Token <- self: consume: "IDENT", "Expected struct name.";
+        
+        # Parse Type Params <T, U>
+        let typeParams: ASTList <- nil;
+        let tkP: Token <- self: peek;
+        if:
+        condition:
+            return tkP.type == "SYMBOL" and tkP.value == "<";
+        end condition.
+        then:
+             self: advance; # <
+             typeParams <- ASTList: new: nil, nil;
+             let tpTail: ASTNode <- nil;
+             loop:
+                 let tp: Token <- self: consume: "IDENT", "Expected type parameter name.";
+                 let tpNode: ASTNode <- ASTNode: new: tp, nil;
+                 if:
+                 condition:
+                     return typeParams.head == nil;
+                 end condition.
+                 then:
+                     typeParams.head <- tpNode;
+                     tpTail <- tpNode;
+                 end then.
+                 else:
+                     let tpTailNode: ASTNode <- Casts: toASTNode: tpTail;
+                     tpTailNode.next <- tpNode;
+                     tpTail <- tpNode;
+                 end else.
+                 end if.
+                 
+                 let tkNext: Token <- self: peek;
+                 if:
+                 condition:
+                     return tkNext.value == ",";
+                 end condition.
+                 then:
+                      self: advance;
+                      continue;
+                 end then.
+                 end if.
+                 break;
+             end loop.
+             self: consume: "SYMBOL", ">";
+        end then.
+        end if.
+
+        # Check style (brace or colon)
+        tk <- self: peek;
+        useBraces <- false;
+        
+        if:
+        condition:
+            return tk.type == "SYMBOL";
+        end condition.
+        then:
+             if:
+             condition:
+                 return tk.value == "{";
+             end condition.
+             then:
+                 useBraces <- true; self: advance;
+             end then.
+             end if.
+             if:
+             condition:
+                 return tk.value == ":";
+             end condition.
+             then:
+                 self: advance;
+             end then.
+             end if.
+        end then.
+        end if.
+        
+        fields <- ASTList: new: nil, nil;
+        let tail: ASTNode <- nil;
+        
+        loop:
+             let tk: Token <- self: peek;
+             if:
+             condition:
+                 return useBraces;
+             end condition.
+             then:
+                 if:
+                 condition:
+                     return tk.type == "SYMBOL" and tk.value == "}";
+                 end condition.
+                 then:
+                     self: advance; break;
+                 end then.
+                 end if.
+             end then.
+             else:
+                 if:
+                 condition:
+                     return tk.type == "KEYWORD" and tk.value == "end";
+                 end condition.
+                 then:
+                      self: advance;
+                      self: consume: "KEYWORD", "struct";
+                      self: consume: "SYMBOL", "."; 
+                      break; 
+                 end then.
+                 end if.
+            end else.
+             end if.
+             
+             if:
+             condition:
+                 return self: isAtEnd;
+             end condition.
+             then:
+            break;
+             end then.
+             end if.
+             
+             # Parse field
+             let field: void* <- self: parseField;
+             if:
+             condition:
+                 return field != nil;
+             end condition.
+             then:
+                 let fNode: ASTNode <- ASTNode: new: field, nil;
+                 if:
+                 condition:
+                     return fields.head == nil;
+                 end condition.
+                 then:
+                     fields.head <- fNode;
+                     tail <- fNode;
+                 end then.
+                 else:
+                     let tailNode: ASTNode <- Casts: toASTNode: tail; # cast
+                     tailNode.next <- fNode;
+                     tail <- fNode;
+                 end else.
+                 end if.
+             end then.
+             end if.
+        end loop.
+        
+        let st: StructDecl <- StructDecl: new: "StructDecl", nameTok.value, typeParams, fields;
+        return st.
+    end method.
+
+    has method parseField -> void*:
+        let tk: Token <- self: peek;
+        if:
+        condition:
+            return tk.type != "IDENT";
+        end condition.
+        then:
+            return nil;
+        end then.
+        end if.
+        
+        let nameTok: Token <- self: consume: "IDENT", "Expected field name.";
+        
+        # Check :
+        let tk2: Token <- self: peek;
+        if:
+        condition:
+            return tk2.type != "SYMBOL";
+        end condition.
+        then:
+            return nil;
+        end then.
+        end if.
+        if:
+        condition:
+            return tk2.value != ":";
+        end condition.
+        then:
+            return nil;
+        end then.
+        end if.
+        
+        self: advance; # Consume :
+        
+        typeName <- self: parseType: "Expected field type."; 
+        
+        # Optional terminator
+        let tk4: Token <- self: peek;
+        if:
+        condition:
+            return tk4.type == "SYMBOL" and (tk4.value == ":" or tk4.value == ";" or tk4.value == ".");
+        end condition.
+        then:
+            self: advance;
+        end then.
+        end if.
+        
+        f <- FieldDecl: new: "FieldDecl", nameTok.value, typeName;
+        return f.
+    end method.
+
+    has method parsePath: msg: string -> string:
+        let res: string <- "";
+        loop:
+            tk: Token <- self: peek;
+            if:
+            condition:
+                return tk.type == "IDENT" or tk.type == "KEYWORD";
+            end condition.
+            then:
+                self: advance;
+                res <- res + tk.value;
+            end then.
+            else:
+                break;
+            end else.
+            end if.
+            
+            tkN: Token <- self: peek;
+            if:
+            condition:
+                return tkN.type == "SYMBOL" and tkN.value == ".";
+            end condition.
+            then:
+                self: advance;
+                res <- res + ".";
+            end then.
+            else:
+                break;
+            end else.
+            end if.
+        end loop.
+
+        if:
+        condition:
+            return res == "";
+        end condition.
+        then:
+            ErrorReporter: report: msg, self: peek, self.source;
+        end then.
+        end if.
+
+        return res.
+    end method.
+
+    has method parseType: msg: string -> string:
+        let res: string <- "";
+        let tk: Token <- self: peek;
+        if:
+        condition:
+            return tk.type != "IDENT" and tk.type != "KEYWORD";
+        end condition.
+        then:
+             ErrorReporter: report: msg, tk, self.source;
+             return "".
+        end then.
+        end if.
+        
+        self: advance;
+        res <- tk.value;
+        
+        # Check for generics < ... >
+        let tkN: Token <- self: peek;
+        if:
+        condition:
+            return tkN.type == "SYMBOL" and tkN.value == "<";
+        end condition.
+        then:
+            self: advance; # <
+            res <- res + "<";
+            loop:
+                tSub: string <- self: parseType: "Expected type argument.";
+                res <- res + tSub;
+                
+                tkNext: Token <- self: peek;
+                if:
+                condition:
+                    return tkNext.type == "SYMBOL" and tkNext.value == ",";
+                end condition.
+                then:
+                    self: advance;
+                    res <- res + ",";
+                end then.
+                else:
+                    break;
+                end else.
+                end if.
+            end loop.
+            
+            self: consume: "SYMBOL", ">";
+            res <- res + ">";
+        end then.
+        end if.
+
+        # Check for pointer *
+        loop:
+            tkP: Token <- self: peek;
+            if:
+            condition:
+                return tkP.type == "SYMBOL" and tkP.value == "*";
+            end condition.
+            then:
+                self: advance;
+                res <- res + "*";
+            end then.
+            else:
+                break;
+            end else.
+            end if.
+        end loop.
+
+        return res.
+    end method.
+
+    has method parseModule -> void*:
+        self: advance; # module
+        let path: string <- self: parsePath: "Expected module name.";
+        
+        # Optional terminator
+        let tk: Token <- self: peek;
+        if:
+        condition:
+            return tk.type == "SYMBOL" and (tk.value == ":" or tk.value == ";" or tk.value == ".");
+        end condition.
+        then:
+            self: advance;
+        end then.
+        end if.
+        
+        mod <- ModuleDecl: new: "ModuleDecl", path;
+        return mod.
+    end method.
+
+    has method parseImport -> void*:
+        self: advance; # import
+        let path: string <- self: parsePath: "Expected import name.";
+        
+        # Optional terminator
+        let tk: Token <- self: peek;
+        if:
+        condition:
+            return tk.type == "SYMBOL" and (tk.value == ":" or tk.value == ";" or tk.value == ".");
+        end condition.
+        then:
+            self: advance;
+        end then.
+        end if.
+        
+        imp <- ImportDecl: new: "ImportDecl", path;
+        return imp.
+    end method.
+
+    has method parseInclude -> void*:
+        self: advance; # include
+        let path: string <- self: parsePath: "Expected include path.";
+        
+        # Optional terminator
+        let tk: Token <- self: peek;
+        if:
+        condition:
+            return tk.type == "SYMBOL" and (tk.value == ":" or tk.value == ";" or tk.value == ".");
+        end condition.
+        then:
+            self: advance;
+        end then.
+        end if.
+        
+        inc <- IncludeDecl: new: "IncludeDecl", path;
+        return inc.
+    end method.
+
+    has method isIncluded: path: string -> bool:
+        let list: ASTList <- self.includedFiles;
+        let curr: ASTNode <- list.head;
+        loop:
+            if:
+            condition:
+                return curr == nil;
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            let s: string <- curr.value;
+            if:
+            condition:
+                return s == path;
+            end condition.
+            then:
+                return true;
+            end then.
+            end if.
+            curr <- curr.next;
+        end loop.
+        return false.
+    end method.
+
+    has method addIncluded: path: string -> void:
+        let list: ASTList <- self.includedFiles;
+        let node: ASTNode <- ASTNode: new: path, nil;
+        if:
+        condition:
+            return list.head == nil;
+        end condition.
+        then:
+            list.head <- node;
+            list.tail <- node;
+        end then.
+        else:
+            let tail: ASTNode <- Casts: toASTNode: list.tail;
+            tail.next <- node;
+            list.tail <- node;
+        end else.
+        end if.
+    end method.
+
+    has method resolvePath: path: string -> string:
+        let p: string <- Strings: replace: path, ".", "/";
+        let res: string <- p + ".bnk";
+        return res.
+    end method.
+
+    has method parseIncludeFile: path: string -> void*: # returns ASTList*
+        let resolved: string <- self: resolvePath: path;
+        print: "DEBUG: parseIncludeFile path=" + path + " resolved=" + resolved;
+        if:
+        condition:
+            return self: isIncluded: resolved;
+        end condition.
+        then:
+             print: "DEBUG: already included " + resolved;
+             return nil;
+        end then.
+        end if.
+        self: addIncluded: resolved;
+        
+        let fileObj: File <- File: open: resolved;
+        if:
+        condition:
+            return fileObj == nil;
+        end condition.
+        then:
+             resolved <- "src/std/" + resolved;
+             fileObj <- File: open: resolved;
+             if:
+             condition:
+                 return fileObj == nil;
+             end condition.
+             then:
+                  print: "Error: Could not include file " + path;
+                  return nil;
+             end then.
+             end if.
+        end then.
+        end if.
+        
+        let subSource: string <- fileObj: readToString;
+        fileObj: close;
+        
+        let subLexer <- Lexer: new: subSource;
+        let subTokens <- ASTList: new: nil, nil;
+        let subTail: ASTNode <- nil;
+        loop:
+            let tok <- subLexer: nextToken;
+            if:
+            condition:
+                return tok.type == "EOF";
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            let subNode <- ASTNode: new: tok, nil;
+            if:
+            condition:
+                return subTokens.head == nil;
+            end condition.
+            then:
+                subTokens.head <- subNode;
+                subTail <- subNode;
+            end then.
+            else:
+                let sTailNode: ASTNode <- Casts: toASTNode: subTail;
+                sTailNode.next <- subNode;
+                subTail <- subNode;
+            end else.
+            end if.
+        end loop.
+        
+        let subParser <- Parser: new: subTokens, subSource;
+        subParser.includedFiles <- self.includedFiles;
+        let subProgVoid: void* <- subParser: parseProgram;
+        let subProgRec: Program <- Casts: toProgram: subProgVoid;
+        return subProgRec.stmts.
+    end method.
+    has method parseUnabstracted -> void*:
+        self: advance; # unabstracted
+        # Optional :
+        let tk: Token <- self: peek;
+        if:
+        condition:
+            return tk.type == "SYMBOL" and tk.value == ":";
+        end condition.
+        then:
+             self: advance;
+        end then.
+        end if.
+        
+        let bodyVoid: void* <- self: parseBlock;
+        
+        # consume end unabstracted. (if present)
+        let tkEnd: Token <- self: peek;
+        let tkNext: Token <- self: peekNext;
+        if:
+        condition:
+            return tkEnd.value == "end" and tkNext.value == "unabstracted";
+        end condition.
+        then:
+             print: "DEBUG: parseUnabstracted consuming end unabstracted.";
+             self: advance; # end
+             self: advance; # unabstracted
+             let tkDot: Token <- self: peek;
+             if:
+             condition:
+                 return tkDot.value == ".";
+             end condition.
+             then:
+                 self: advance;
+             end then.
+             end if.
+        end then.
+        end if.
+        
+        let tkTmp: Token <- self: peek;
+        # print: "DEBUG: parseUnabstracted returning. Next token: " + tkTmp.value;
+        
+        let un: UnabstractedBlock <- UnabstractedBlock: new: "UnabstractedBlock", bodyVoid;
+        return un.
+    end method.
+
+    has method parseAsm -> void*:
+        self: advance; # asm
+        let targetTok: Token <- self: consume: "IDENT", "Expected asm target (e.g. c).";
+        self: consume: "SYMBOL", ":";
+        let codeTok: Token <- self: consume: "STRING", "Expected asm code string.";
+        
+        # Optional semicolon
+        let tk: Token <- self: peek;
+        if:
+        condition:
+            return tk.type == "SYMBOL" and (tk.value == ":" or tk.value == ";" or tk.value == ".");
+        end condition.
+        then:
+            self: advance;
+        end then.
+        end if.
+        
+        let asmNode: AsmStmt <- AsmStmt: new: "AsmStmt", targetTok.value, codeTok.value;
+        return asmNode.
+    end method.
+
+
+    has method parseProgram -> void*:
+        prog <- Program: new: "Program", nil, nil;
+        stmts <- ASTList: new: nil, nil;
+        
+        let tail: ASTNode <- nil;
+        
+        # 1. Module (Optional)
+        let tkMod: Token <- self: peek;
+        if:
+        condition:
+            return tkMod.type == "KEYWORD";
+        end condition.
+        then:
+             if:
+             condition:
+                 return tkMod.value == "module";
+             end condition.
+             then:
+                  mod <- self: parseModule;
+                  prog.module <- mod;
+                  modNode <- ASTNode: new: mod, nil;
+                  stmts.head <- modNode;
+                  tail <- modNode;
+             end then.
+             end if.
+        end then.
+        end if.
+        
+        # 2. Includes
+        loop:
+             if:
+             condition:
+            return self: isAtEnd;
+        end condition.
+        then:
+            break;
+             end then.
+             end if.
+             let tkInc: Token <- self: peek;
+             if:
+             condition:
+                 return tkInc.type == "KEYWORD";
+             end condition.
+             then:
+                  if:
+                  condition:
+                      return tkInc.value == "include";
+                  end condition.
+                  then:
+                       incVoid: void* <- self: parseInclude;
+                       incD: IncludeDecl <- Casts: toIncludeDecl: incVoid;
+                       
+                       # Recursive Include
+                       stmtsFromIncludeVoid: void* <- self: parseIncludeFile: incD.path;
+                       if:
+                       condition:
+                           return stmtsFromIncludeVoid != nil;
+                       end condition.
+                       then:
+                            let listInc: ASTList <- Casts: toASTList: stmtsFromIncludeVoid;
+                            let subN: ASTNode <- listInc.head;
+                            loop:
+                                if:
+                                condition:
+                                    return subN == nil;
+                                end condition.
+                                then:
+                                    break;
+                                end then.
+                                end if.
+                                let subStmt: void* <- subN.value;
+                                let subNode: ASTNode <- ASTNode: new: subStmt, nil;
+                                
+                                if:
+                                condition:
+                                    return stmts.head == nil;
+                                end condition.
+                                then:
+                                     stmts.head <- subNode;
+                                     tail <- subNode;
+                                end then.
+                                else:
+                                     let t: ASTNode <- Casts: toASTNode: tail;
+                                     t.next <- subNode;
+                                     tail <- subNode;
+                                end else.
+                                end if.
+                                
+                                subN <- subN.next;
+                             end loop.
+                       end then.
+                       end if.
+                       continue;
+                  end then.
+                  end if.
+             end then.
+             end if.
+             break;
+        end loop.
+
+        # 3. Imports
+        loop:
+             if:
+             condition:
+            return self: isAtEnd;
+        end condition.
+        then:
+            break;
+             end then.
+             end if.
+             let tkImp: Token <- self: peek;
+             if:
+             condition:
+                 return tkImp.type == "KEYWORD";
+             end condition.
+             then:
+                  if:
+                  condition:
+                      return tkImp.value == "import";
+                  end condition.
+                  then:
+                       impVoid: void* <- self: parseImport;
+                       imp: ImportDecl <- Casts: toImportDecl: impVoid;
+                       
+                       impNode <- ASTNode: new: imp, nil;
+                       if:
+                       condition:
+                           return stmts.head == nil;
+                       end condition.
+                       then:
+                            stmts.head <- impNode;
+                            tail <- impNode;
+                       end then.
+                       else:
+                            impTail: ASTNode <- tail;
+                            impTail.next <- impNode;
+                            tail <- impNode;
+                       end else.
+                       end if.
+                       
+                       stmtsFromImportVoid: void* <- self: parseIncludeFile: imp.name;
+                       if:
+                       condition:
+                           return stmtsFromImportVoid != nil;
+                       end condition.
+                       then:
+                            let listImp: ASTList <- Casts: toASTList: stmtsFromImportVoid;
+                            let subN: ASTNode <- listImp.head;
+                            loop:
+                                if:
+                                condition:
+                                    return subN == nil;
+                                end condition.
+                                then:
+                                    break;
+                                end then.
+                                end if.
+                                let subStmt: void* <- subN.value;
+                                let subNode: ASTNode <- ASTNode: new: subStmt, nil;
+                                
+                                if:
+                                condition:
+                                    return stmts.head == nil;
+                                end condition.
+                                then:
+                                     stmts.head <- subNode;
+                                     tail <- subNode;
+                                end then.
+                                else:
+                                     let t: ASTNode <- Casts: toASTNode: tail;
+                                     t.next <- subNode;
+                                     tail <- subNode;
+                                end else.
+                                end if.
+                                
+                                subN <- subN.next;
+                             end loop.
+                       end then.
+                       end if.
+                       
+                       continue;
+                  end then.
+                  end if.
+             end then.
+             end if.
+             break;
+        end loop.
+        
+        # 3. Declarations
+        loop:
+             if:
+             condition:
+            return self: isAtEnd;
+        end condition.
+        then:
+            break;
+             end then.
+             end if.
+             
+             stmt <- self: parseDeclaration;
+             
+             if:
+             condition:
+                 return stmt != nil;
+             end condition.
+             then:
+                 node <- ASTNode: new: stmt, nil;
+                 
+                 if:
+                 condition:
+                     return stmts.head == nil;
+                 end condition.
+                 then:
+                     stmts.head <- node;
+                     tail <- node;
+                 end then.
+                 else:
+                     let tailNode: ASTNode <- Casts: toASTNode: tail;
+                     tailNode.next <- node;
+                     tail <- node;
+                 end else.
+                 end if.
+             end then.
+             else:
+                  self: advance;
+             end else.
+             end if.
+        end loop.
+        
+        prog.stmts <- stmts;
+        return prog.
+    end method.
+
+    has method parseBlock -> Block:
+        # print: "DEBUG: parseBlock entering";
+        block <- Block: new: "Block", nil, false;
+        
+        stmts <- ASTList: new: nil, nil;
+        let tail: ASTNode <- nil;
+        
+        loop:
+            if:
+            condition:
+            return self: isAtEnd;
+        end condition.
+        then:
+            break;
+            end then.
+            end if.
+            
+            # Check for block terminators: 'end' or 'else'
+            tk <- self: peek;
+            
+            if:
+            condition:
+                return tk.type == "KEYWORD";
+            end condition.
+            then:
+                if:
+                condition:
+                    return tk.value == "end";
+                end condition.
+                then:
+                    break;
+                end then.
+                end if.
+                if:
+                condition:
+                    return tk.value == "else";
+                end condition.
+                then:
+                    break;
+                end then.
+                end if.
+            end then.
+            end if.
+            
+            # Check for return-dot terminator
+            if:
+            condition:
+                return tk.type == "SYMBOL";
+            end condition.
+            then:
+                if:
+                condition:
+                    return tk.value == ".";
+                end condition.
+                then:
+                     if:
+                     condition:
+                         return stmts.head != nil;
+                     end condition.
+                     then:
+                          self: advance; # Consume '.'
+                          block.terminatedByDot <- true;
+                          break;
+                     end then.
+                     end if.
+                end then.
+                end if.
+            end then.
+            end if.
+            
+            stmt <- self: parseStatement;
+            if:
+            condition:
+                return stmt != nil;
+            end condition.
+            then:
+                h: Header <- stmt; # print: "DEBUG: parseBlock ADDED stmt type=" + h.type;
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return stmt != nil;
+            end condition.
+            then:
+                node <- ASTNode: new: stmt, nil;
+                if:
+                condition:
+                    return stmts.head == nil;
+                end condition.
+                then:
+                    stmts.head <- node;
+                    tail <- node;
+                end then.
+                else:
+                    let tailNode: ASTNode <- Casts: toASTNode: tail;
+                    tailNode.next <- node;
+                    tail <- node;
+                end else.
+                end if.
+            end then.
+            end if.
+            
+            # Terminator check for statements (;)
+            tk2 <- self: peek;
+            if:
+            condition:
+                return tk2.type == "SYMBOL";
+            end condition.
+            then:
+                 if:
+                 condition:
+                     return tk2.value == ":";
+                 end condition.
+                 then:
+                     self: advance;
+                 end then.
+                 end if.
+            end then.
+            end if.
+        end loop.
+        
+        block.stmts <- stmts;
+        return block.
+    end method.
+
+    has method parseStatement -> void*:
+        tk <- self: peek;
+        
+        if:
+        condition:
+            return tk.type == "KEYWORD";
+        end condition.
+        then:
+            if:
+            condition:
+                return tk.value == "return";
+            end condition.
+            then:
+                return self: parseReturn;
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return tk.value == "if";
+            end condition.
+            then:
+                return self: parseIf;
+            end then.
+            end if.
+
+            if:
+            condition:
+                return tk.value == "unabstracted";
+            end condition.
+            then:
+                return self: parseUnabstracted;
+            end then.
+            end if.
+
+            if:
+            condition:
+                return tk.value == "asm";
+            end condition.
+            then:
+                return self: parseAsm;
+            end then.
+            end if.
+
+            if:
+            condition:
+                return tk.value == "while";
+            end condition.
+            then:
+                return self: parseWhile;
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return tk.value == "loop";
+            end condition.
+            then:
+                return self: parseLoop;
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return tk.value == "break";
+            end condition.
+            then:
+                # TODO: BreakStmt
+                self: advance; 
+                return nil;
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return tk.value == "continue";
+            end condition.
+            then:
+                # TODO: ContinueStmt
+                self: advance;
+                return nil;
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return tk.value == "let";
+            end condition.
+            then:
+                self: advance; # Consume 'let'
+                let res: void* <- self: parseAssignment: true;
+                self: consume: "SYMBOL", "Expected ';' after let statement.";
+                return res;
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return tk.value == "module";
+            end condition.
+            then:
+                self: advance;
+                self: advance; # name
+                # Optional ;
+                tks <- self: peek;
+                if:
+                condition:
+                    return tks.type == "SYMBOL";
+                end condition.
+                then:
+                    if:
+                    condition:
+                        return tks.value == ":";
+                    end condition.
+                    then:
+                        self: advance;
+                    end then.
+                    end if.
+                end then.
+                end if.
+                return nil;
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return tk.value == "scoped";
+            end condition.
+            then:
+                return self: parseScoped;
+            end then.
+            end if.
+        end then.
+        end if.
+        if:
+        condition:
+            return tk.type == "SYMBOL" and (tk.value == ";" or tk.value == "." or tk.value == ":");
+        end condition.
+        then:
+             self: advance;
+             return nil;
+        end then.
+        end if.
+        
+        return self: parseExpressionStatement.
+    end method.
+
+    has method parseScoped -> void*:
+        self: advance; # consume scoped
+        
+        # Optional ':'
+        tk <- self: peek;
+        if:
+        condition:
+            return tk.type == "SYMBOL";
+        end condition.
+        then:
+            if:
+            condition:
+                return tk.value == ":";
+            end condition.
+            then:
+                self: advance;
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        body <- self: parseBlock;
+        
+        # Check for 'end scoped.'
+        tkEnd <- self: peek;
+        tkNext <- self: peekNext;
+        if:
+        condition:
+            return tkEnd.value == "end" and tkNext.value == "scoped";
+        end condition.
+        then:
+             self: advance; # end
+             self: consume: "KEYWORD", "scoped";
+             self: consume: "SYMBOL", ".";
+        end then.
+        else:
+             if:
+             condition:
+                 return body.terminatedByDot == false;
+             end condition.
+             then:
+                  self: consume: "KEYWORD", "end";
+                  self: consume: "KEYWORD", "scoped";
+                  self: consume: "SYMBOL", ".";
+             end then.
+             end if.
+        end else.
+        end if.
+        
+        stmt <- ScopedStmt: new: "ScopedStmt", body;
+        return stmt.
+    end method.
+
+    has method parseLoop -> void*:
+        # print: "DEBUG: Loop 1";
+        self: advance; # consume loop
+        
+        # Optional ':'
+        tk <- self: peek;
+        if:
+        condition:
+            return tk.type == "SYMBOL";
+        end condition.
+        then:
+            if:
+            condition:
+                return tk.value == ":";
+            end condition.
+            then:
+                self: advance;
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        # print: "DEBUG: Loop 2 - Body";
+        body <- self: parseBlock;
+        # print: "DEBUG: Loop 3 - Body Done";
+        
+        # Check for 'end loop.'
+        tkEnd <- self: peek;
+        tkNext <- self: peekNext;
+        if:
+        condition:
+            return tkEnd.value == "end" and tkNext.value == "loop";
+        end condition.
+        then:
+             self: advance; # end
+             self: consume: "KEYWORD", "loop";
+             self: consume: "SYMBOL", ".";
+        end then.
+        else:
+             if:
+             condition:
+                 return body.terminatedByDot == false;
+             end condition.
+             then:
+                  self: consume: "KEYWORD", "end";
+                  self: consume: "KEYWORD", "loop";
+                  self: consume: "SYMBOL", ".";
+             end then.
+             end if.
+        end else.
+        end if.
+        
+        # print: "DEBUG: Loop 4 - Done";
+        
+        stmt <- LoopStmt: new: "LoopStmt", body;
+        return stmt.
+    end method.
+
+    has method parseWhile -> void*:
+        self: advance; # consume while
+        
+        cond <- self: parseExpression;
+        
+        # Optional ':'
+        tk <- self: peek;
+        if:
+        condition:
+            return tk.type == "SYMBOL";
+        end condition.
+        then:
+            if:
+            condition:
+                return tk.value == ":";
+            end condition.
+            then:
+                self: advance;
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        body <- self: parseBlock;
+        
+        # Check for 'end while.'
+        tkEnd <- self: peek;
+        tkNext <- self: peekNext;
+        if:
+        condition:
+            return tkEnd.value == "end" and tkNext.value == "while";
+        end condition.
+        then:
+             self: advance; # end
+             self: consume: "KEYWORD", "while";
+             self: consume: "SYMBOL", ".";
+        end then.
+        else:
+             if:
+             condition:
+                 return body.terminatedByDot == false;
+             end condition.
+             then:
+                  self: consume: "KEYWORD", "end";
+                  self: consume: "KEYWORD", "while";
+                  self: consume: "SYMBOL", ".";
+             end then.
+             end if.
+        end else.
+        end if.
+        
+        stmt <- WhileStmt: new: "WhileStmt", cond, body;
+        return stmt.
+    end method.
+
+    has method parseIf -> void*:
+        # print: "DEBUG: Parsing IF new syntax";
+        self: advance; # consume 'if'
+        self: consume: "SYMBOL", ":";
+        
+        # Condition Block
+        self: consume: "KEYWORD", "condition";
+        self: consume: "SYMBOL", ":";
+        let condBlock: Block <- self: parseBlock;
+        
+        # Consuming 'end condition.'
+        self: consume: "KEYWORD", "end";
+        self: consume: "KEYWORD", "condition";
+        self: consume: "SYMBOL", ".";
+        
+        # Then Block
+        self: consume: "KEYWORD", "then";
+        self: consume: "SYMBOL", ":";
+        let thenBlock: Block <- self: parseBlock;
+        
+        # Consuming 'end then.'
+        self: consume: "KEYWORD", "end";
+        self: consume: "KEYWORD", "then";
+        self: consume: "SYMBOL", ".";
+        
+        let elseStmt: Block <- nil;
+        let tk: Token <- self: peek;
+        
+        if:
+        condition:
+            return tk.value == "else";
+        end condition.
+        then:
+            self: advance; # else
+            self: consume: "SYMBOL", ":";
+            elseStmt <- self: parseBlock;
+            
+            # Consuming 'end else.'
+            self: consume: "KEYWORD", "end";
+            self: consume: "KEYWORD", "else";
+            self: consume: "SYMBOL", ".";
+        end then.
+        end if.
+        
+        # Final end if.
+        self: consume: "KEYWORD", "end";
+        self: consume: "KEYWORD", "if";
+        self: consume: "SYMBOL", ".";
+        
+        let res: IfStmt <- IfStmt: new: "IfStmt", condBlock, thenBlock, elseStmt;
+        return res.
+    end method.
+
+    has method parseReturn -> void*:
+        self: advance; # Consume 'return'
+        
+        stmt <- ReturnStmt: new: "ReturnStmt", nil;
+        
+        # Check if next is terminator
+        tk <- self: peek;
+        isTerm <- false;
+        
+        if:
+        condition:
+            return tk.type == "SYMBOL";
+        end condition.
+        then:
+             if:
+             condition:
+                 return tk.value == "." or tk.value == ";";
+             end condition.
+             then:
+                 isTerm <- true;
+             end then.
+             end if.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return isTerm;
+        end condition.
+        then:
+            stmt.value <- nil;
+        end then.
+        else:
+            stmt.value <- self: parseExpression;
+        end else.
+        end if.
+        
+        # Optional semicolon
+        tk2 <- self: peek;
+        if:
+        condition:
+            return tk2.value == ";";
+        end condition.
+        then:
+            self: advance;
+        end then.
+        end if.
+        
+        return stmt.
+    end method.
+
+    has method parseExpressionStatement -> void*:
+        expr <- self: parseExpression;
+        if:
+        condition:
+            return expr == nil;
+        end condition.
+        then:
+            return nil;
+        end then.
+        end if.
+        
+        # Optional semicolon
+        tk <- self: peek;
+        if:
+        condition:
+            return tk.value == ";";
+        end condition.
+        then:
+            self: advance;
+        end then.
+        end if.
+        
+        let res: ExprStmt <- ExprStmt: new: "ExprStmt", expr;
+        return res.
+    end method.
+        
+    has method parseExpression -> void*:
+        return self: parseAssignment: false.
+    end method.
+        
+    has method parseAssignment: isLet: bool -> void*:
+        expr <- self: parseEquality;
+        
+        # Check for optional type hint: x : int <- val
+        let typeHint: string <- "";
+        
+        tk <- self: peek;
+        if:
+        condition:
+            return expr == nil;
+        end condition.
+        then:
+            return nil;
+        end then.
+        end if.
+        
+        let header: Header <- expr;
+        if:
+        condition:
+            return header.type == "VariableExpr";
+        end condition.
+        then:
+             if:
+             condition:
+                 return tk.type == "SYMBOL";
+             end condition.
+             then:
+                  if:
+                  condition:
+                      return tk.value == ":";
+                  end condition.
+                  then:
+                       # Ambiguity check: Only consume if followed by type name (IDENT)
+                       # Because 'if cond: block' uses ':' too.
+                       nextTk <- self: peekNext;
+                       if:
+                       condition:
+                           return nextTk.type == "IDENT" or nextTk.type == "KEYWORD";
+                       end condition.
+                       then:
+                           self: advance;
+                           typeHint <- self: parseType: "Expected type name after ':'.";
+                           tk <- self: peek; # Update tk after consuming type hint
+                       end then.
+                       end if.
+                  end then.
+                  end if.
+             end then.
+             end if.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return tk.type == "OPERATOR";
+        end condition.
+        then:
+             if:
+             condition:
+                 return tk.value == "<-";
+             end condition.
+             then:
+                 self: advance;
+                 value <- self: parseAssignment: false;
+                 
+                 # VariableExpr or GetExpr (member access) are valid targets
+                 if:
+                 condition:
+                     return header.type == "VariableExpr";
+                 end condition.
+                 then:
+                      varExpr: VariableExpr <- expr;
+                      if:
+                      condition:
+                          return typeHint != "" or isLet;
+                      end condition.
+                      then:
+                           return LetStmt: new: "LetStmt", varExpr.name, typeHint, value.
+                      end then.
+                      end if.
+                      return AssignExpr: new: "AssignExpr", expr, value.
+                 end then.
+                 else:
+                      if:
+                      condition:
+                          return header.type == "GetExpr" or header.type == "ArrayAccess";
+                      end condition.
+                      then:
+                           if:
+                           condition:
+                               return isLet;
+                           end condition.
+                           then:
+                                print: "Error: Cannot used 'let' with member access at line " + tk.line;
+                           end then.
+                           end if.
+                           return AssignExpr: new: "AssignExpr", expr, value.
+                      end then.
+                      else:
+                           print: "Error: Invalid assignment target type " + header.type + " at line " + tk.line;
+                      end else.
+                      end if.
+                 end else.
+                 end if.
+             end then.
+             end if.
+        end then.
+        end if.
+        
+        return expr.
+    end method.
+
+    has method parseEquality -> void*:
+        expr <- self: parseComparison;
+        
+        loop:
+            tk <- self: peek;
+            match <- false;
+            
+            if:
+            condition:
+                return tk.type == "OPERATOR";
+            end condition.
+            then:
+                if:
+                condition:
+                    return tk.value == "==";
+                end condition.
+                then:
+                    match <- true;
+                end then.
+                end if.
+                if:
+                condition:
+                    return tk.value == "!=";
+                end condition.
+                then:
+                    match <- true;
+                end then.
+                end if.
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return match;
+            end condition.
+            then:
+                op: Token <- self: advance;
+                right <- self: parseComparison;
+                bin <- BinaryExpr: new: "BinaryExpr", expr, op, right;
+                expr <- bin;
+                continue;
+            end then.
+            end if.
+            break;
+        end loop.
+        return expr;
+    end method.
+
+    has method parseComparison -> void*:
+        expr <- self: parseTerm;
+        
+        loop:
+            tk <- self: peek;
+            match <- false;
+            
+            if:
+            condition:
+                return tk.type == "OPERATOR";
+            end condition.
+            then:
+                if:
+                condition:
+                    return tk.value == ">=";
+                end condition.
+                then:
+                    match <- true;
+                end then.
+                end if.
+                if:
+                condition:
+                    return tk.value == "<=";
+                end condition.
+                then:
+                    match <- true;
+                end then.
+                end if.
+            end then.
+            end if.
+            if:
+            condition:
+                return tk.type == "SYMBOL";
+            end condition.
+            then:
+                if:
+                condition:
+                    return tk.value == ">";
+                end condition.
+                then:
+                    match <- true;
+                end then.
+                end if.
+                if:
+                condition:
+                    return tk.value == "<";
+                end condition.
+                then:
+                    match <- true;
+                end then.
+                end if.
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return match;
+            end condition.
+            then:
+                op: Token <- self: advance;
+                right <- self: parseTerm;
+                bin <- BinaryExpr: new: "BinaryExpr", expr, op, right;
+                expr <- bin;
+                continue;
+            end then.
+            end if.
+            break;
+        end loop.
+        
+        return expr;
+    end method.
+
+    has method parseTerm -> void*:
+        expr <- self: parseFactor;
+        
+        loop:
+            tk <- self: peek;
+            match <- false;
+            
+            if:
+            condition:
+                return tk.type == "SYMBOL";
+            end condition.
+            then:
+                if:
+                condition:
+                    return tk.value == "+";
+                end condition.
+                then:
+                    match <- true;
+                end then.
+                end if.
+                if:
+                condition:
+                    return tk.value == "-";
+                end condition.
+                then:
+                    match <- true;
+                end then.
+                end if.
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return match;
+            end condition.
+            then:
+                op: Token <- self: advance;
+                right <- self: parseFactor;
+                bin <- BinaryExpr: new: "BinaryExpr", expr, op, right;
+                expr <- bin;
+                continue;
+            end then.
+            end if.
+            break;
+        end loop.
+        
+        return expr;
+    end method.
+
+    has method parseFactor -> void*:
+        expr <- self: parseUnary;
+        
+        loop:
+            tk <- self: peek;
+            match <- false;
+            
+            if:
+            condition:
+                return tk.type == "SYMBOL";
+            end condition.
+            then:
+                if:
+                condition:
+                    return tk.value == "*";
+                end condition.
+                then:
+                    match <- true;
+                end then.
+                end if.
+                if:
+                condition:
+                    return tk.value == "/";
+                end condition.
+                then:
+                    match <- true;
+                end then.
+                end if.
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return match;
+            end condition.
+            then:
+                op: Token <- self: advance;
+                right <- self: parseUnary;
+                bin <- BinaryExpr: new: "BinaryExpr", expr, op, right;
+                expr <- bin;
+                continue;
+            end then.
+            end if.
+            break;
+        end loop.
+        
+        return expr;
+    end method.
+
+    has method parseUnary -> void*:
+        tk <- self: peek;
+        match <- false;
+        
+        if:
+        condition:
+            return tk.type == "KEYWORD";
+        end condition.
+        then:
+             if:
+             condition:
+                 return tk.value == "not";
+             end condition.
+             then:
+                 match <- true;
+             end then.
+             end if.
+        end then.
+        end if.
+        if:
+        condition:
+            return tk.type == "SYMBOL";
+        end condition.
+        then:
+             if:
+             condition:
+                 return tk.value == "-";
+             end condition.
+             then:
+                 match <- true;
+             end then.
+             end if.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return match;
+        end condition.
+        then:
+             let op: Token <- self: advance;
+             right <- self: parseUnary;
+                          un <- UnaryExpr: new: "UnaryExpr", op, right;
+             return un;
+        end then.
+        end if.
+        
+        return self: parseCall;
+    end method.
+
+    has method parseCall -> void*:
+        expr <- self: parsePrimary;
+        
+        loop:
+            tk: Token <- self: peek;
+            
+            # Method Call: ':'
+            if:
+            condition:
+                return tk.type == "SYMBOL" and tk.value == ":";
+            end condition.
+            then:
+                nt: Token <- self: peekNext;
+                print: "DEBUG: parseCall ':' nt.type=" + nt.type + " value=" + nt.value;
+                
+                     # Type hint check: if it's ': Type <-' or ': Type<' it's a declaration.
+                     if:
+                     condition:
+                         return nt.type == "IDENT" or nt.type == "KEYWORD";
+                     end condition.
+                     then:
+                         currNode: ASTNode <- self.current;
+                         if:
+                         condition:
+                             return currNode.next != nil;
+                         end condition.
+                         then:
+                             ntNode: ASTNode <- currNode.next;
+                             if:
+                             condition:
+                                 return ntNode.next != nil;
+                             end condition.
+                             then:
+                                  n2node: ASTNode <- ntNode.next;
+                                  tk2: Token <- n2node.value;
+                                  print: "DEBUG: parseCall ':' tk2.type=" + tk2.type + " value=" + tk2.value;
+                                  if:
+                                  condition:
+                                      return tk2.value == "<-" or tk2.value == "<";
+                                  end condition.
+                                  then:
+                                       break; # It's a declaration hint, not a call
+                                  end then.
+                                  end if.
+                             end then.
+                             end if.
+                         end then.
+                         end if.
+                     end then.
+                     end if.
+
+                if:
+                condition:
+                    return nt.type == "IDENT" or nt.type == "STRING" or nt.type == "NUMBER" or nt.value == "(";
+                end condition.
+                then:
+                    self: advance; # Consume the first ':'
+                    let methodName: string <- "";
+                    let args: ASTList <- nil;
+                    let n2: Token <- self: peekAt: 1; 
+
+                    # Case 1: receiver : method : args
+                    if:
+                    condition:
+                        return nt.type == "IDENT" and n2.value == ":";
+                    end condition.
+                    then:
+                         methodName <- nt.value;
+                         self: advance; # Consume methodName
+                         self: advance; # Consume second ':'
+                         args <- self: parseArgumentList;
+                    end then.
+                    else:
+                         # Case 2: globalCall : args (like print: 10) OR receiver : method (no args)
+                         let isGlobal: bool <- false;
+                         if:
+                         condition:
+                             return expr != nil;
+                         end condition.
+                         then:
+                              let h: Header <- expr;
+                              if:
+                              condition:
+                                  return h.type == "VariableExpr";
+                              end condition.
+                              then:
+                                   let v: VariableExpr <- Casts: toVariableExpr: expr;
+                                   if:
+                                   condition:
+                                       return v.name.value == "print";
+                                   end condition.
+                                   then:
+                                        isGlobal <- true;
+                                   end then.
+                                   end if.
+                              end then.
+                              end if.
+                         end then.
+                         end if.
+                         
+                         if:
+                         condition:
+                             return isGlobal;
+                         end condition.
+                         then:
+                              # It's methodName: args. We replace methodName with the variable's value and set expr to nil.
+                              let vExt: VariableExpr <- Casts: toVariableExpr: expr;
+                              methodName <- vExt.name.value;
+                              expr <- nil;
+                              args <- self: parseArgumentList;
+                         end then.
+                         else:
+                              # Case 3: receiver : method (could be static or instance, optional further args)
+                              if:
+                              condition:
+                                  return nt.type == "IDENT";
+                              end condition.
+                              then:
+                                   methodName <- nt.value;
+                                   self: advance; # Consume methodName
+                                   # Check for optional further args: receiver: method: args
+                                   let tkN3: Token <- self: peek;
+                                   if:
+                                   condition:
+                                       return tkN3.type == "SYMBOL" and tkN3.value == ":";
+                                   end condition.
+                                   then:
+                                        self: advance; # Consume second ':'
+                                        args <- self: parseArgumentList;
+                                   end then.
+                                   end if.
+                              end then.
+                              end if.
+                         end else.
+                         end if.
+                    end else.
+                    end if.
+                    
+                    metTok: Token <- nil;
+                    if:
+                    condition:
+                        return methodName != "";
+                    end condition.
+                    then:
+                        metTok <- Token: new: "IDENT", methodName, tk.line, tk.column, tk.offset;
+                    end then.
+                    end if.
+                    
+                    # Note: The above is a bit hacky, better capture the actual token in parseCall.
+                    # But for now, let's just update the constructor call.
+                    callRec: MethodCall <- MethodCall: new: "MethodCall", expr, metTok, args;
+                    expr <- callRec;
+                    continue;
+                end then.
+                end if.
+            end then.
+            end if.
+            
+            # Property Access: '.'
+            if:
+            condition:
+                return tk.type == "SYMBOL" and tk.value == ".";
+            end condition.
+            then:
+                propTk: Token <- self: peekNext;
+                if:
+                condition:
+                    return propTk.type == "IDENT";
+                end condition.
+                then:
+                    self: advance; # Consume '.'
+                    pTok: Token <- self: consume: "IDENT", "Expected property name.";
+                    getRec: GetExpr <- GetExpr: new: "GetExpr", expr, pTok;
+                    expr <- getRec;
+                    continue;
+                end then.
+                end if.
+            end then.
+            end if.
+            
+            # Array Access: '['
+            if:
+            condition:
+                return tk.type == "SYMBOL" and tk.value == "[";
+            end condition.
+            then:
+                self: advance; # Consume '['
+                indexExpr: void* <- self: parseExpression;
+                self: consume: "SYMBOL", "Expected ']' after array index.";
+                aaRec: ArrayAccess <- ArrayAccess: new: "ArrayAccess", expr, indexExpr;
+                expr <- aaRec;
+                continue;
+            end then.
+            end if.
+            
+            break;
+        end loop.
+        
+        return expr;
+    end method.
+
+    has method parseArgumentList -> ASTList:
+        let list: ASTList <- ASTList: new: nil, nil;
+        let tail: ASTNode <- nil;
+        
+        loop:
+             let tk: Token <- self: peek;
+              if:
+              condition:
+                  return tk.type == "EOF" or tk.value == "." or tk.value == ":" or tk.value == "end";
+              end condition.
+              then:
+                  break;
+              end then.
+              end if.
+             
+             let arg: void* <- self: parseExpression;
+             
+             let node: ASTNode <- ASTNode: new: arg, nil;
+             
+             if:
+             condition:
+                 return list.head == nil;
+             end condition.
+             then:
+                 list.head <- node;
+                 tail <- node;
+             end then.
+             else:
+                 let tailNode: ASTNode <- Casts: toASTNode: tail;
+                 tailNode.next <- node;
+                 tail <- node;
+             end else.
+             end if.
+             
+             let tk3: Token <- self: peek;
+             if:
+             condition:
+                 return tk3.type == "SYMBOL" or tk3.type == "OPERATOR";
+             end condition.
+             then:
+                 if:
+                 condition:
+                     return tk3.value == ",";
+                 end condition.
+                 then:
+                      self: advance;
+                      continue;
+                 end then.
+                 end if.
+             end then.
+             end if.
+             break;
+        end loop.
+        
+        return list.
+    end method.
+
+    has method parsePrimary -> void*:
+        let lit: LiteralExpr <- nil;
+        tk <- self: peek;
+        
+        if:
+        condition:
+            return tk.type == "KEYWORD";
+        end condition.
+        then:
+            if:
+            condition:
+                return tk.value == "true";
+            end condition.
+            then:
+                self: advance;
+                lit <- LiteralExpr: new: "LiteralExpr", tk, "bool"; return lit;
+            end then.
+            end if.
+            if:
+            condition:
+                return tk.value == "false";
+            end condition.
+            then:
+                self: advance;
+                lit <- LiteralExpr: new: "LiteralExpr", tk, "bool"; return lit;
+            end then.
+            end if.
+            if:
+            condition:
+                return tk.value == "nil";
+            end condition.
+            then:
+                self: advance;
+                lit <- LiteralExpr: new: "LiteralExpr", tk, "nil"; return lit;
+            end then.
+            end if.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return tk.type == "NUMBER";
+        end condition.
+        then:
+             numTok <- self: advance;
+             lit <- LiteralExpr: new: "LiteralExpr", numTok, "int"; print: "DEBUG: created LiteralExpr NUM val=" + lit.tok.value; return lit;
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return tk.type == "STRING";
+        end condition.
+        then:
+             strTok <- self: advance;
+             lit <- LiteralExpr: new: "LiteralExpr", strTok, "string"; print: "DEBUG: created LiteralExpr STR val=" + lit.tok.value; return lit;
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return tk.type == "IDENT" or tk.type == "KEYWORD";
+        end condition.
+        then:
+              # Check for generics after IDENT/KEYWORD if followed by <
+              let tkNext: Token <- self: peekNext;
+              if:
+              condition:
+                  return tkNext.type == "SYMBOL" and tkNext.value == "<";
+              end condition.
+              then:
+                   # Disambiguation: Is it Type<...>: (method call or static field) or Type<...><- (let assignment) ?
+                   # Or is it a comparison 'a < b'?
+                   # We look ahead for ':'. If not found, it might be comparison.
+                   let foundTypeMarker: bool <- false;
+                   let offset: int <- 2;
+                   let depth: int <- 1;
+                   print: "DEBUG: Disambiguating < for " + tk.value;
+                   loop:
+                       let tS: Token <- self: peekAt: offset;
+                       if:
+                       condition:
+                           return tS.type == "EOF" or tS.value == ";" or tS.value == "." or tS.value == "then";
+                       end condition.
+                       then:
+                           break;
+                       end then.
+                       end if.
+                       if:
+                       condition:
+                           return tS.value == "(";
+                       end condition.
+                       then:
+                           # Probably a method call without explicit type application ending in :
+                           # But wait, Type<T>(...) isn't standard Bunker yet, it's Type: method.
+                           # If we see '(', it's likely part of an expression, not a type ref.
+                           break;
+                       end then.
+                       end if.
+                       
+                       if:
+                       condition:
+                           return tS.value == "<";
+                       end condition.
+                       then:
+                           depth <- depth + 1;
+                       end then.
+                       end if.
+                       if:
+                       condition:
+                           return tS.value == ">";
+                       end condition.
+                       then:
+                           depth <- depth - 1;
+                           if:
+                           condition:
+                               return depth == 0;
+                           end condition.
+                           then:
+                                # Look one more for ':' or '<-'
+                                let tNext: Token <- self: peekAt: offset + 1;
+                                print: "DEBUG: Found > at depth 0, next=" + tNext.value;
+                                if:
+                                condition:
+                                    return tNext.value == ":" or tNext.value == "<-" or tNext.value == "," or tNext.value == ")" or tNext.value == "]" or tNext.value == ";" or tNext.value == "." or tNext.value == "then" or tNext.value == "else" or tNext.value == "do" or tNext.value == "has";
+                                end condition.
+                                then:
+                                    foundTypeMarker <- true;
+                                end then.
+                                end if.
+                                break;
+                           end then.
+                           end if.
+                       end then.
+                       end if.
+                       offset <- offset + 1;
+                   end loop.
+
+                   if:
+                   condition:
+                       return foundTypeMarker;
+                   end condition.
+                   then:
+                       print: "DEBUG: Decided it IS a generic type.";
+                       let fullType: string <- self: parseType: "Expected generic type application";
+                       let genTk: Token <- Token: new: "IDENT", fullType, tk.line, tk.column, tk.offset;
+                       return VariableExpr: new: "VariableExpr", genTk.
+                   end then.
+                   end if.
+                   print: "DEBUG: Decided it is NOT a generic type.";
+              end then.
+              end if.
+
+              # Fallback for simple IDENT or KEYWORD (like 'string' or 'int' used as type in static call)
+              identTok <- self: advance;
+              return VariableExpr: new: "VariableExpr", identTok.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return tk.type == "SYMBOL";
+        end condition.
+        then:
+             if:
+             condition:
+                 return tk.value == ":";
+             end condition.
+             then:
+                 return nil;
+             end then.
+             end if.
+             if:
+             condition:
+                 return tk.value == "(";
+             end condition.
+             then:
+                 self: advance;
+                 expr <- self: parseExpression;
+                 self: consume: "SYMBOL", "Expected ')' after expression.";
+                 # Verify ')' ? consume consumes based on type..
+                 # TODO: make consume verify value too or use check logic
+                 
+                 group <- GroupingExpr: new: "GroupingExpr", expr;
+                 return group;
+             end then.
+             end if.
+        end then.
+        end if.
+        
+        # Error
+        ErrorReporter: report: "Unexpected token '" + tk.value + "'", tk, self.source;
+        self: advance; # Advance to avoid infinite loops
+        self.hadError <- true;
+        return nil;
+    end method.
+
+end Entity.
+
+Entity Main:
+    has static method main: argc: int, argv: void** -> int:
+        print: "--- Bunker Self-Hosted Lexer & Parser v0.3 ---";
+        
+        if:
+        condition:
+            return argc < 2;
+        end condition.
+        then:
+             print: "Usage: bunker <source.bnk>";
+             return 1;
+        end then.
+        end if.
+
+        let filename: string <- argv[1];
+        print: "Reading file: " + filename;
+
+        f <- File: open: filename;
+        if:
+        condition:
+            return f == nil;
+        end condition.
+        then:
+             print: "Error: Could not open file " + filename;
+             return 1;
+        end then.
+        end if.
+
+        code <- f: readToString;
+        f: close;
+        print: "File read, length: " + Strings: length: code;
+        
+        print: "Initializing Lexer...";
+        lexer <- Lexer: new: code;
+        print: "Lexer initialized.";
+        
+        print: "Collecting tokens...";
+        tokens <- ASTList: new: nil, nil;
+        let tail: ASTNode <- nil;
+        let tokCount: int <- 0;
+        loop:
+            tok <- lexer: nextToken;
+            tokCount <- tokCount + 1;
+            if:
+            condition:
+                return tok.type == "EOF";
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            
+            if:
+            condition:
+                return tokCount % 1000 == 0;
+            end condition.
+            then:
+                 print: "Collected " + tokCount + " tokens...";
+            end then.
+            end if.
+            
+            node <- ASTNode: new: tok, nil;
+            if:
+            condition:
+                return tokens.head == nil;
+            end condition.
+            then:
+                tokens.head <- node;
+                tail <- node;
+            end then.
+            else:
+                let tailNode: ASTNode <- Casts: toASTNode: tail;
+                tailNode.next <- node;
+                tail <- node;
+            end else.
+            end if.
+        end loop.
+        print: "Tokens collected: " + tokCount;
+        
+        print: "Tokens collected";
+        
+        parser <- Parser: new: tokens, code;
+        prog <- parser: parseProgram;
+        
+        if:
+        condition:
+            return parser.hadError;
+        end condition.
+        then:
+             print: "Parsing failed.";
+             return 1;
+        end then.
+        else:
+             print: "Parsing successful!";
+             
+             # Verify AST
+             let progRec: Program <- prog;
+             let list: ASTList <- progRec.stmts;
+             let curr: ASTNode <- list.head;
+             
+             print: "AST Structure:";
+             loop:
+                 if:
+                 condition:
+                     return curr == nil;
+                 end condition.
+                 then:
+                     break;
+                 end then.
+                 end if.
+                 
+                 # Cast to Program to access 'type' field which is first
+                 let stmt: Program <- curr.value;
+                 print: " - Stmt Type: " + stmt.type;
+                 
+                 # Move next
+                 curr <- curr.next;
+             end loop.
+              print: "";
+              print: "Running Type Checker...";
+              checker <- TypeChecker: new: parser, code;
+              checker: checkProgram: prog;
+              
+              if:
+              condition:
+                  return checker.hadError;
+              end condition.
+              then:
+                   print: "Type checking failed.";
+                   return 1;
+              end then.
+              end if.
+
+              print: "Generating C Code...";
+              transpiler <- CTranspiler: new;
+              transpiler.symbols <- checker.symbols;
+              transpiler: transpile: prog;
+
+              # Output filename
+              out_path <- filename + ".c";
+              outFile <- File: create: out_path;
+              if:
+              condition:
+                  return outFile != nil;
+              end condition.
+              then:
+                  print: "Saving to: " + out_path;
+                  let outList: ASTList <- transpiler.output;
+                  let currNode: ASTNode <- outList.head;
+                  loop:
+                      if:
+                      condition:
+                          return currNode == nil;
+                      end condition.
+                      then:
+                          break;
+                      end then.
+                      end if.
+                      
+                      let s: string <- currNode.value;
+                      outFile: writeString: s;
+                      currNode <- currNode.next;
+                  end loop.
+                  outFile: close;
+                  print: "Saved successfully.";
+              end then.
+              else:
+                  print: "Error: Could not create output file: " + out_path;
+              end else.
+              end if.
+             end else.
+             end if.
+        return 0.
+    end method.
+
+    end Entity.
+

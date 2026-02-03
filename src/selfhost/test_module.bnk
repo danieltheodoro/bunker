@@ -1,0 +1,10 @@
+module MyMod;
+import Strings;
+
+Entity MyEnt:
+    has method run:
+       x <- 1;
+    end method.
+end Entity.
+
+x <- 100;

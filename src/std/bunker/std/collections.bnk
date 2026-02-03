@@ -1,0 +1,118 @@
+module bunker.std.collections;
+
+Entity Map<K, V>:
+    # Existing Map implementation...
+    has keys: Array<K>;
+    has values: Array<V>;
+    has count: int;
+    has cap: int;
+
+    has public static method create -> Map<K, V>:
+        let m: Map<K, V> <- Map<K, V> : alloc;
+        m.cap <- 16;
+        m.count <- 0;
+        m.keys <- Array<K> : create: 16;
+        m.values <- Array<V> : create: 16;
+        return m;
+    .
+
+    has public method set: key: K, value: V:
+        # Simple linear search for now
+        let i: int <- 0;
+        while i < self.count:
+            unabstracted:
+                asm c: "bool match = false;";
+                asm c: "if (_Generic((key), char*: 1, default: 0)) {";
+                asm c: "  match = strcmp((char*)key, (char*)self->keys->data[i]) == 0;";
+                asm c: "} else {";
+                asm c: "  match = key == (K)self->keys->data[i];";
+                asm c: "}";
+                asm c: "if (match) { self->values->data[i] = (void*)value; return; }";
+            .
+            i <- i + 1;
+        .
+        
+        if:
+        condition:
+            return self.count < self.cap;
+        end condition.
+        then:
+             self.keys[self.count] <- key;
+             self.values[self.count] <- value;
+             self.count <- self.count + 1;
+        end then.
+        end if.
+    .
+
+    has public method get: key: K -> V:
+        let i: int <- 0;
+        while i < self.count:
+            unabstracted:
+                asm c: "bool match = false;";
+                asm c: "if (_Generic((key), char*: 1, default: 0)) {";
+                asm c: "  match = strcmp((char*)key, (char*)self->keys->data[i]) == 0;";
+                asm c: "} else {";
+                asm c: "  match = key == (K)self->keys->data[i];";
+                asm c: "}";
+                asm c: "if (match) return (V)self->values->data[i];";
+            .
+            i <- i + 1;
+        .
+        return nil;
+    .
+end Entity.
+
+Entity List<T>:
+    has data: Array<T>;
+    has count: int;
+    has cap: int;
+
+    has public static method create -> List<T>:
+        let l: List<T> <- List<T> : alloc;
+        l.count <- 0;
+        l.cap <- 8;
+        l.data <- Array<T> : create: 8;
+        return l;
+    .
+
+    has public method add: item: T:
+        if:
+        condition:
+            return self.count == self.cap;
+        end condition.
+        then:
+            self._resize;
+        end then.
+        end if.
+        self.data[self.count] <- item;
+        self.count <- self.count + 1;
+    .
+
+    has public method get: index: int -> T:
+        if:
+        condition:
+            return index < 0 or index >= self.count;
+        end condition.
+        then:
+            return nil;
+        end then.
+        end if.
+        return self.data[index];
+    .
+
+    has public method size -> int:
+        return self.count;
+    .
+
+    has method _resize:
+        let newCap: int <- self.cap * 2;
+        let newData: Array<T> <- Array<T> : create: newCap;
+        let i: int <- 0;
+        while i < self.count:
+            newData[i] <- self.data[i];
+            i <- i + 1;
+        .
+        self.data <- newData;
+        self.cap <- newCap;
+    .
+end Entity.

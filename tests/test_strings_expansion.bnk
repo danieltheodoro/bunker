@@ -1,0 +1,98 @@
+module test_strings_expansion;
+
+import bunker.std.io;
+import bunker.std.strings;
+import bunker.std.collections;
+
+Entity test_strings_expansion:
+    has public static method main:
+        print: "=== Bunker Strings Expansion Verification ===";
+
+        # 1. Basic Utils
+        let original : string <- "  Hello Bunker  ";
+        let trimmed : string <- Strings : trim: original;
+        print: "Trimmed: '";
+        print: trimmed;
+        print: "'";
+
+        let upper : string <- Strings : toUpper: trimmed;
+        print: "Upper: ";
+        print: upper;
+
+        let lower : string <- Strings : toLower: trimmed;
+        print: "Lower: ";
+        print: lower;
+
+        # 2. Search & Replace
+        let text : string <- "The quick brown fox jumps over the lazy dog";
+        let contains_fox : bool <- Strings : contains: text, "fox";
+        print: "Contains 'fox': ";
+        if:
+        condition:
+            return contains_fox;
+        end condition.
+        then:
+            print: "YES";
+        end then.
+        else:
+            print: "NO";
+        end if.
+
+        let index_fox : int <- Strings : indexOf: text, "fox";
+        print: "Index of 'fox': ";
+        if:
+        condition:
+            return index_fox == 16;
+        end condition.
+        then:
+            print: "16 (Correct)";
+        end then.
+        else:
+            print: "Wrong";
+        end if.
+
+        let replaced : string <- Strings : replace: text, "fox", "cat";
+        print: "Replaced 'fox' with 'cat':";
+        print: replaced;
+
+        # 3. Parsing
+        let num_str : string <- "12345";
+        let num : int <- Strings : toInt: num_str;
+        print: "Parsed Int: ";
+        if:
+        condition:
+            return num == 12345;
+        end condition.
+        then:
+            print: "12345 (Correct)";
+        end then.
+        else:
+            print: "Wrong";
+        end if.
+
+        # 4. Split & Join
+        print: "Testing Split & Join...";
+        let csv : string <- "apple,banana,cherry";
+        let fruits : List<string> <- Strings : split: csv, ",";
+        print: "Split size: ";
+        if:
+        condition:
+            return (fruits : size) == 3;
+        end condition.
+        then:
+            print: "3 (Correct)";
+        end then.
+        else:
+            print: "Wrong";
+        end if.
+        
+        print: "First fruit: ";
+        print: fruits : get: 0;
+
+        let joined : string <- Strings : join: fruits, " - ";
+        print: "Joined: ";
+        print: joined;
+
+        print: "=== All tests passed! ===";
+    end method.
+end Entity.

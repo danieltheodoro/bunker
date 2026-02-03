@@ -1,0 +1,13 @@
+module TestWriteClose;
+
+include bunker.std.io;
+
+Entity App:
+    has method main:
+        p: str <- "test.txt";
+        f: File <- File : create: p;
+        f : writeString: "test content";
+        f : close;
+        print: "Done";
+    end method.
+end Entity.

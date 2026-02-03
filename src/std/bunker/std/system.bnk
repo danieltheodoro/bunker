@@ -1,0 +1,21 @@
+module bunker.std.system;
+
+Entity System:
+    has public static method exit: code: int:
+        unabstracted:
+            asm c: "exit(code);";
+        .
+    end method.
+
+    has public static method getenv: name: string -> string:
+        unabstracted:
+            asm c: "return getenv(name);";
+        .
+    end method.
+
+    has public static method time -> int:
+        unabstracted:
+            asm c: "return (long long)time(NULL);";
+        .
+    end method.
+end Entity.

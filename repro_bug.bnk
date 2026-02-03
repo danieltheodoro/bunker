@@ -1,0 +1,15 @@
+module test;
+
+Entity Test:
+    has method test:
+        let index: int <- 0;
+        if:
+        condition:
+            return index < 10;
+        end condition.
+        then:
+            print: "Less than 10";
+        end then.
+        end if.
+    .
+end Entity.

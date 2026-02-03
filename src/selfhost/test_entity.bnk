@@ -1,0 +1,7 @@
+Entity MyEnt:
+    has method run: -> void:
+        x <- 42;
+    end method.
+end Entity.
+
+x <- 100;

@@ -1,0 +1,8 @@
+module hello_world;
+include bunker.std.io;
+
+Entity Hello_worldApp:
+    has method main:
+        print: "Hello, Bunker v2.6.0!";
+    end method.
+end Entity.

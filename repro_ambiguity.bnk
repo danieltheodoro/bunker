@@ -1,0 +1,40 @@
+module ReproAmbiguity;
+
+Entity MyType<T>:
+    has static method test -> bool:
+        return true;
+    end method.
+end Entity.
+
+Entity Main:
+    has static method main: argc: int, argv: void** -> int:
+        # 1. Comparison with uppercase identifier
+        X <- 10;
+        if:
+        condition:
+             b <- X < 20;
+             return b;
+        end condition.
+        then:
+            print: "X < 20 is true";
+        end then.
+        end if.
+
+        # 2. Generic type application in expression (with : call)
+        if:
+        condition:
+            b2 <- MyType<int>: test;
+            return b2;
+        end condition.
+        then:
+             print: "MyType<int>: test is true";
+        end then.
+        end if.
+
+        # 3. Generic type application as argument (NO : or <- follows)
+        # This is expected to FAIL to parse correctly as a generic type
+        print: MyType<int>;
+
+        return 0;
+    end method.
+end Entity.

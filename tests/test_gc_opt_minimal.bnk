@@ -1,0 +1,13 @@
+module test;
+
+Entity App:
+    has static method main -> int:
+        print: "Testing GC Optimizations...";
+        
+        
+        
+        print: "Outside scoped block";
+        
+        return 0.
+    end method.
+end Entity.

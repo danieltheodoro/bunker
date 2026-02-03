@@ -1,0 +1,26 @@
+module TestFloat;
+
+Entity App:
+    has method main:
+        val1: float <- 3.14;
+        val2: float <- 2.0;
+        val3: float <- val1 * val2;
+        print: val3;
+        
+        # Test mixed arithmetic
+        intVal: int <- 10;
+        floatVal: float <- 0.5;
+        resultVal: float <- intVal * floatVal;
+        print: resultVal;
+        
+        # Test comparison
+        if:
+        condition:
+            return val1 > val2;
+        end condition.
+        then:
+            print: "val1 is greater than val2";
+        end then.
+        end if.
+    end method.
+end Entity.

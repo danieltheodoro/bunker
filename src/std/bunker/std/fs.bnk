@@ -1,0 +1,15 @@
+module bunker.std.fs;
+
+Entity FileSystem:
+    has public static method exists: path: string -> bool:
+        unabstracted:
+            asm c: "return access(path, F_OK) == 0;"
+        .
+    end method.
+
+    has public static method delete: path: string -> bool:
+        unabstracted:
+            asm c: "return remove(path) == 0;"
+        .
+    end method.
+end Entity.

@@ -1,0 +1,45 @@
+
+module TestGenericsSimple;
+
+# Inline simple List implementation for testing
+struct List<T> {
+    items: void**;
+    count: int;
+    capacity: int;
+}
+
+Entity ListOps:
+    has static method create<T> -> List<T>:
+        list: List<T> <- List : alloc;
+        list.count <- 0;
+        list.capacity <- 10;
+        list.items <- Memory : alloc: 10 * 8;
+        return list;
+    end method.
+    
+    has static method append<T>: list: List<T>, item: T -> void:
+        list.items[list.count] <- item;
+        list.count <- list.count + 1;
+    end method.
+    
+    has static method get<T>: list: List<T>, index: int -> T:
+        return list.items[index];
+    end method.
+end Entity.
+
+Entity Main:
+    has static method main: argc: int, argv: void** -> int:
+        print: "=== Simple Generics Test ===";
+        
+        # Test List<int>
+        list: List<int> <- ListOps : create;
+        ListOps : append: list, 10;
+        ListOps : append: list, 20;
+        
+        val: int <- ListOps : get: list, 0;
+        print: val;
+        
+        print: "=== Done ===";
+        return 0;
+    end method.
+end Entity.
