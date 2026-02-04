@@ -519,13 +519,13 @@ char* System_arch(void* _self) {
     #endif
 }
 
-typedef struct MyType MyType;
 typedef struct Main Main;
-struct MyType {
-};
+typedef struct MyType_int MyType_int;
 struct Main {
 };
-bool MyType_test(void* _self);
+struct MyType_int {
+};
+bool MyType_int_test(void* _self);
 int main(int argc, char** argv) {
     int _ret = 0;
     volatile void* dummy; gc_stack_bottom = (void*)&dummy;
@@ -538,13 +538,23 @@ int main(int argc, char** argv) {
         printf("%s\n", "X < 20 is true");
     }
     if (({ 
-        void* b2 = MyType_int_test(NULL);
+        bool b2 = MyType_int_test(NULL);
         b2;
     })) {
         printf("%s\n", "MyType<int>: test is true");
     }
     printf("Unknown type: %s\n", "MyType<int>");
     _ret = 0;
+    goto end;
+    end:
+    (void)&&end;
+    return _ret;
+}
+bool MyType_int_test(void* _self) {
+    bool _ret = 0;
+    struct MyType_int* self = (struct MyType_int*)_self;
+    (void)self;
+    _ret = true;
     goto end;
     end:
     (void)&&end;

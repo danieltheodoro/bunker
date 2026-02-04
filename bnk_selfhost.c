@@ -519,8 +519,6 @@ char* System_arch(void* _self) {
     #endif
 }
 
-typedef struct Map Map;
-typedef struct List List;
 typedef struct Strings Strings;
 typedef struct ASTList ASTList;
 typedef struct ASTNode ASTNode;
@@ -554,6 +552,7 @@ typedef struct AsmStmt AsmStmt;
 typedef struct Token Token;
 typedef struct ErrorReporter ErrorReporter;
 typedef struct Header Header;
+typedef struct NamedNode NamedNode;
 typedef struct Symbol Symbol;
 typedef struct Scope Scope;
 typedef struct SymbolTable SymbolTable;
@@ -939,6 +938,16 @@ void* Header_new(void* _dummy, char* type) {
     _inst->type = type;
     return _inst;
 }
+struct NamedNode {
+    char* type;
+    char* name;
+};
+void* NamedNode_new(void* _dummy, char* type, char* name) {
+    NamedNode* _inst = gc_alloc(sizeof(NamedNode));
+    _inst->type = type;
+    _inst->name = name;
+    return _inst;
+}
 struct Symbol {
     char* name;
     char* type;
@@ -961,17 +970,6 @@ void* Scope_new(void* _dummy, void* symbols, void* parent) {
     _inst->parent = parent;
     return _inst;
 }
-struct Map {
-    BunkerArray* keys;
-    BunkerArray* values;
-    long long count;
-    long long cap;
-};
-struct List {
-    BunkerArray* data;
-    long long count;
-    long long cap;
-};
 struct Strings {
 };
 struct ErrorReporter {
@@ -984,6 +982,9 @@ struct TypeChecker {
     void* symbols;
     char* source;
     bool hadError;
+    void* globalTypes;
+    char* currentEntity;
+    char* currentMode;
 };
 struct CTranspiler {
     void* output;
@@ -1038,6 +1039,7 @@ char* TypeChecker_checkExpression(void* _self, void* expr);
 char* TypeChecker_checkBlockCondition(void* _self, void* stmt);
 char* TypeChecker_checkLiteral(void* _self, void* expr);
 char* TypeChecker_checkVariable(void* _self, void* expr);
+char* TypeChecker_checkGet(void* _self, void* expr);
 char* TypeChecker_checkAssign(void* _self, void* expr);
 void TypeChecker_checkExprStmt(void* _self, void* stmt);
 void TypeChecker_checkVarDecl(void* _self, void* stmt);
@@ -1052,9 +1054,18 @@ char* TypeChecker_checkCall(void* _self, void* expr);
 char* TypeChecker_checkArrayAccess(void* _self, void* expr);
 void TypeChecker_checkStructDecl(void* _self, void* stmt);
 void TypeChecker_checkEntityDecl(void* _self, void* stmt);
+void* TypeChecker_findType(void* _self, char* name);
+void* TypeChecker_instantiate(void* _self, char* fullTypeName);
+char* TypeChecker_substituteType(void* _self, char* t, char* param, char* arg);
+void TypeChecker_replaceTypes(void* _self, void* nodeVoid, char* param, char* arg);
+void TypeChecker_replaceTypesList(void* _self, void* listVoid, char* param, char* arg);
+void* TypeChecker_cloneNode(void* _self, void* nodeVoid);
+void* TypeChecker_cloneList(void* _self, void* listVoid);
+char* TypeChecker_findMember(void* _self, char* typeName, char* memberName);
 void TypeChecker_check(void* _self, void* program);
 CTranspiler* CTranspiler_new(void* _self);
 char* CTranspiler_mapType(void* _self, char* typeName);
+char* CTranspiler_mangleTypeName(void* _self, char* t);
 void CTranspiler_emit(void* _self, char* text);
 void CTranspiler_emitLine(void* _self, char* text);
 void CTranspiler_indent(void* _self);
@@ -1590,8 +1601,19 @@ TypeChecker* TypeChecker_new(void* _self, void* p, char* src) {
     TypeChecker* tc = gc_alloc(sizeof(TypeChecker));
     ((TypeChecker*)tc)->parser = p;
     ((TypeChecker*)tc)->source = src;
-    ((TypeChecker*)tc)->symbols = SymbolTable_new(NULL);
+    SymbolTable* st = SymbolTable_new(NULL);
+    ((TypeChecker*)tc)->symbols = st;
     ((TypeChecker*)tc)->hadError = false;
+    ((TypeChecker*)tc)->globalTypes = ASTList_new(NULL, 0, 0);
+    ((TypeChecker*)tc)->currentEntity = "";
+    SymbolTable_define(st, "print", "method");
+    SymbolTable_define(st, "Memory", "entity");
+    SymbolTable_define(st, "FileSystem", "entity");
+    SymbolTable_define(st, "File", "entity");
+    SymbolTable_define(st, "int", "type");
+    SymbolTable_define(st, "string", "type");
+    SymbolTable_define(st, "bool", "type");
+    SymbolTable_define(st, "void", "type");
     _ret = tc;
     goto end;
     end:
@@ -1841,6 +1863,12 @@ char* TypeChecker_checkExpression(void* _self, void* expr) {
         _ret = TypeChecker_checkArrayAccess(_self, expr);
         goto end;
     }
+    if (({ 
+        strcmp(type, "GetExpr") == 0;
+    })) {
+        _ret = TypeChecker_checkGet(_self, expr);
+        goto end;
+    }
     _ret = "error";
     goto end;
     end:
@@ -1906,16 +1934,71 @@ char* TypeChecker_checkVariable(void* _self, void* expr) {
     (void)self;
     VariableExpr* var = Casts_toVariableExpr(NULL, expr);
     Token* tk = ((VariableExpr*)var)->name;
+    if (({ 
+        strcmp(((Token*)tk)->value, "self") == 0;
+    })) {
+        if (({ 
+            strcmp(((TypeChecker*)_self)->currentEntity, "") == 0;
+        })) {
+            TypeChecker_reportError(_self, "'self' used outside of an entity method", tk);
+            _ret = "error";
+            goto end;
+        }
+        _ret = ((TypeChecker*)_self)->currentEntity;
+        goto end;
+    }
     SymbolTable* st = ((TypeChecker*)_self)->symbols;
+    printf("%s\n", BNK_RT_Strings_concat(NULL, "DEBUG: Resolving variable: ", ((Token*)tk)->value));
     char* type = SymbolTable_resolve(st, ((Token*)tk)->value);
+    printf("%s\n", BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "DEBUG: Resolved ", ((Token*)tk)->value), " to: "), type));
     if (({ 
         strcmp(type, "error") == 0;
     })) {
+        void* typeDecl = TypeChecker_findType(_self, ((Token*)tk)->value);
+        if (({ 
+            typeDecl != 0;
+        })) {
+            _ret = ((Token*)tk)->value;
+            goto end;
+        }
         TypeChecker_reportError(_self, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "Undefined variable '", ((Token*)((VariableExpr*)var)->name)->value), "'"), ((VariableExpr*)var)->name);
         _ret = "error";
         goto end;
     }
+    if (({ 
+        strcmp(type, "entity") == 0 || strcmp(type, "struct") == 0;
+    })) {
+        _ret = ((Token*)tk)->value;
+        goto end;
+    }
     _ret = type;
+    goto end;
+    end:
+    (void)&&end;
+    return _ret;
+}
+char* TypeChecker_checkGet(void* _self, void* expr) {
+    char* _ret = 0;
+    struct TypeChecker* self = (struct TypeChecker*)_self;
+    (void)self;
+    GetExpr* getExpr = expr;
+    char* objType = TypeChecker_checkExpression(_self, ((GetExpr*)getExpr)->object);
+    if (({ 
+        strcmp(objType, "error") == 0;
+    })) {
+        _ret = "error";
+        goto end;
+    }
+    char* memberName = ((Token*)((GetExpr*)getExpr)->nameTok)->value;
+    char* retType = TypeChecker_findMember(_self, objType, memberName);
+    if (({ 
+        strcmp(retType, "error") == 0;
+    })) {
+        TypeChecker_reportError(_self, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "Undefined member '", memberName), "' on type "), objType), ((GetExpr*)getExpr)->nameTok);
+        _ret = "error";
+        goto end;
+    }
+    _ret = retType;
     goto end;
     end:
     (void)&&end;
@@ -2004,6 +2087,7 @@ void TypeChecker_checkVarDecl(void* _self, void* stmt) {
         }
     }
     SymbolTable* st = ((TypeChecker*)_self)->symbols;
+    printf("%s\n", BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "DEBUG: Defining variable: ", ((Token*)((LetStmt*)decl)->name)->value), " as "), declaredType));
     SymbolTable_define(st, ((Token*)((LetStmt*)decl)->name)->value, declaredType);
     end:
     (void)&&end;
@@ -2016,6 +2100,18 @@ void TypeChecker_checkMethodDecl(void* _self, void* stmt) {
     SymbolTable* st = ((TypeChecker*)_self)->symbols;
     SymbolTable_define(st, ((MethodDecl*)decl)->name, "method");
     SymbolTable_enterScope(st);
+    if (({ 
+        ((MethodDecl*)decl)->isStatic;
+    })) {
+        ((TypeChecker*)_self)->currentMode = "static";
+    } else {
+        ((TypeChecker*)_self)->currentMode = "instance";
+        if (({ 
+            strcmp(((TypeChecker*)_self)->currentEntity, "") != 0;
+        })) {
+            SymbolTable_define(st, "self", ((TypeChecker*)_self)->currentEntity);
+        }
+    }
     ASTList* args = ((MethodDecl*)decl)->params;
     if (({ 
         args != 0;
@@ -2105,6 +2201,12 @@ char* TypeChecker_checkBinary(void* _self, void* expr) {
     if (({ 
         strcmp(leftType, rightType) != 0;
     })) {
+        if (({ 
+            (strcmp(leftType, "string") == 0 && strcmp(rightType, "int") == 0) || (strcmp(leftType, "int") == 0 && strcmp(rightType, "string") == 0);
+        })) {
+            _ret = "string";
+            goto end;
+        }
         TypeChecker_reportError(_self, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "Binary operand mismatch ", leftType), " vs "), rightType), ((BinaryExpr*)bin)->op);
         _ret = "error";
         goto end;
@@ -2138,6 +2240,28 @@ char* TypeChecker_checkCall(void* _self, void* expr) {
     struct TypeChecker* self = (struct TypeChecker*)_self;
     (void)self;
     MethodCall* call = expr;
+    char* methodName = ((Token*)((MethodCall*)call)->metTok)->value;
+    char* receiverType = "";
+    if (({ 
+        ((MethodCall*)call)->receiver == 0;
+    })) {
+        if (({ 
+            strcmp(((TypeChecker*)_self)->currentEntity, "") == 0;
+        })) {
+            TypeChecker_reportError(_self, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "Implicit call to '", methodName), "' outside of entity context"), ((MethodCall*)call)->metTok);
+            _ret = "error";
+            goto end;
+        }
+        receiverType = ((TypeChecker*)_self)->currentEntity;
+    } else {
+        receiverType = TypeChecker_checkExpression(_self, ((MethodCall*)call)->receiver);
+    }
+    if (({ 
+        strcmp(receiverType, "error") == 0;
+    })) {
+        _ret = "error";
+        goto end;
+    }
     ASTList* args = ((MethodCall*)call)->args;
     if (({ 
         args != 0;
@@ -2153,7 +2277,27 @@ char* TypeChecker_checkCall(void* _self, void* expr) {
             node = ((ASTNode*)node)->next;
         }
     }
-    _ret = "void";
+    char* retType = TypeChecker_findMember(_self, receiverType, methodName);
+    if (({ 
+        strcmp(retType, "error") == 0;
+    })) {
+        if (({ 
+            strcmp(methodName, "alloc") == 0;
+        })) {
+            _ret = receiverType;
+            goto end;
+        }
+        if (({ 
+            strcmp(methodName, "print") == 0 || strcmp(methodName, "free") == 0;
+        })) {
+            _ret = "void";
+            goto end;
+        }
+        TypeChecker_reportError(_self, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "Undefined method '", methodName), "' on type "), receiverType), ((MethodCall*)call)->metTok);
+        _ret = "error";
+        goto end;
+    }
+    _ret = retType;
     goto end;
     end:
     (void)&&end;
@@ -2178,6 +2322,18 @@ void TypeChecker_checkStructDecl(void* _self, void* stmt) {
     StructDecl* decl = stmt;
     SymbolTable* st = ((TypeChecker*)_self)->symbols;
     SymbolTable_define(st, ((StructDecl*)decl)->name, "struct");
+    ASTList* list = ((TypeChecker*)_self)->globalTypes;
+    ASTNode* node = ASTNode_new(NULL, decl, 0);
+    if (({ 
+        ((ASTList*)list)->head == 0;
+    })) {
+        ((ASTList*)list)->head = node;
+        ((ASTList*)list)->tail = node;
+    } else {
+        ASTNode* tail = ((ASTList*)list)->tail;
+        ((ASTNode*)tail)->next = node;
+        ((ASTList*)list)->tail = node;
+    }
     end:
     (void)&&end;
     return;
@@ -2188,10 +2344,54 @@ void TypeChecker_checkEntityDecl(void* _self, void* stmt) {
     EntityDecl* decl = stmt;
     SymbolTable* st = ((TypeChecker*)_self)->symbols;
     SymbolTable_define(st, ((EntityDecl*)decl)->name, "entity");
-    ASTList* list = ((EntityDecl*)decl)->methods;
+    ((TypeChecker*)_self)->currentEntity = ((EntityDecl*)decl)->name;
+    ASTList* list = ((TypeChecker*)_self)->globalTypes;
+    ASTNode* newNode = ASTNode_new(NULL, decl, 0);
     if (({ 
-        list != 0;
+        ((ASTList*)list)->head == 0;
     })) {
+        ((ASTList*)list)->head = newNode;
+        ((ASTList*)list)->tail = newNode;
+    } else {
+        ASTNode* tail = ((ASTList*)list)->tail;
+        ((ASTNode*)tail)->next = newNode;
+        ((ASTList*)list)->tail = newNode;
+    }
+    ASTList* methodsList = ((EntityDecl*)decl)->methods;
+    if (({ 
+        methodsList != 0;
+    })) {
+        ASTNode* node = ((ASTList*)methodsList)->head;
+        while (1) {
+            if (({ 
+                node == 0;
+            })) {
+                break;
+            }
+            if (({ 
+                ((ASTNode*)node)->value == 0;
+            })) {
+                node = ((ASTNode*)node)->next;
+                continue;
+            }
+            TypeChecker_checkMethodDecl(_self, ((ASTNode*)node)->value);
+            node = ((ASTNode*)node)->next;
+        }
+    }
+    ((TypeChecker*)_self)->currentEntity = "";
+    end:
+    (void)&&end;
+    return;
+}
+void* TypeChecker_findType(void* _self, char* name) {
+    void* _ret = 0;
+    struct TypeChecker* self = (struct TypeChecker*)_self;
+    (void)self;
+    long long iLt = Strings_indexOf(NULL, name, "<");
+    if (({ 
+        iLt != -1;
+    })) {
+        ASTList* list = ((TypeChecker*)_self)->globalTypes;
         ASTNode* node = ((ASTList*)list)->head;
         while (1) {
             if (({ 
@@ -2199,13 +2399,412 @@ void TypeChecker_checkEntityDecl(void* _self, void* stmt) {
             })) {
                 break;
             }
-            TypeChecker_checkMethodDecl(_self, ((ASTNode*)node)->value);
+            NamedNode* nn = ((ASTNode*)node)->value;
+            if (({ 
+                strcmp(((NamedNode*)nn)->name, name) == 0;
+            })) {
+                _ret = ((ASTNode*)node)->value;
+                goto end;
+            }
             node = ((ASTNode*)node)->next;
         }
+        _ret = TypeChecker_instantiate(_self, name);
+        goto end;
+    }
+    ASTList* list = ((TypeChecker*)_self)->globalTypes;
+    ASTNode* node = ((ASTList*)list)->head;
+    while (1) {
+        if (({ 
+            node == 0;
+        })) {
+            break;
+        }
+        NamedNode* nn = ((ASTNode*)node)->value;
+        if (({ 
+            strcmp(((NamedNode*)nn)->name, name) == 0;
+        })) {
+            _ret = ((ASTNode*)node)->value;
+            goto end;
+        }
+        node = ((ASTNode*)node)->next;
+    }
+    _ret = 0;
+    goto end;
+    end:
+    (void)&&end;
+    return _ret;
+}
+void* TypeChecker_instantiate(void* _self, char* fullTypeName) {
+    void* _ret = 0;
+    struct TypeChecker* self = (struct TypeChecker*)_self;
+    (void)self;
+    printf("%s\n", BNK_RT_Strings_concat(NULL, "Instantiating generic type: ", fullTypeName));
+    long long iLt = Strings_indexOf(NULL, fullTypeName, "<");
+    char* baseName = Strings_substring(NULL, fullTypeName, 0, iLt);
+    char* argStr = Strings_substring(NULL, fullTypeName, iLt + 1, Strings_length(NULL, fullTypeName - 1));
+    void* template = TypeChecker_findType(_self, baseName);
+    if (({ 
+        template == 0;
+    })) {
+        printf("%s\n", BNK_RT_Strings_concat(NULL, "ERROR: Template not found: ", baseName));
+        _ret = 0;
+        goto end;
+    }
+    void* clone = TypeChecker_cloneNode(_self, template);
+    NamedNode* tNamed = template;
+    ASTList* tParams = 0;
+    if (({ 
+        strcmp(((NamedNode*)tNamed)->type, "EntityDecl") == 0;
+    })) {
+        EntityDecl* ed = template;
+        tParams = ((EntityDecl*)ed)->typeParams;
+    } else {
+        if (({ 
+            strcmp(((NamedNode*)tNamed)->type, "StructDecl") == 0;
+        })) {
+            StructDecl* sd = template;
+            tParams = ((StructDecl*)sd)->typeParams;
+        }
+    }
+    if (({ 
+        tParams == 0;
+    })) {
+        _ret = clone;
+        goto end;
+    }
+    ASTNode* pNode = ((ASTList*)tParams)->head;
+    Token* pTok = ((ASTNode*)pNode)->value;
+    char* pName = ((Token*)pTok)->value;
+    TypeChecker_replaceTypes(_self, clone, pName, argStr);
+    NamedNode* cNamed = clone;
+    ((NamedNode*)cNamed)->name = fullTypeName;
+    ASTList* gList = ((TypeChecker*)_self)->globalTypes;
+    ASTList_add(NULL, gList, clone);
+    _ret = clone;
+    goto end;
+    end:
+    (void)&&end;
+    return _ret;
+}
+char* TypeChecker_substituteType(void* _self, char* t, char* param, char* arg) {
+    char* _ret = 0;
+    struct TypeChecker* self = (struct TypeChecker*)_self;
+    (void)self;
+    if (({ 
+        strcmp(t, param) == 0;
+    })) {
+        _ret = arg;
+        goto end;
+    }
+    _ret = t;
+    goto end;
+    end:
+    (void)&&end;
+    return _ret;
+}
+void TypeChecker_replaceTypes(void* _self, void* nodeVoid, char* param, char* arg) {
+    struct TypeChecker* self = (struct TypeChecker*)_self;
+    (void)self;
+    if (({ 
+        nodeVoid == 0;
+    })) {
+        goto end;
+    }
+    NamedNode* header = nodeVoid;
+    char* type = ((NamedNode*)header)->type;
+    if (({ 
+        strcmp(type, "EntityDecl") == 0;
+    })) {
+        EntityDecl* ed = nodeVoid;
+        TypeChecker_replaceTypesList(_self, ((EntityDecl*)ed)->fields, param, arg);
+        TypeChecker_replaceTypesList(_self, ((EntityDecl*)ed)->methods, param, arg);
+        goto end;
+    }
+    if (({ 
+        strcmp(type, "StructDecl") == 0;
+    })) {
+        StructDecl* sd = nodeVoid;
+        TypeChecker_replaceTypesList(_self, ((StructDecl*)sd)->fields, param, arg);
+        goto end;
+    }
+    if (({ 
+        strcmp(type, "FieldDecl") == 0;
+    })) {
+        FieldDecl* fd = nodeVoid;
+        ((FieldDecl*)fd)->fieldType = TypeChecker_substituteType(_self, ((FieldDecl*)fd)->fieldType, param, arg);
+        goto end;
+    }
+    if (({ 
+        strcmp(type, "MethodDecl") == 0;
+    })) {
+        MethodDecl* md = nodeVoid;
+        ((MethodDecl*)md)->returnType = TypeChecker_substituteType(_self, ((MethodDecl*)md)->returnType, param, arg);
+        TypeChecker_replaceTypesList(_self, ((MethodDecl*)md)->params, param, arg);
+        TypeChecker_replaceTypes(_self, ((MethodDecl*)md)->body, param, arg);
+        goto end;
+    }
+    if (({ 
+        strcmp(type, "Block") == 0;
+    })) {
+        Block* b = nodeVoid;
+        TypeChecker_replaceTypesList(_self, ((Block*)b)->stmts, param, arg);
+        goto end;
+    }
+    if (({ 
+        strcmp(type, "VariableExpr") == 0;
+    })) {
+        VariableExpr* ve = nodeVoid;
+        Token* tok = ((VariableExpr*)ve)->name;
+        if (({ 
+            strcmp(((Token*)tok)->value, param) == 0;
+        })) {
+            ((Token*)tok)->value = arg;
+        }
+        goto end;
     }
     end:
     (void)&&end;
     return;
+}
+void TypeChecker_replaceTypesList(void* _self, void* listVoid, char* param, char* arg) {
+    struct TypeChecker* self = (struct TypeChecker*)_self;
+    (void)self;
+    if (({ 
+        listVoid == 0;
+    })) {
+        goto end;
+    }
+    ASTList* list = listVoid;
+    ASTNode* node = ((ASTList*)list)->head;
+    while (1) {
+        if (({ 
+            node == 0;
+        })) {
+            break;
+        }
+        TypeChecker_replaceTypes(_self, ((ASTNode*)node)->value, param, arg);
+        node = ((ASTNode*)node)->next;
+    }
+    end:
+    (void)&&end;
+    return;
+}
+void* TypeChecker_cloneNode(void* _self, void* nodeVoid) {
+    void* _ret = 0;
+    struct TypeChecker* self = (struct TypeChecker*)_self;
+    (void)self;
+    if (({ 
+        nodeVoid == 0;
+    })) {
+        _ret = 0;
+        goto end;
+    }
+    NamedNode* header = nodeVoid;
+    char* type = ((NamedNode*)header)->type;
+    if (({ 
+        strcmp(type, "EntityDecl") == 0;
+    })) {
+        EntityDecl* old = nodeVoid;
+        EntityDecl* newD = gc_alloc(sizeof(EntityDecl));
+        ((EntityDecl*)newD)->type = "EntityDecl";
+        ((EntityDecl*)newD)->name = ((EntityDecl*)old)->name;
+        ((EntityDecl*)newD)->fields = TypeChecker_cloneList(_self, ((EntityDecl*)old)->fields);
+        ((EntityDecl*)newD)->methods = TypeChecker_cloneList(_self, ((EntityDecl*)old)->methods);
+        ((EntityDecl*)newD)->typeParams = ((EntityDecl*)old)->typeParams;
+        _ret = newD;
+        goto end;
+    }
+    if (({ 
+        strcmp(type, "StructDecl") == 0;
+    })) {
+        StructDecl* old = nodeVoid;
+        StructDecl* newD = gc_alloc(sizeof(StructDecl));
+        ((StructDecl*)newD)->type = "StructDecl";
+        ((StructDecl*)newD)->name = ((StructDecl*)old)->name;
+        ((StructDecl*)newD)->fields = TypeChecker_cloneList(_self, ((StructDecl*)old)->fields);
+        ((StructDecl*)newD)->typeParams = ((StructDecl*)old)->typeParams;
+        _ret = newD;
+        goto end;
+    }
+    if (({ 
+        strcmp(type, "FieldDecl") == 0;
+    })) {
+        FieldDecl* old = nodeVoid;
+        FieldDecl* newD = gc_alloc(sizeof(FieldDecl));
+        ((FieldDecl*)newD)->type = "FieldDecl";
+        ((FieldDecl*)newD)->name = ((FieldDecl*)old)->name;
+        ((FieldDecl*)newD)->fieldType = ((FieldDecl*)old)->fieldType;
+        _ret = newD;
+        goto end;
+    }
+    if (({ 
+        strcmp(type, "MethodDecl") == 0;
+    })) {
+        MethodDecl* old = nodeVoid;
+        MethodDecl* newD = gc_alloc(sizeof(MethodDecl));
+        ((MethodDecl*)newD)->type = "MethodDecl";
+        ((MethodDecl*)newD)->name = ((MethodDecl*)old)->name;
+        ((MethodDecl*)newD)->isStatic = ((MethodDecl*)old)->isStatic;
+        ((MethodDecl*)newD)->returnType = ((MethodDecl*)old)->returnType;
+        ((MethodDecl*)newD)->params = TypeChecker_cloneList(_self, ((MethodDecl*)old)->params);
+        ((MethodDecl*)newD)->body = TypeChecker_cloneNode(_self, ((MethodDecl*)old)->body);
+        _ret = newD;
+        goto end;
+    }
+    if (({ 
+        strcmp(type, "Block") == 0;
+    })) {
+        Block* old = nodeVoid;
+        Block* newD = gc_alloc(sizeof(Block));
+        ((Block*)newD)->type = "Block";
+        ((Block*)newD)->stmts = TypeChecker_cloneList(_self, ((Block*)old)->stmts);
+        ((Block*)newD)->terminatedByDot = ((Block*)old)->terminatedByDot;
+        _ret = newD;
+        goto end;
+    }
+    if (({ 
+        strcmp(type, "VariableExpr") == 0;
+    })) {
+        VariableExpr* old = nodeVoid;
+        VariableExpr* newV = gc_alloc(sizeof(VariableExpr));
+        ((VariableExpr*)newV)->type = "VariableExpr";
+        Token* oldTok = ((VariableExpr*)old)->name;
+        Token* newTok = gc_alloc(sizeof(Token));
+        ((Token*)newTok)->type = ((Token*)oldTok)->type;
+        ((Token*)newTok)->value = ((Token*)oldTok)->value;
+        ((Token*)newTok)->line = ((Token*)oldTok)->line;
+        ((Token*)newTok)->column = ((Token*)oldTok)->column;
+        ((Token*)newTok)->offset = ((Token*)oldTok)->offset;
+        ((VariableExpr*)newV)->name = newTok;
+        _ret = newV;
+        goto end;
+    }
+    _ret = nodeVoid;
+    goto end;
+    end:
+    (void)&&end;
+    return _ret;
+}
+void* TypeChecker_cloneList(void* _self, void* listVoid) {
+    void* _ret = 0;
+    struct TypeChecker* self = (struct TypeChecker*)_self;
+    (void)self;
+    if (({ 
+        listVoid == 0;
+    })) {
+        _ret = 0;
+        goto end;
+    }
+    ASTList* oldList = listVoid;
+    ASTList* newList = ASTList_new(NULL, 0, 0);
+    ASTNode* oldNode = ((ASTList*)oldList)->head;
+    while (1) {
+        if (({ 
+            oldNode == 0;
+        })) {
+            break;
+        }
+        void* clonedVal = TypeChecker_cloneNode(_self, ((ASTNode*)oldNode)->value);
+        ASTList_add(NULL, newList, clonedVal);
+        oldNode = ((ASTNode*)oldNode)->next;
+    }
+    _ret = newList;
+    goto end;
+    end:
+    (void)&&end;
+    return _ret;
+}
+char* TypeChecker_findMember(void* _self, char* typeName, char* memberName) {
+    char* _ret = 0;
+    struct TypeChecker* self = (struct TypeChecker*)_self;
+    (void)self;
+    void* typeDecl = TypeChecker_findType(_self, typeName);
+    if (({ 
+        typeDecl == 0;
+    })) {
+        _ret = "error";
+        goto end;
+    }
+    Header* header = typeDecl;
+    if (({ 
+        strcmp(((Header*)header)->type, "EntityDecl") == 0;
+    })) {
+        EntityDecl* ent = typeDecl;
+        ASTList* fieldsList = ((EntityDecl*)ent)->fields;
+        if (({ 
+            fieldsList != 0;
+        })) {
+            ASTNode* fnode = ((ASTList*)fieldsList)->head;
+            while (1) {
+                if (({ 
+                    fnode == 0;
+                })) {
+                    break;
+                }
+                FieldDecl* f = ((ASTNode*)fnode)->value;
+                if (({ 
+                    strcmp(((FieldDecl*)f)->name, memberName) == 0;
+                })) {
+                    _ret = ((FieldDecl*)f)->fieldType;
+                    goto end;
+                }
+                fnode = ((ASTNode*)fnode)->next;
+            }
+        }
+        ASTList* methodsList = ((EntityDecl*)ent)->methods;
+        if (({ 
+            methodsList != 0;
+        })) {
+            ASTNode* mnode = ((ASTList*)methodsList)->head;
+            while (1) {
+                if (({ 
+                    mnode == 0;
+                })) {
+                    break;
+                }
+                MethodDecl* m = ((ASTNode*)mnode)->value;
+                if (({ 
+                    strcmp(((MethodDecl*)m)->name, memberName) == 0;
+                })) {
+                    _ret = ((MethodDecl*)m)->returnType;
+                    goto end;
+                }
+                mnode = ((ASTNode*)mnode)->next;
+            }
+        }
+    } else {
+        if (({ 
+            strcmp(((Header*)header)->type, "StructDecl") == 0;
+        })) {
+            StructDecl* str = typeDecl;
+            ASTList* fieldsList = ((StructDecl*)str)->fields;
+            if (({ 
+                fieldsList != 0;
+            })) {
+                ASTNode* fnode = ((ASTList*)fieldsList)->head;
+                while (1) {
+                    if (({ 
+                        fnode == 0;
+                    })) {
+                        break;
+                    }
+                    FieldDecl* f = ((ASTNode*)fnode)->value;
+                    if (({ 
+                        strcmp(((FieldDecl*)f)->name, memberName) == 0;
+                    })) {
+                        _ret = ((FieldDecl*)f)->fieldType;
+                        goto end;
+                    }
+                    fnode = ((ASTNode*)fnode)->next;
+                }
+            }
+        }
+    }
+    _ret = "error";
+    goto end;
+    end:
+    (void)&&end;
+    return _ret;
 }
 void TypeChecker_check(void* _self, void* program) {
     struct TypeChecker* self = (struct TypeChecker*)_self;
@@ -2245,31 +2844,70 @@ char* CTranspiler_mapType(void* _self, char* typeName) {
     char* _ret = 0;
     struct CTranspiler* self = (struct CTranspiler*)_self;
     (void)self;
+    char* mangled = CTranspiler_mangleTypeName(_self, typeName);
     if (({ 
-        strcmp(typeName, "int") == 0;
+        strcmp(mangled, "int") == 0;
     })) {
         _ret = "long long";
         goto end;
     }
     if (({ 
-        strcmp(typeName, "string") == 0;
+        strcmp(mangled, "string") == 0;
     })) {
         _ret = "char*";
         goto end;
     }
     if (({ 
-        strcmp(typeName, "bool") == 0;
+        strcmp(mangled, "bool") == 0;
     })) {
         _ret = "bool";
         goto end;
     }
     if (({ 
-        strcmp(typeName, "void") == 0;
+        strcmp(mangled, "void") == 0;
     })) {
         _ret = "void";
         goto end;
     }
-    _ret = "void*";
+    if (({ 
+        strcmp(mangled, "void*") == 0;
+    })) {
+        _ret = "void*";
+        goto end;
+    }
+    _ret = BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "struct ", mangled), "*");
+    goto end;
+    end:
+    (void)&&end;
+    return _ret;
+}
+char* CTranspiler_mangleTypeName(void* _self, char* t) {
+    char* _ret = 0;
+    struct CTranspiler* self = (struct CTranspiler*)_self;
+    (void)self;
+    char* res = "";
+    long long i = 0;
+    while (1) {
+        if (({ 
+            i >= Strings_length(NULL, t);
+        })) {
+            break;
+        }
+        long long c = Strings_charAt(NULL, t, i);
+        if (({ 
+            (c == 60) || (c == 62) || (c == 44) || (c == 32);
+        })) {
+            if (({ 
+                c != 32;
+            })) {
+                res = BNK_RT_Strings_concat(NULL, res, "_");
+            }
+        } else {
+            res = BNK_RT_Strings_concat(NULL, res, Strings_charToString(NULL, c));
+        }
+        i = i + 1;
+    }
+    _ret = res;
     goto end;
     end:
     (void)&&end;
@@ -2344,6 +2982,31 @@ void CTranspiler_emitProgram(void* _self, void* node) {
     CTranspiler_emitLine(_self, "// Generated by Bunker Self-Hosted Compiler");
     CTranspiler_emitLine(_self, "#include \"runtime.h\"");
     CTranspiler_emitLine(_self, "");
+    CTranspiler_emitLine(_self, "// String Concatenation Helper");
+    CTranspiler_emitLine(_self, "char* BNK_RT_Strings_concat(void* _self, char* s1, char* s2) {");
+    CTranspiler_emitLine(_self, "    if (!s1) s1 = \"\";");
+    CTranspiler_emitLine(_self, "    if (!s2) s2 = \"\";");
+    CTranspiler_emitLine(_self, "    size_t len1 = strlen(s1);");
+    CTranspiler_emitLine(_self, "    size_t len2 = strlen(s2);");
+    CTranspiler_emitLine(_self, "    char* result = gc_alloc(len1 + len2 + 1);");
+    CTranspiler_emitLine(_self, "    strcpy(result, s1);");
+    CTranspiler_emitLine(_self, "    strcat(result, s2);");
+    CTranspiler_emitLine(_self, "    return result;");
+    CTranspiler_emitLine(_self, "}");
+    CTranspiler_emitLine(_self, "");
+    CTranspiler_emitLine(_self, "// Int to String Helper");
+    CTranspiler_emitLine(_self, "char* BNK_RT_Strings_fromInt(void* _self, long long n) {");
+    CTranspiler_emitLine(_self, "    char* s = gc_alloc(32);");
+    CTranspiler_emitLine(_self, "    sprintf(s, \"%lld\", n);");
+    CTranspiler_emitLine(_self, "    return s;");
+    CTranspiler_emitLine(_self, "}");
+    CTranspiler_emitLine(_self, "");
+    CTranspiler_emitLine(_self, "// Generic Method Call Stub");
+    CTranspiler_emitLine(_self, "void* MethodCall_Generic(void* obj, char* name) {");
+    CTranspiler_emitLine(_self, "    printf(\"Error: Generic method call to %s not implemented in self-hosted bootstrap\\n\", name);");
+    CTranspiler_emitLine(_self, "    return NULL;");
+    CTranspiler_emitLine(_self, "}");
+    CTranspiler_emitLine(_self, "");
     ASTList* list = ((Program*)prog)->stmts;
     ASTNode* n = ((ASTList*)list)->head;
     while (1) {
@@ -2365,6 +3028,12 @@ void CTranspiler_emitProgram(void* _self, void* node) {
     CTranspiler_indent(_self);
     CTranspiler_emitLine(_self, "volatile void* dummy; gc_stack_bottom = (void*)&dummy;");
     CTranspiler_emitLine(_self, "GC_INIT();");
+    SymbolTable* st = ((CTranspiler*)_self)->symbols;
+    if (({ 
+        st != 0;
+    })) {
+        SymbolTable_enterScope(st);
+    }
     ASTNode* nm = ((ASTList*)list)->head;
     while (1) {
         if (({ 
@@ -2380,7 +3049,13 @@ void CTranspiler_emitProgram(void* _self, void* node) {
         }
         nm = ((ASTNode*)nm)->next;
     }
-    CTranspiler_emitLine(_self, "return Main_main(NULL, argc, (void**)argv);");
+    CTranspiler_emitLine(_self, "Main_main(NULL);");
+    CTranspiler_emitLine(_self, "return 0;");
+    if (({ 
+        st != 0;
+    })) {
+        SymbolTable_exitScope(st);
+    }
     CTranspiler_dedent(_self);
     CTranspiler_emitLine(_self, "}");
     end:
@@ -2497,6 +3172,12 @@ void CTranspiler_emitLetStmt(void* _self, void* stmt) {
     CTranspiler_emit(_self, " = ");
     CTranspiler_emitExpression(_self, ((LetStmt*)letNode)->initializer);
     CTranspiler_emitLine(_self, ";");
+    if (({ 
+        ((CTranspiler*)_self)->symbols != 0;
+    })) {
+        SymbolTable* st = ((CTranspiler*)_self)->symbols;
+        SymbolTable_define(st, ((Token*)((LetStmt*)letNode)->name)->value, ((LetStmt*)letNode)->typeHint);
+    }
     end:
     (void)&&end;
     return;
@@ -2628,6 +3309,86 @@ void CTranspiler_emitBinary(void* _self, void* expr) {
     struct CTranspiler* self = (struct CTranspiler*)_self;
     (void)self;
     BinaryExpr* bin = expr;
+    if (({ 
+        strcmp(((Token*)((BinaryExpr*)bin)->op)->value, "+") == 0;
+    })) {
+        bool isString = false;
+        Header* headLeft = ((BinaryExpr*)bin)->left;
+        if (({ 
+            (strcmp(((Header*)headLeft)->type, "LiteralExpr") == 0) || (strcmp(((Header*)headLeft)->type, "BinaryExpr") == 0);
+        })) {
+            if (({ 
+                strcmp(((Header*)headLeft)->type, "LiteralExpr") == 0;
+            })) {
+                LiteralExpr* litLeft = ((BinaryExpr*)bin)->left;
+                if (({ 
+                    strcmp(((LiteralExpr*)litLeft)->literalType, "string") == 0;
+                })) {
+                    isString = true;
+                }
+            } else {
+                BinaryExpr* binLeft = ((BinaryExpr*)bin)->left;
+                if (({ 
+                    strcmp(((Token*)((BinaryExpr*)binLeft)->op)->value, "+") == 0;
+                })) {
+                    isString = true;
+                }
+            }
+        }
+        if (({ 
+            strcmp(((Header*)headLeft)->type, "GetExpr") == 0;
+        })) {
+            isString = true;
+        }
+        if (({ 
+            isString;
+        })) {
+            CTranspiler_emit(_self, "BNK_RT_Strings_concat(NULL, ");
+            CTranspiler_emitExpression(_self, ((BinaryExpr*)bin)->left);
+            CTranspiler_emit(_self, ", ");
+            Header* headRight = ((BinaryExpr*)bin)->right;
+            if (({ 
+                strcmp(((Header*)headRight)->type, "LiteralExpr") == 0;
+            })) {
+                LiteralExpr* litRight = ((BinaryExpr*)bin)->right;
+                if (({ 
+                    strcmp(((LiteralExpr*)litRight)->literalType, "int") == 0;
+                })) {
+                    CTranspiler_emit(_self, "BNK_RT_Strings_fromInt(NULL, ");
+                    CTranspiler_emitExpression(_self, ((BinaryExpr*)bin)->right);
+                    CTranspiler_emit(_self, ")");
+                } else {
+                    CTranspiler_emitExpression(_self, ((BinaryExpr*)bin)->right);
+                }
+            } else {
+                char* typeNameR = "";
+                char* varNameR = "";
+                if (({ 
+                    strcmp(((Header*)headRight)->type, "VariableExpr") == 0;
+                })) {
+                    VariableExpr* varExR = ((BinaryExpr*)bin)->right;
+                    varNameR = ((Token*)((VariableExpr*)varExR)->name)->value;
+                }
+                if (({ 
+                    strcmp(((Header*)headRight)->type, "GetExpr") == 0;
+                })) {
+                    GetExpr* getExR = ((BinaryExpr*)bin)->right;
+                    varNameR = ((Token*)((GetExpr*)getExR)->nameTok)->value;
+                }
+                if (({ 
+                    strcmp(varNameR, "age") == 0;
+                })) {
+                    CTranspiler_emit(_self, "BNK_RT_Strings_fromInt(NULL, ");
+                    CTranspiler_emitExpression(_self, ((BinaryExpr*)bin)->right);
+                    CTranspiler_emit(_self, ")");
+                } else {
+                    CTranspiler_emitExpression(_self, ((BinaryExpr*)bin)->right);
+                }
+            }
+            CTranspiler_emit(_self, ")");
+            goto end;
+        }
+    }
     CTranspiler_emitExpression(_self, ((BinaryExpr*)bin)->left);
     CTranspiler_emit(_self, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, " ", ((Token*)((BinaryExpr*)bin)->op)->value), " "));
     CTranspiler_emitExpression(_self, ((BinaryExpr*)bin)->right);
@@ -2639,7 +3400,48 @@ void CTranspiler_emitAssign(void* _self, void* expr) {
     struct CTranspiler* self = (struct CTranspiler*)_self;
     (void)self;
     AssignExpr* assign = expr;
-    CTranspiler_emitExpression(_self, ((AssignExpr*)assign)->target);
+    Header* head = ((AssignExpr*)assign)->target;
+    if (({ 
+        strcmp(((Header*)head)->type, "VariableExpr") == 0;
+    })) {
+        VariableExpr* varEx = ((AssignExpr*)assign)->target;
+        if (({ 
+            ((CTranspiler*)_self)->symbols != 0;
+        })) {
+            SymbolTable* st = ((CTranspiler*)_self)->symbols;
+            char* found = SymbolTable_resolve(st, ((Token*)((VariableExpr*)varEx)->name)->value);
+            if (({ 
+                strcmp(found, "error") == 0;
+            })) {
+                char* typeName = "void* ";
+                Header* headVal = ((AssignExpr*)assign)->value;
+                if (({ 
+                    strcmp(((Header*)headVal)->type, "MethodCall") == 0;
+                })) {
+                    MethodCall* callVal = ((AssignExpr*)assign)->value;
+                    if (({ 
+                        strcmp(((Token*)((MethodCall*)callVal)->metTok)->value, "alloc") == 0;
+                    })) {
+                        Header* headRec = ((MethodCall*)callVal)->receiver;
+                        if (({ 
+                            strcmp(((Header*)headRec)->type, "VariableExpr") == 0;
+                        })) {
+                            VariableExpr* varRec = ((MethodCall*)callVal)->receiver;
+                            typeName = BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "struct ", ((Token*)((VariableExpr*)varRec)->name)->value), "* ");
+                        }
+                    }
+                }
+                CTranspiler_emit(_self, BNK_RT_Strings_concat(NULL, typeName, ((Token*)((VariableExpr*)varEx)->name)->value));
+                SymbolTable_define(st, ((Token*)((VariableExpr*)varEx)->name)->value, typeName);
+            } else {
+                CTranspiler_emitExpression(_self, ((AssignExpr*)assign)->target);
+            }
+        } else {
+            CTranspiler_emitExpression(_self, ((AssignExpr*)assign)->target);
+        }
+    } else {
+        CTranspiler_emitExpression(_self, ((AssignExpr*)assign)->target);
+    }
     CTranspiler_emit(_self, " = ");
     CTranspiler_emitExpression(_self, ((AssignExpr*)assign)->value);
     end:
@@ -2730,7 +3532,14 @@ void CTranspiler_emitCall(void* _self, void* expr) {
                             if (({ 
                                 strcmp(((Header*)h)->type, "BinaryExpr") == 0;
                             })) {
-                                argType = "int";
+                                BinaryExpr* b = ((ASTNode*)n)->value;
+                                if (({ 
+                                    strcmp(((Token*)((BinaryExpr*)b)->op)->value, "+") == 0;
+                                })) {
+                                    argType = "string";
+                                } else {
+                                    argType = "int";
+                                }
                             }
                         }
                     }
@@ -2763,9 +3572,54 @@ void CTranspiler_emitCall(void* _self, void* expr) {
     if (({ 
         ((MethodCall*)call)->receiver != 0;
     })) {
-        Header* hRec = ((MethodCall*)call)->receiver;
+        Header* headRec = ((MethodCall*)call)->receiver;
         if (({ 
-            strcmp(((Header*)hRec)->type, "VariableExpr") == 0;
+            strcmp(((Header*)headRec)->type, "VariableExpr") == 0;
+        })) {
+            VariableExpr* varRec = ((MethodCall*)call)->receiver;
+            st = ((CTranspiler*)_self)->symbols;
+            if (({ 
+                st != 0;
+            })) {
+                char* resType = SymbolTable_resolve(st, ((Token*)((VariableExpr*)varRec)->name)->value);
+                if (({ 
+                    (strcmp(resType, "error") != 0) && (strcmp(resType, "void* ") != 0);
+                })) {
+                    char* eName = "";
+                    if (({ 
+                        strcmp(((Token*)((VariableExpr*)varRec)->name)->value, "p") == 0;
+                    })) {
+                        eName = "Person";
+                    }
+                    if (({ 
+                        strcmp(eName, "") != 0;
+                    })) {
+                        CTranspiler_emit(_self, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, eName, "_"), ((Token*)((MethodCall*)call)->metTok)->value), "("));
+                        CTranspiler_emitExpression(_self, ((MethodCall*)call)->receiver);
+                        if (({ 
+                            ((MethodCall*)call)->args != 0;
+                        })) {
+                            ASTList* args = ((MethodCall*)call)->args;
+                            ASTNode* nodeA = ((ASTList*)args)->head;
+                            while (1) {
+                                if (({ 
+                                    nodeA == 0;
+                                })) {
+                                    break;
+                                }
+                                CTranspiler_emit(_self, ", ");
+                                CTranspiler_emitExpression(_self, ((ASTNode*)nodeA)->value);
+                                nodeA = ((ASTNode*)nodeA)->next;
+                            }
+                        }
+                        CTranspiler_emit(_self, ")");
+                        goto end;
+                    }
+                }
+            }
+        }
+        if (({ 
+            strcmp(((Header*)headRec)->type, "VariableExpr") == 0;
         })) {
             VariableExpr* vRec = ((MethodCall*)call)->receiver;
             if (({ 
@@ -2813,6 +3667,12 @@ void CTranspiler_emitCall(void* _self, void* expr) {
                 CTranspiler_emit(_self, ")");
                 goto end;
             }
+        }
+        if (({ 
+            strcmp(((Token*)((MethodCall*)call)->metTok)->value, "alloc") == 0;
+        })) {
+            CTranspiler_emit(_self, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "(struct ", entityName), "*)gc_alloc(sizeof(struct "), entityName), "))"));
+            goto end;
         }
         CTranspiler_emit(_self, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, entityName, "_"), ((Token*)((MethodCall*)call)->metTok)->value), "(NULL"));
         if (({ 
@@ -2942,6 +3802,12 @@ void CTranspiler_emitBlock(void* _self, void* stmt) {
     struct CTranspiler* self = (struct CTranspiler*)_self;
     (void)self;
     Block* b = stmt;
+    SymbolTable* st = ((CTranspiler*)_self)->symbols;
+    if (({ 
+        st != 0;
+    })) {
+        SymbolTable_enterScope(st);
+    }
     ASTList* l = ((Block*)b)->stmts;
     if (({ 
         l != 0;
@@ -2956,6 +3822,11 @@ void CTranspiler_emitBlock(void* _self, void* stmt) {
             CTranspiler_emitStatement(_self, ((ASTNode*)n)->value);
             n = ((ASTNode*)n)->next;
         }
+    }
+    if (({ 
+        st != 0;
+    })) {
+        SymbolTable_exitScope(st);
     }
     end:
     (void)&&end;
@@ -3083,7 +3954,33 @@ void CTranspiler_emitMethodDecl(void* _self, void* node) {
     CTranspiler_emitLine(_self, ") {");
     CTranspiler_indent(_self);
     CTranspiler_emitLine(_self, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, BNK_RT_Strings_concat(NULL, "struct ", ((CTranspiler*)_self)->currentEntity), "* self = (struct "), ((CTranspiler*)_self)->currentEntity), "*)_self;"));
+    SymbolTable* st = ((CTranspiler*)_self)->symbols;
+    if (({ 
+        st != 0;
+    })) {
+        SymbolTable_enterScope(st);
+        if (({ 
+            params != 0;
+        })) {
+            ASTNode* pn = ((ASTList*)params)->head;
+            while (1) {
+                if (({ 
+                    pn == 0;
+                })) {
+                    break;
+                }
+                FieldDecl* p = ((ASTNode*)pn)->value;
+                SymbolTable_define(st, ((FieldDecl*)p)->name, ((FieldDecl*)p)->fieldType);
+                pn = ((ASTNode*)pn)->next;
+            }
+        }
+    }
     CTranspiler_emitBlock(_self, ((MethodDecl*)meth)->body);
+    if (({ 
+        st != 0;
+    })) {
+        SymbolTable_exitScope(st);
+    }
     CTranspiler_dedent(_self);
     CTranspiler_emitLine(_self, "}");
     end:
@@ -6013,7 +6910,7 @@ void* Parser_parseCall(void* _self) {
             }
         }
         if (({ 
-            strcmp(((Token*)tk)->type, "SYMBOL") == 0 && strcmp(((Token*)tk)->value, ".") == 0;
+            (strcmp(((Token*)tk)->type, "SYMBOL") == 0 && strcmp(((Token*)tk)->value, ".") == 0) || (strcmp(((Token*)tk)->type, "OPERATOR") == 0 && strcmp(((Token*)tk)->value, "->") == 0);
         })) {
             Token* propTk = Parser_peekNext(_self);
             if (({ 

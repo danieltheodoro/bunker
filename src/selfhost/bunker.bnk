@@ -3574,10 +3574,10 @@ Entity Parser:
             end then.
             end if.
             
-            # Property Access: '.'
+            # Property Access: '.' or '->'
             if:
             condition:
-                return tk.type == "SYMBOL" and tk.value == ".";
+                return (tk.type == "SYMBOL" and tk.value == ".") or (tk.type == "OPERATOR" and tk.value == "->");
             end condition.
             then:
                 propTk: Token <- self: peekNext;

@@ -1,0 +1,27 @@
+module test_generics;
+
+Entity Box<T>:
+    has value: T;
+    
+    has static method create: val: T -> Box<T>:
+        b: Box<T> <- Box<T>: alloc;
+        b->value <- val;
+        return b;
+    end method.
+    
+    has method get -> T:
+        return self->value;
+    end method.
+end Entity.
+
+Entity Main:
+    has static method main -> void:
+        # We use -> for fields and : for methods in this test to be safe with my recent transpiler fixes
+        b1: Box<string> <- Box<string>: create: "Hello Generics";
+        print: b1: get;
+        
+        # Test with int
+        b2: Box<int> <- Box<int>: create: 42;
+        print: b2: get;
+    end method.
+end Entity.

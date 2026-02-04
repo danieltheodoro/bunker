@@ -519,15 +519,9 @@ char* System_arch(void* _self) {
     #endif
 }
 
-typedef struct List List;
 typedef struct App App;
 typedef struct List_int List_int;
 typedef struct List_str List_str;
-struct List {
-    BunkerArray* data;
-    long long count;
-    long long cap;
-};
 struct App {
 };
 struct List_int {
@@ -555,7 +549,7 @@ int main(int argc, char** argv) {
     volatile void* dummy; gc_stack_bottom = (void*)&dummy;
     GC_INIT();
     printf("%s\n", "=== Generics Test ===");
-    List_int* list = List_create(NULL);
+    List_int* list = List_int_create(NULL);
     List_int_append(list, 10);
     List_int_append(list, 20);
     long long val = List_int_get(list, 0);
@@ -564,7 +558,7 @@ int main(int argc, char** argv) {
     printf("%lld\n", (long long)val2);
     long long size = List_int_size(list);
     printf("%lld\n", (long long)size);
-    List_str* slist = List_create(NULL);
+    List_str* slist = List_str_create(NULL);
     List_str_append(slist, "Hello");
     List_str_append(slist, "World");
     char* s1 = List_str_get(slist, 0);

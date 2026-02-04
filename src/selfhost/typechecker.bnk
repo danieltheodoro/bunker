@@ -6,6 +6,11 @@ struct Header {
     type: string;
 }
 
+struct NamedNode {
+    type: string;
+    name: string;
+}
+
 struct Symbol {
     name: string;
     type: string;
@@ -146,13 +151,28 @@ Entity TypeChecker:
     has symbols: void*; # SymbolTable*
     has source: string; # Source code for error reporting
     has hadError: bool;
+    has globalTypes: void*; # ASTList* of Entity/StructDecl
+    has currentEntity: string;
+    has currentMode: string; # "static" or "instance"
     
     has static method new: p: void*, src: string -> TypeChecker:
         tc <- TypeChecker: alloc;
         tc.parser <- p;
         tc.source <- src;
-        tc.symbols <- SymbolTable: new;
+        st <- SymbolTable: new;
+        tc.symbols <- st;
         tc.hadError <- false;
+        tc.globalTypes <- ASTList: new: nil, nil;
+        tc.currentEntity <- "";
+        # Register Built-ins
+        st: define: "print", "method";
+        st: define: "Memory", "entity";
+        st: define: "FileSystem", "entity";
+        st: define: "File", "entity";
+        st: define: "int", "type";
+        st: define: "string", "type";
+        st: define: "bool", "type";
+        st: define: "void", "type";
         return tc;
     end method.
 
@@ -482,6 +502,14 @@ Entity TypeChecker:
             return self: checkArrayAccess: expr;
         end then.
         end if.
+        if:
+        condition:
+            return type == "GetExpr";
+        end condition.
+        then:
+            return self: checkGet: expr;
+        end then.
+        end if.
         
         return "error";
     end method.
@@ -548,19 +576,90 @@ Entity TypeChecker:
         var: VariableExpr <- Casts: toVariableExpr: expr;
         tk <- var.name;
         
+        # Handle self
+        if:
+        condition:
+            return tk.value == "self";
+        end condition.
+        then:
+             if:
+             condition:
+                 return self.currentEntity == "";
+             end condition.
+             then:
+                  self: reportError: "'self' used outside of an entity method", tk;
+                  return "error";
+             end then.
+             end if.
+             return self.currentEntity;
+        end then.
+        end if.
+
         st: SymbolTable <- self.symbols;
+        print: "DEBUG: Resolving variable: " + tk.value;
         type: string <- st: resolve: tk.value;
+        print: "DEBUG: Resolved " + tk.value + " to: " + type;
         
         if:
         condition:
             return type == "error";
         end condition.
         then:
+             # Check if it's a global entity/struct name
+             typeDecl: void* <- self: findType: tk.value;
+             if:
+             condition:
+                 return typeDecl != nil;
+             end condition.
+             then:
+                  return tk.value; # Return actual name (e.g. "Person")
+             end then.
+             end if.
+
              self: reportError: "Undefined variable '" + var.name.value + "'", var.name;
              return "error";
         end then.
         end if.
+        
+        # If it resolved to "entity" or "struct", return the name instead if we can find it
+        if:
+        condition:
+            return type == "entity" or type == "struct";
+        end condition.
+        then:
+             return tk.value;
+        end then.
+        end if.
+
         return type;
+    end method.
+
+    has method checkGet: expr: void* -> string:
+        getExpr: GetExpr <- expr;
+        objType <- self: checkExpression: getExpr.object;
+        if:
+        condition:
+            return objType == "error";
+        end condition.
+        then:
+            return "error";
+        end then.
+        end if.
+        
+        let memberName: string <- getExpr.nameTok.value;
+        let retType: string <- self: findMember: objType, memberName;
+        
+        if:
+        condition:
+            return retType == "error";
+        end condition.
+        then:
+             self: reportError: "Undefined member '" + memberName + "' on type " + objType, getExpr.nameTok;
+             return "error";
+        end then.
+        end if.
+        
+        return retType;
     end method.
     
     has method checkAssign: expr: void* -> string:
@@ -672,6 +771,7 @@ Entity TypeChecker:
         end if.
         
         st: SymbolTable <- self.symbols;
+        print: "DEBUG: Defining variable: " + decl.name.value + " as " + declaredType;
         st: define: decl.name.value, declaredType;
     end method.
 
@@ -680,10 +780,31 @@ Entity TypeChecker:
         st: SymbolTable <- self.symbols;
         
         # Define method in current scope (global)
-        st: define: decl.name, "method"; # TODO: function type signature
+        st: define: decl.name, "method";
         
         # Enter method scope
         st: enterScope;
+        
+        # Context
+        if:
+        condition:
+            return decl.isStatic;
+        end condition.
+        then:
+             self.currentMode <- "static";
+        end then.
+        else:
+             self.currentMode <- "instance";
+             if:
+             condition:
+                 return self.currentEntity != "";
+             end condition.
+             then:
+                  st: define: "self", self.currentEntity;
+             end then.
+             end if.
+        end else.
+        end if.
         
         # Define parameters
         args: ASTList <- decl.params;
@@ -785,6 +906,16 @@ Entity TypeChecker:
             return leftType != rightType;
         end condition.
         then:
+             # Relax for string concatenation
+             if:
+             condition:
+                 return (leftType == "string" and rightType == "int") or (leftType == "int" and rightType == "string");
+             end condition.
+             then:
+                  return "string";
+             end then.
+             end if.
+
              self: reportError: "Binary operand mismatch " + leftType + " vs " + rightType, bin.op;
              return "error";
         end then.
@@ -810,12 +941,42 @@ Entity TypeChecker:
     
     has method checkCall: expr: void* -> string:
         call: MethodCall <- expr;
+        let methodName: string <- call.metTok.value;
         
-        # Check receiver
-        # For now, assume receiver is implicit 'self' or explicit?
-        # Receiver logic is complex in self-hosted;
-        # But we verify args at least;
+        # 1. Resolve receiver type
+        let receiverType: string <- "";
+        if:
+        condition:
+            return call.receiver == nil;
+        end condition.
+        then:
+             # Implicit self
+             if:
+             condition:
+                 return self.currentEntity == "";
+             end condition.
+             then:
+                  self: reportError: "Implicit call to '" + methodName + "' outside of entity context", call.metTok;
+                  return "error";
+             end then.
+             end if.
+             receiverType <- self.currentEntity;
+        end then.
+        else:
+             receiverType <- self: checkExpression: call.receiver;
+        end else.
+        end if.
         
+        if:
+        condition:
+            return receiverType == "error";
+        end condition.
+        then:
+            return "error";
+        end then.
+        end if.
+        
+        # 2. Check arguments
         args: ASTList <- call.args;
         if:
         condition:
@@ -838,10 +999,37 @@ Entity TypeChecker:
         end then.
         end if.
         
-        # Helper: resolve method return type from symbol table if possible?
-        # Or hardcode for known methods;
-        # For this stage, just return "void" or "unknown" to avoid crashing
-        return "void"; 
+        # 3. Resolve method
+        let retType: string <- self: findMember: receiverType, methodName;
+        if:
+        condition:
+            return retType == "error";
+        end condition.
+        then:
+             # Basic built-ins
+             if:
+             condition:
+                 return methodName == "alloc";
+             end condition.
+             then:
+                  return receiverType;
+             end then.
+             end if.
+             if:
+             condition:
+                 return methodName == "print" or methodName == "free";
+             end condition.
+             then:
+                  return "void";
+             end then.
+             end if.
+             
+             self: reportError: "Undefined method '" + methodName + "' on type " + receiverType, call.metTok;
+             return "error";
+        end then.
+        end if.
+        
+        return retType; 
     end method.
 
     has method checkArrayAccess: expr: void* -> string:
@@ -855,6 +1043,24 @@ Entity TypeChecker:
         let decl: StructDecl <- stmt;
         let st: SymbolTable <- self.symbols;
         st: define: decl.name, "struct";
+        
+        # Register in globalTypes
+        let list: ASTList <- self.globalTypes;
+        let node: ASTNode <- ASTNode: new: decl, nil;
+        if:
+        condition:
+            return list.head == nil;
+        end condition.
+        then:
+             list.head <- node;
+             list.tail <- node;
+        end then.
+        else:
+             tail: ASTNode <- list.tail;
+             tail.next <- node;
+             list.tail <- node;
+        end else.
+        end if.
     end method.
 
     has method checkEntityDecl: stmt: void* -> void:
@@ -863,15 +1069,34 @@ Entity TypeChecker:
         
         # Register Entity Name
         st: define: decl.name, "entity";
+        self.currentEntity <- decl.name;
         
-        # Check Methods
-        let list: ASTList <- decl.methods;
+        # Register in globalTypes
+        let list: ASTList <- self.globalTypes;
+        let newNode: ASTNode <- ASTNode: new: decl, nil;
         if:
         condition:
-            return list != nil;
+            return list.head == nil;
         end condition.
         then:
-             let node: ASTNode <- list.head;
+             list.head <- newNode;
+             list.tail <- newNode;
+        end then.
+        else:
+             tail: ASTNode <- list.tail;
+             tail.next <- newNode;
+             list.tail <- newNode;
+        end else.
+        end if.
+        
+        # Check Methods
+        let methodsList: ASTList <- decl.methods;
+        if:
+        condition:
+            return methodsList != nil;
+        end condition.
+        then:
+             let node: ASTNode <- methodsList.head;
              loop:
                  if:
                  condition:
@@ -881,11 +1106,544 @@ Entity TypeChecker:
                      break;
                  end then.
                  end if.
+                 if:
+                 condition:
+                     return node.value == nil;
+                 end condition.
+                 then:
+                      node <- node.next;
+                      continue;
+                 end then.
+                 end if.
                  self: checkMethodDecl: node.value;
                  node <- node.next;
              end loop.
         end then.
         end if.
+        
+        self.currentEntity <- "";
+    end method.
+
+    has method findType: name: string -> void*:
+        # Detect Generic application: List<string>
+        iLt: int <- Strings: indexOf: name, "<";
+        if:
+        condition:
+            return iLt != -1;
+        end condition.
+        then:
+             list: ASTList <- self.globalTypes;
+             node: ASTNode <- list.head;
+             loop:
+                 if:
+                 condition:
+                     return node == nil;
+                 end condition.
+                 then:
+                     break;
+                 end then.
+                 end if.
+                 let nn: NamedNode <- node.value;
+                 if:
+                 condition:
+                     return nn.name == name;
+                 end condition.
+                 then:
+                     return node.value;
+                 end then.
+                 end if.
+                 node <- node.next;
+             end loop.
+             
+             # Not found, instantiate
+             return self: instantiate: name.
+        end then.
+        end if.
+
+        list: ASTList <- self.globalTypes;
+        node: ASTNode <- list.head;
+        loop:
+            if:
+            condition:
+                return node == nil;
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            
+            let nn: NamedNode <- node.value;
+            if:
+            condition:
+                return nn.name == name;
+            end condition.
+            then:
+                return node.value;
+            end then.
+            end if.
+            node <- node.next;
+        end loop.
+        return nil.
+    end method.
+
+    has method instantiate: fullTypeName: string -> void*:
+        print: "Instantiating generic type: " + fullTypeName;
+        iLt: int <- Strings: indexOf: fullTypeName, "<";
+        baseName: string <- Strings: substring: fullTypeName, 0, iLt;
+        
+        argStr: string <- Strings: substring: fullTypeName, iLt + 1, Strings: length: fullTypeName - 1;
+        
+        template: void* <- self: findType: baseName;
+        if:
+        condition:
+            return template == nil;
+        end condition.
+        then:
+             print: "ERROR: Template not found: " + baseName;
+             return nil.
+        end then.
+        end if.
+        
+        let clone: void* <- self: cloneNode: template;
+        
+        let tNamed: NamedNode <- template;
+        let tParams: ASTList <- nil;
+        if:
+        condition:
+            return tNamed.type == "EntityDecl";
+        end condition.
+        then:
+             let ed: EntityDecl <- template;
+             tParams <- ed.typeParams;
+        end then.
+        else:
+             if:
+             condition:
+                 return tNamed.type == "StructDecl";
+             end condition.
+             then:
+                  let sd: StructDecl <- template;
+                  tParams <- sd.typeParams;
+             end then.
+             end if.
+        end else.
+        end if.
+        
+        if:
+        condition:
+            return tParams == nil;
+        end condition.
+        then:
+             return clone.
+        end then.
+        end if.
+        
+        let pNode: ASTNode <- tParams.head;
+        let pTok: Token <- pNode.value;
+        let pName: string <- pTok.value;
+        
+        self: replaceTypes: clone, pName, argStr;
+        
+        let cNamed: NamedNode <- clone;
+        cNamed.name <- fullTypeName;
+        
+        let gList: ASTList <- self.globalTypes;
+        ASTList: add: gList, clone;
+        
+        return clone.
+    end method.
+
+    has method substituteType: t: string, param: string, arg: string -> string:
+        if:
+        condition:
+            return t == param;
+        end condition.
+        then:
+            return arg;
+        end then.
+        end if.
+        return t.
+    end method.
+
+    has method replaceTypes: nodeVoid: void*, param: string, arg: string -> void:
+        if:
+        condition:
+            return nodeVoid == nil;
+        end condition.
+        then:
+            return;
+        end then.
+        end if.
+        
+        let header: NamedNode <- nodeVoid;
+        let type: string <- header.type;
+        
+        if:
+        condition:
+            return type == "EntityDecl";
+        end condition.
+        then:
+             let ed: EntityDecl <- nodeVoid;
+             self: replaceTypesList: ed.fields, param, arg;
+             self: replaceTypesList: ed.methods, param, arg;
+             return.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return type == "StructDecl";
+        end condition.
+        then:
+             let sd: StructDecl <- nodeVoid;
+             self: replaceTypesList: sd.fields, param, arg;
+             return.
+        end then.
+        end if.
+
+        if:
+        condition:
+            return type == "FieldDecl";
+        end condition.
+        then:
+             let fd: FieldDecl <- nodeVoid;
+             fd.fieldType <- self: substituteType: fd.fieldType, param, arg;
+             return.
+        end then.
+        end if.
+
+        if:
+        condition:
+            return type == "MethodDecl";
+        end condition.
+        then:
+             let md: MethodDecl <- nodeVoid;
+             md.returnType <- self: substituteType: md.returnType, param, arg;
+             self: replaceTypesList: md.params, param, arg;
+             self: replaceTypes: md.body, param, arg;
+             return.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return type == "Block";
+        end condition.
+        then:
+             let b: Block <- nodeVoid;
+             self: replaceTypesList: b.stmts, param, arg;
+             return.
+        end then.
+        end if.
+
+        if:
+        condition:
+            return type == "VariableExpr";
+        end condition.
+        then:
+             let ve: VariableExpr <- nodeVoid;
+             let tok: Token <- ve.name;
+             if:
+             condition:
+                 return tok.value == param;
+             end condition.
+             then:
+                  tok.value <- arg;
+             end then.
+             end if.
+             return.
+        end then.
+        end if.
+
+        # Handle more nodes recursively if needed
+    end method.
+
+    has method replaceTypesList: listVoid: void*, param: string, arg: string -> void:
+        if:
+        condition:
+            return listVoid == nil;
+        end condition.
+        then:
+            return;
+        end then.
+        end if.
+        let list: ASTList <- listVoid;
+        let node: ASTNode <- list.head;
+        loop:
+            if:
+            condition:
+                return node == nil;
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            self: replaceTypes: node.value, param, arg;
+            node <- node.next;
+        end loop.
+    end method.
+
+    has method cloneNode: nodeVoid: void* -> void*:
+        if:
+        condition:
+            return nodeVoid == nil;
+        end condition.
+        then:
+            return nil.
+        end then.
+        end if.
+        
+        let header: NamedNode <- nodeVoid;
+        let type: string <- header.type;
+        
+        if:
+        condition:
+            return type == "EntityDecl";
+        end condition.
+        then:
+             let old: EntityDecl <- nodeVoid;
+             let newD: EntityDecl <- EntityDecl: alloc;
+             newD.type <- "EntityDecl";
+             newD.name <- old.name;
+             newD.fields <- self: cloneList: old.fields;
+             newD.methods <- self: cloneList: old.methods;
+             newD.typeParams <- old.typeParams; # Keep these as is for template identification if needed
+             return newD.
+        end then.
+        end if.
+
+        if:
+        condition:
+            return type == "StructDecl";
+        end condition.
+        then:
+             let old: StructDecl <- nodeVoid;
+             let newD: StructDecl <- StructDecl: alloc;
+             newD.type <- "StructDecl";
+             newD.name <- old.name;
+             newD.fields <- self: cloneList: old.fields;
+             newD.typeParams <- old.typeParams;
+             return newD.
+        end then.
+        end if.
+
+        if:
+        condition:
+            return type == "FieldDecl";
+        end condition.
+        then:
+             let old: FieldDecl <- nodeVoid;
+             let newD: FieldDecl <- FieldDecl: alloc;
+             newD.type <- "FieldDecl";
+             newD.name <- old.name;
+             newD.fieldType <- old.fieldType;
+             return newD.
+        end then.
+        end if.
+
+        if:
+        condition:
+            return type == "MethodDecl";
+        end condition.
+        then:
+             let old: MethodDecl <- nodeVoid;
+             let newD: MethodDecl <- MethodDecl: alloc;
+             newD.type <- "MethodDecl";
+             newD.name <- old.name;
+             newD.isStatic <- old.isStatic;
+             newD.returnType <- old.returnType;
+             newD.params <- self: cloneList: old.params;
+             newD.body <- self: cloneNode: old.body;
+             return newD.
+        end then.
+        end if.
+        
+        if:
+        condition:
+            return type == "Block";
+        end condition.
+        then:
+             let old: Block <- nodeVoid;
+             let newD: Block <- Block: alloc;
+             newD.type <- "Block";
+             newD.stmts <- self: cloneList: old.stmts;
+             newD.terminatedByDot <- old.terminatedByDot;
+             return newD.
+        end then.
+        end if.
+
+        if:
+        condition:
+            return type == "VariableExpr";
+        end condition.
+        then:
+             let old: VariableExpr <- nodeVoid;
+             let newV: VariableExpr <- VariableExpr: alloc;
+             newV.type <- "VariableExpr";
+             let oldTok: Token <- old.name;
+             let newTok: Token <- Token: alloc;
+             newTok.type <- oldTok.type;
+             newTok.value <- oldTok.value;
+             newTok.line <- oldTok.line;
+             newTok.column <- oldTok.column;
+             newTok.offset <- oldTok.offset;
+             newV.name <- newTok;
+             return newV.
+        end then.
+        end if.
+
+        return nodeVoid.
+    end method.
+
+    has method cloneList: listVoid: void* -> void*:
+        if:
+        condition:
+            return listVoid == nil;
+        end condition.
+        then:
+            return nil.
+        end then.
+        end if.
+        let oldList: ASTList <- listVoid;
+        let newList: ASTList <- ASTList: new: nil, nil;
+        let oldNode: ASTNode <- oldList.head;
+        loop:
+            if:
+            condition:
+                return oldNode == nil;
+            end condition.
+            then:
+                break;
+            end then.
+            end if.
+            let clonedVal: void* <- self: cloneNode: oldNode.value;
+            ASTList: add: newList, clonedVal;
+            oldNode <- oldNode.next;
+        end loop.
+        return newList.
+    end method.
+
+    has method findMember: typeName: string, memberName: string -> string:
+        # Search for field or method in entity/struct
+        typeDecl: void* <- self: findType: typeName;
+        if:
+        condition:
+            return typeDecl == nil;
+        end condition.
+        then:
+            return "error";
+        end then.
+        end if.
+        
+        header: Header <- typeDecl;
+        if:
+        condition:
+            return header.type == "EntityDecl";
+        end condition.
+        then:
+             ent: EntityDecl <- typeDecl;
+             # Check fields
+             fieldsList: ASTList <- ent.fields;
+             if:
+             condition:
+                 return fieldsList != nil;
+             end condition.
+             then:
+                  fnode: ASTNode <- fieldsList.head;
+                  loop:
+                      if:
+                      condition:
+                          return fnode == nil;
+                      end condition.
+                      then:
+                          break;
+                      end then.
+                      end if.
+                      f: FieldDecl <- fnode.value;
+                      if:
+                      condition:
+                          return f.name == memberName;
+                      end condition.
+                      then:
+                          return f.fieldType;
+                      end then.
+                      end if.
+                      fnode <- fnode.next;
+                  end loop.
+             end then.
+             end if.
+             # Check methods
+             methodsList: ASTList <- ent.methods;
+             if:
+             condition:
+                 return methodsList != nil;
+             end condition.
+             then:
+                  mnode: ASTNode <- methodsList.head;
+                  loop:
+                      if:
+                      condition:
+                          return mnode == nil;
+                      end condition.
+                      then:
+                          break;
+                      end then.
+                      end if.
+                      m: MethodDecl <- mnode.value;
+                      if:
+                      condition:
+                          return m.name == memberName;
+                      end condition.
+                      then:
+                          return m.returnType;
+                      end then.
+                      end if.
+                      mnode <- mnode.next;
+                  end loop.
+             end then.
+             end if.
+        end then.
+        else:
+             if:
+             condition:
+                 return header.type == "StructDecl";
+             end condition.
+             then:
+                  str: StructDecl <- typeDecl;
+                  fieldsList: ASTList <- str.fields;
+                  if:
+                  condition:
+                      return fieldsList != nil;
+                  end condition.
+                  then:
+                       fnode: ASTNode <- fieldsList.head;
+                       loop:
+                           if:
+                           condition:
+                               return fnode == nil;
+                           end condition.
+                           then:
+                               break;
+                           end then.
+                           end if.
+                           f: FieldDecl <- fnode.value;
+                           if:
+                           condition:
+                               return f.name == memberName;
+                           end condition.
+                           then:
+                               return f.fieldType;
+                           end then.
+                           end if.
+                           fnode <- fnode.next;
+                       end loop.
+                  end then.
+                  end if.
+             end then.
+             end if.
+        end else.
+        end if.
+        return "error";
     end method.
 
     has method check: program: void* -> void:
@@ -904,7 +1662,10 @@ Entity TypeChecker:
         self: checkModule: prog.module;
         print: "DEBUG: TypeChecker: Module checked";
         
-        # Statements
+        # Statements (Register all types first in a pass?)
+        # For simplicity, we assume declarations are before usage or we do a pre-pass;
+        # Actually, let's just use the current order;
+        
         self: checkBlock: prog.stmts;
         print: "DEBUG: TypeChecker: Program checked";
     end method.

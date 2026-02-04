@@ -1,0 +1,28 @@
+module test;
+
+Entity Person:
+    has name: string;
+    has age: int;
+
+    has static method new: name: string, age: int -> Person:
+        p <- Person: alloc;
+        p->name <- name;
+        p->age <- age;
+        return p;
+    end method.
+
+    has method greet -> void:
+        print: "Hello, my name is " + self->name;
+        print: "I am " + self->age + " years old";
+    end method.
+end Entity.
+
+Entity Main:
+    has static method main -> void:
+        p: Person <- Person: new: "Alice", 30;
+        p: greet;
+        
+        # Test direct field access
+        print: "Direct access: " + p->name;
+    end method.
+end Entity.

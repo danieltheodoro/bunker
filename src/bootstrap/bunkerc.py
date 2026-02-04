@@ -1268,14 +1268,14 @@ class Parser:
             
             # Loop for postfix chains: .field, [index]
             while True:
-                 # Check for Field Access: .field
-                 if self.peek().value == '.' and self.pos + 1 < len(self.tokens) and \
+                 # Check for Field Access: .field or ->field
+                 if (self.peek().value == '.' or self.peek().value == '->') and self.pos + 1 < len(self.tokens) and \
                     (self.tokens[self.pos+1].type == TokenType.IDENT or self.tokens[self.pos+1].type == TokenType.KEYWORD) and \
                     self.peek().line == self.tokens[self.pos+1].line:
-                      self.consume(TokenType.SYMBOL, '.')
-                      field_name = self._consume_field_name()
-                      node = FieldAccess(node, field_name)
-                      continue
+                       self.consume(self.peek().type, self.peek().value)
+                       field_name = self._consume_field_name()
+                       node = FieldAccess(node, field_name)
+                       continue
                  
                  # Check for Array Access: [index]
                  if self.peek().value == '[' and \
@@ -2051,16 +2051,16 @@ class CTranspiler:
                 name = stmt.name
                 if name in emitted_typedefs: continue
                 
-                if isinstance(stmt, EntityDecl):
+                if isinstance(stmt, EntityDecl) and not stmt.type_params:
                      self.emit(f"typedef struct {stmt.name} {stmt.name};")
                      emitted_typedefs.add(name)
-                if isinstance(stmt, StructDecl):
+                if isinstance(stmt, StructDecl) and not stmt.type_params:
                      self.emit(f"typedef struct {stmt.name} {stmt.name};")
                      emitted_typedefs.add(name)
 
             # Pass 1: Emit Struct Definitions and Foreign Decls
             for stmt in node.stmts:
-                if isinstance(stmt, StructDecl):
+                if isinstance(stmt, StructDecl) and not stmt.type_params:
                      if stmt.name in emitted_structs: continue
                      self.transpile_struct_decl(stmt)
                      emitted_structs.add(stmt.name)
@@ -2069,7 +2069,7 @@ class CTranspiler:
             
             # Pass 1.2: Emit Entity Struct Definitions
             for stmt in node.stmts:
-                if isinstance(stmt, EntityDecl):
+                if isinstance(stmt, EntityDecl) and not stmt.type_params:
                      if stmt.name in emitted_structs: continue
                      
                      # Emit the actual struct definition
@@ -2086,7 +2086,7 @@ class CTranspiler:
             emitted_prototypes = set()
             # Pass 1.5: Emit Method Prototypes for Entities
             for stmt in node.stmts:
-                if isinstance(stmt, EntityDecl):
+                if isinstance(stmt, EntityDecl) and not stmt.type_params:
                      for member in stmt.members:
                           if isinstance(member, MethodDecl):
                                # Dedup prototypes? Methods are usually unique per Entity.
@@ -3687,6 +3687,15 @@ class TypeChecker:
             
             # 2. Check type hint compatibility
             if node.type_hint:
+                # AST REWRITE: If we have a type hint List<int> and call is List:create, 
+                # rewrite the call to List<int>:create for easier transpilation
+                if '<' in node.type_hint and isinstance(node.expr, MethodCall) and isinstance(node.expr.target, Variable):
+                     base_hint = node.type_hint.split('<')[0]
+                     if node.expr.target.name == base_hint:
+                          node.expr.target.name = node.type_hint
+                          # Re-resolve expr_type
+                          expr_type = self.resolve_type(node.expr)
+
                 # INSTANTIATION TRIGGER
                 self.ensure_type_instantiated(node.type_hint)
                 
@@ -3739,8 +3748,12 @@ class TypeChecker:
             if node.name not in self.env:
                 # Check for capitalized static target
                 if node.name[0].isupper() or node.name == 'System':
+                    self.ensure_type_instantiated(node.name)
                     return node.name
                 raise TypeError(f"Undefined variable '{node.name}'")
+            # Even if in env, it might be a type name assigned to a variable (though rare in Bunker currently)
+            # or if node.name is actually a type reference like List<int>
+            self.ensure_type_instantiated(self.env[node.name])
             return self.env[node.name]
             
         if isinstance(node, UnaryExpr):
